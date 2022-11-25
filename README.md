@@ -1,2 +1,2 @@
 # PhasicFlow-coupling
-Fluid-particle coupling for multiphase flow based on PhasicFlow
+Fluid-particle coupling is a software package for simulating fluid-particle flows. The fluid is assumed as a continuum phase and the particles as discrete bodies. Fluid is modeled using CFD and particles using DEM. The calculations in the DEM part are done using (PhasicFlow) [https://github.com/PhasicFlow/phasicFlow] and the calculations in the CFD part are done using OpenFOAM. 
