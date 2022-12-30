@@ -1,0 +1,107 @@
+/*------------------------------- phasicFlow ---------------------------------
+      O        C enter of
+     O O       E ngineering and
+    O   O      M ultiscale modeling of
+   OOOOOOO     F luid flow       
+------------------------------------------------------------------------------
+  Copyright (C): www.cemf.ir
+  email: hamid.r.norouzi AT gmail.com
+------------------------------------------------------------------------------  
+Licence:
+  This file is part of phasicFlow code. It is a free software for simulating 
+  granular and multiphase flows. You can redistribute it and/or modify it under
+  the terms of GNU General Public License v3 or any other later versions. 
+ 
+  phasicFlow is distributed to help others in their research in the field of 
+  granular and multiphase flows, but WITHOUT ANY WARRANTY; without even the
+  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+-----------------------------------------------------------------------------*/
+
+#ifndef __processor_H__
+#define __processor_H__ 
+
+#include "mpiTypes.hpp"
+
+namespace pFlow::MPI
+{
+	bool checkMPI(
+		const char* funcName,
+		int error, 
+		bool forceAbort, 
+		const char* fileName, 
+		int lineNumebr);
+
+	int  parReportAndExit(int errorCode);
+}
+
+#define ExitParCode(errorCode)\
+	pFlow::MPI::parReportAndExit((errorCode))
+
+#define CheckMPI(caller, fAbort)\
+   pFlow::MPI::checkMPI(#caller, (caller), fAbort, __FILE__, __LINE__);
+
+namespace pFlow::MPI
+{
+
+
+
+class processor
+{
+private:
+	
+
+	/*struct TypeInitializer
+	{
+		TypeInitializer();
+		~TypeInitializer();
+	};
+
+	static inline 
+	TypeInitializer types_{};*/
+
+public:
+
+	processor();
+	
+	~processor();
+
+	static
+	int myProcessorNo();
+	
+	static
+	int nProcessors();
+	
+	static
+	int masterNo();
+
+	static
+	bool isParallel();
+	
+	static
+	bool isInitialized();
+	
+	static
+	bool isMaster();
+	
+	static
+	Comm worldCommunicator();
+	
+	static
+	int commSize();
+	
+	static
+	int commRank();
+
+	static
+	void abort(int error);
+
+}; //processor
+
+
+
+}
+
+
+
+#endif //__processor_H__
