@@ -21,26 +21,41 @@ Licence:
 #ifndef __couplingSystem_hpp__
 #define __couplingSystem_hpp__
 
+// from OpenFOAM
+#include "IOdictionary.H"
+
 // from phasicFlow
 #include "box.hpp"
 
+// from phasicFlow-coupling
 #include "scatteredCommunication.hpp"
 #include "procCMFields.hpp"
 
 #include "couplingMesh.hpp"
+#include "porosity.hpp"
 #include "procDEMSystem.hpp"
 
 
 namespace pFlow::coupling
 {
 
+
 class couplingSystem
+:
+	public Foam::IOdictionary
 {
 protected:
 
-	// this is created only on the master processor
+	pFlow::real					subDomainExpansionFraction_;
+
+	pFlow::real 				subDomainUpdateInterval_;
+
+	pFlow::real 				lastTimeUpdated_;
+	
 	couplingMesh 				couplingMesh_;
 	
+	MPI::procVector<box> 		meshBoxes_;
+
 	MPI::procCommunication 		processorComm_;
 
 	MPI::scatteredCommunication<real> 	realScatteredComm_;
@@ -53,9 +68,15 @@ protected:
 
 	MPI::realProcCMField		particleDiameter_;
 
+	MPI::realx3ProcCMField 		particleVelocity_;
+
 	MPI::realx3ProcCMField 		fluidForce_;
 
 	MPI::realx3ProcCMField   	fluidTorque_;
+
+	uniquePtr<porosity>			porosity_ = nullptr;
+
+	bool checkForDomainUpdate(real t, real fluidDt);
 
 public:
 
@@ -76,11 +97,17 @@ public:
 
 	virtual ~couplingSystem() =default;
 
+	bool getDataFromDEM(real t, real dt);
+
+	bool calculatePorosity(Foam::volScalarField& alpha);
+
 	bool collectFluidForce();
 
 	bool collectFluidTorque();
 
-	bool checkParticleDistribution();
+	bool distributeParticles();
+
+	bool distributeVelocity();
 
 	inline 
 	auto numParticles()const
@@ -100,6 +127,12 @@ public:
 		return centerMass_;
 	}
 
+	inline
+	auto& particleVelocity()
+	{
+		return particleVelocity_;
+	}
+
 	inline 
 	auto& fluidTorque()
 	{
@@ -111,6 +144,14 @@ public:
 	{
 		return fluidForce_;
 	}
+
+	inline 
+	const auto& meshBoxes()const
+	{
+		return meshBoxes_;
+	}
+
+
 
 }; 
 

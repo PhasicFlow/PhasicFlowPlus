@@ -20,43 +20,153 @@ Licence:
 
 #include "couplingSystem.hpp"
 
+bool pFlow::coupling::couplingSystem::checkForDomainUpdate(real t, real fluidDt)
+{
+	real sT = procDEMSystem_.startTime();
+	if( pFlow::equal(t, sT) ) 
+	{
+		lastTimeUpdated_ = t;
+		return true;
+	}
+
+	if( abs(t-(lastTimeUpdated_+subDomainUpdateInterval_)) < 0.98*fluidDt)
+	{
+		lastTimeUpdated_ = t;
+		return true;
+	}
+
+	return false;
+
+}
+
 pFlow::coupling::couplingSystem::couplingSystem(
 		word demSystemName, 
 		Foam::fvMesh& mesh,
 		int argc, 
 		char* argv[])
 :
+	Foam::IOdictionary
+    (
+        IOobject
+        (
+            "couplingProperties",
+            mesh.time().caseConstant(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        )
+    ),
+    subDomainExpansionFraction_(lookup<pFlow::real>("subDomainExpansionFraction")),
+    subDomainUpdateInterval_(lookup<pFlow::real>("subDomainUpdateInterval")),
 	couplingMesh_(mesh),
 	processorComm_(),
 	procDEMSystem_(demSystemName, argc, argv),
 	centerMass_(),
 	particleDiameter_("diameter",centerMass_),
+	particleVelocity_("velocity", centerMass_),
 	fluidForce_("fluidForce",centerMass_),
 	fluidTorque_("fluidTorque",centerMass_)
 {
-
 	auto domain = couplingMesh_.meshBox();
 
-	if( 
-		auto [domains, success] = processorComm_.collectAllToMaster(domain) ; 
-		success)
+	if(! processorComm_.collectAllToAll(domain, meshBoxes_))
 	{
-		
-	}
-	else
-	{
-		// - error 
 		fatalErrorInFunction<<"could not corrlect meshBox into the master"<<endl;
 		MPI::processor::abort(0);
 	}
+
+	// 
+	Foam::Info<<"\nCreating porosity model ...\n"<<Foam::endl;
+
+	porosity_ = porosity::create(
+		subDict("porosity"), 
+		couplingMesh_,
+		centerMass_,
+		particleDiameter_);
+
 }
 
+bool pFlow::coupling::couplingSystem::getDataFromDEM(real t, real fluidDt)
+{
+	// this updates data on host side
+	procDEMSystem_.getDataFromDEM();
+
+	
+	if( checkForDomainUpdate(t, fluidDt) )
+	{
+		Foam::Info<<"Sub-domains have been updated at time "<< t<<Foam::endl;
+
+		if(!procDEMSystem_.updateParticleDistribution(
+			 subDomainExpansionFraction_, 
+			meshBoxes_))
+		{
+			fatalErrorInFunction;
+			MPI::processor::abort(0);
+			return false;
+		}
+
+		auto numParsInDomains = procDEMSystem_.numParInDomainMaster();
+
+		if( auto [thisNoPars, success] =  
+			processorComm_.distributeMasterToAll(numParsInDomains); !success)
+		{
+			fatalErrorInFunction<<
+			"failed to distribute particle numbers among processors"<<endl;
+			MPI::processor::abort(0);
+			return false;
+		}
+		else
+		{
+			if(!centerMass_.checkForNewSize(thisNoPars))
+			{
+				fatalErrorInFunction<<
+				"cannot change the size of containers to new size "<< thisNoPars<<endl;
+				MPI::processor::abort(0);
+				return false;
+			}
+		}
+
+		// first cunstructs index distribution
+		auto parIndexInDomains = procDEMSystem_.parIndexInDomainsMaster();
+		if(!realScatteredComm_.changeDataMaps(parIndexInDomains))
+		{
+			fatalErrorInFunction<<
+			"error in creating index block for real type"<<endl;
+			MPI::processor::abort(0);
+			return false;
+		}
+
+		if(!realx3ScatteredComm_.changeDataMaps(parIndexInDomains))
+		{
+			fatalErrorInFunction<<
+			"error in creating index block for realx3 type"<<endl;
+			MPI::processor::abort(0);
+			return false;
+		}
+
+	}
+
+	// update position and diameter in each processor
+	distributeParticles();
+
+	// update velocity in each processor
+	distributeVelocity();
+
+	return true;
+}
+
+bool pFlow::coupling::couplingSystem::calculatePorosity(
+	Foam::volScalarField& alpha)
+{
+	return porosity_->calculatePorosity(alpha);
+}
 
 bool pFlow::coupling::couplingSystem::collectFluidForce()
 {
 	// realx3 scatteredComm is used 
-	auto allForce = procDEMSystem_.particlesFluidForceAll();
+	auto allForce = procDEMSystem_.particlesFluidForceAllMaster();
 	auto thisForce = makeSpan(fluidForce_);
+	
 	if(!realx3ScatteredComm_.collectSum(thisForce, allForce))
 	{
 		fatalErrorInFunction<<
@@ -70,7 +180,7 @@ bool pFlow::coupling::couplingSystem::collectFluidForce()
 bool pFlow::coupling::couplingSystem::collectFluidTorque()
 {
 	// realx3 scatteredComm is used 
-	auto allTorque = procDEMSystem_.particlesFluidTorqueAll();
+	auto allTorque = procDEMSystem_.particlesFluidTorqueAllMaster();
 	auto thisTorque = makeSpan(fluidTorque_);
 	if(!realx3ScatteredComm_.collectSum(thisTorque, allTorque))
 	{
@@ -82,49 +192,10 @@ bool pFlow::coupling::couplingSystem::collectFluidTorque()
 	return true;	
 }
 
-bool pFlow::coupling::couplingSystem::checkParticleDistribution()
+bool pFlow::coupling::couplingSystem::distributeParticles()
 {
-	auto numParsInDomains = procDEMSystem_.numParInDomain();
 
-	if( auto [thisNoPars, success] =  
-		processorComm_.distributeMasterToAll(numParsInDomains); !success)
-	{
-		fatalErrorInFunction<<
-		"failed to distribute particle numbers among processors"<<endl;
-		MPI::processor::abort(0);
-		return false;
-	}
-	else
-	{
-		if(!centerMass_.checkForNewSize(thisNoPars))
-		{
-			fatalErrorInFunction<<
-			"cannot change the size of containers to new size "<< thisNoPars<<endl;
-			MPI::processor::abort(0);
-			return false;
-		}
-	}
-
-	// first cunstructs index distribution
-	auto parIndexInDomains = procDEMSystem_.parIndexInDomains();
-	if(!realScatteredComm_.changeDataMaps(parIndexInDomains))
-	{
-		fatalErrorInFunction<<
-		"error in creating index block for real type"<<endl;
-		MPI::processor::abort(0);
-		return false;
-	}
-
-	if(!realx3ScatteredComm_.changeDataMaps(parIndexInDomains))
-	{
-		fatalErrorInFunction<<
-		"error in creating index block for realx3 type"<<endl;
-		MPI::processor::abort(0);
-		return false;
-	}
-
-
-	auto allDiam = procDEMSystem_.particledDiameterAll();
+	auto allDiam = procDEMSystem_.particledDiameterAllMaster();
 	auto thisDiam = makeSpan(particleDiameter_);
 
 	if(!realScatteredComm_.distribute(allDiam, thisDiam))
@@ -135,7 +206,7 @@ bool pFlow::coupling::couplingSystem::checkParticleDistribution()
 		return false;
 	}
 
-	auto allPos = procDEMSystem_.particlesCenterMassAll();
+	auto allPos = procDEMSystem_.particlesCenterMassAllMaster();
 	auto thisPos = makeSpan(centerMass_);
 	if(!realx3ScatteredComm_.distribute(allPos, thisPos))
 	{
@@ -147,4 +218,19 @@ bool pFlow::coupling::couplingSystem::checkParticleDistribution()
 
 	return true;
 
+}
+
+bool pFlow::coupling::couplingSystem::distributeVelocity()
+{
+	auto allVel = procDEMSystem_.particlesVelocityAllMaster();
+	auto thisVel = makeSpan(particleVelocity_);
+	if(!realx3ScatteredComm_.distribute(allVel, thisVel))
+	{
+		fatalErrorInFunction<<
+		"cannot distribute particle velocity among processors"<<endl;
+		MPI::processor::abort(0);
+		return false;
+	}
+
+	return true;
 }

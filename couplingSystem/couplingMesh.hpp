@@ -69,12 +69,6 @@ public:
 		return meshBox_;
 	}
 
-	/*inline
-	const auto& foamTime()const
-	{
-		return mesh_.Time();
-	}*/
-
 	
 	Foam::label 
 	findCell(const realx3& p, Foam::label cellCheck)
@@ -85,7 +79,7 @@ public:
 			auto sample = Foam::point(p.x(), p.y(), p.z());
 		#endif
 
-		return -1;
+		return mesh_.findCell(sample);
 	}
 
 

@@ -41,12 +41,45 @@ protected:
 	// the main processor 
 	uniquePtr<DEMSystem> 		demSystem_ = nullptr;
 
+	real 						startTime_= 0;
 public:
 
 	procDEMSystem(
 		word demSystemName,
 		int argc, 
 		char* argv[]);
+
+	inline 
+	real startTime()const
+	{
+		return startTime_;
+	}
+
+	inline 
+	bool getDataFromDEM()
+	{
+		if(demSystem_)
+		{
+			return demSystem_->beforeIteration();
+		}
+		else
+		{
+			return true;
+		}
+	}
+
+	
+	bool updateParticleDistribution(real extentFraction, const procVector<box>& domains)
+	{
+		if(demSystem_)
+		{
+			return demSystem_->updateParticleDistribution(extentFraction, domains);
+		}
+		else
+		{
+			return true;
+		}
+	}
 
 	inline 
 	span<const int32> parIndexInDomain(int32 di)const
@@ -61,12 +94,11 @@ public:
 	}
 
 	inline 
-	span<realx3> particlesCenterMassAll()
+	span<realx3> particlesCenterMassAllMaster()
 	{
 		if(demSystem_)
 		{
-			notImplementedFunction;
-			return span<realx3>();
+			return demSystem_->parPosition();
 		}else
 		{
 			return span<realx3>();
@@ -74,12 +106,24 @@ public:
 	}
 
 	inline 
-	span<realx3> particlesFluidForceAll()
+	span<realx3> particlesVelocityAllMaster()
 	{
 		if(demSystem_)
 		{
-			notImplementedFunction;
+			return demSystem_->parVelocity();
+		}else
+		{
 			return span<realx3>();
+		}
+	}
+
+
+	inline 
+	span<realx3> particlesFluidForceAllMaster()
+	{
+		if(demSystem_)
+		{
+			return demSystem_->parFluidForce();
 		}else
 		{
 			return span<realx3>();
@@ -87,12 +131,11 @@ public:
 	}
 
 	inline
-	span<realx3> particlesFluidTorqueAll()
+	span<realx3> particlesFluidTorqueAllMaster()
 	{
 		if(demSystem_)
 		{
-			notImplementedFunction;
-			return span<realx3>();
+			return demSystem_->parFluidTorque();
 		}else
 		{
 			return span<realx3>();
@@ -100,12 +143,11 @@ public:
 	}
 
 	inline
-	span<real> particledDiameterAll()
+	span<real> particledDiameterAllMaster()
 	{
 		if(demSystem_)
 		{
-			notImplementedFunction;
-			return span<real>();
+			return demSystem_->parDiameter();
 		}else
 		{
 			return span<real>();
@@ -113,7 +155,7 @@ public:
 	}
 
 	inline
-	procVector<int32> numParInDomain()const
+	procVector<int32> numParInDomainMaster()const
 	{
 		if(demSystem_)
 		{
@@ -126,7 +168,7 @@ public:
 	}
 
 	inline
-	procVector<span<const int32>> parIndexInDomains()const
+	procVector<span<const int32>> parIndexInDomainsMaster()const
 	{
 		procVector<span<const int32>> parIndex(true);
 		if(demSystem_)
@@ -138,6 +180,32 @@ public:
 		}
 
 		return parIndex;
+	}
+
+	inline 
+	bool sendFluidForceToDEM()
+	{
+		if(demSystem_)
+		{
+			return demSystem_->sendFluidForceToDEM();
+		}
+		else
+		{
+			return true;
+		}
+	}
+
+	inline
+	bool sendFluidTorqueToDEM()
+	{
+		if(demSystem_)
+		{
+			return demSystem_->sendFluidTorqueToDEM();
+		}
+		else
+		{
+			return true;
+		}
 	}
 
 };

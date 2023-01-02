@@ -52,6 +52,13 @@ public:
 		
 	}
 
+	template<typename T>
+	bool distributeMasterToAll(const T& val, T& recvVal)
+	{
+		recvVal = val;
+		return CheckMPI(Bcast(recvVal, masterNo(),worldCommunicator()),false);
+	}
+
 	// send each values in vector (size is equal to number of processors) to each processor
 	template<typename T>
 	std::pair<T,bool> distributeMasterToAll(procVector<T>& vals)
@@ -72,6 +79,13 @@ public:
 		auto res = CheckMPI(allGather(val, vec, worldCommunicator()), false);
 		
 		return {allVec, res};
+	}
+
+	template<typename T>
+	bool collectAllToAll(const T& val, procVector<T>& allVec)
+	{
+		auto vec = makeSpan(allVec);
+		return CheckMPI(allGather(val, vec, worldCommunicator()), false);
 	}
 
 	template<typename T>

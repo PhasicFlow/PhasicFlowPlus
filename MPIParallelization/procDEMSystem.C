@@ -20,6 +20,7 @@ Licence:
 
 #include "procDEMSystem.hpp"
 #include "procVector.hpp"
+#include "procCommunication.hpp"
 
 pFlow::MPI::procDEMSystem::procDEMSystem
 (
@@ -40,5 +41,19 @@ pFlow::MPI::procDEMSystem::procDEMSystem
 				)), 
 			argc, 
 			argv);	
+	}
+
+	procCommunication proc;
+	
+	real startT;
+	if(demSystem_)
+	{
+		startT = demSystem_->Control().time().startTime();
+	}
+
+	if(!proc.distributeMasterToAll(startT, startTime_))
+	{
+		fatalErrorInFunction<< "could not get start time"<<endl;
+		proc.abort(0);
 	}
 }
