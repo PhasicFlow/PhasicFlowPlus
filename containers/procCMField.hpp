@@ -83,6 +83,19 @@ public:
 		preserveContent_ = preserveContent;
 	}
 
+	procCMField(
+		word name,
+		const T& value,
+		const centerMassField& cm,
+		bool 	preserveContent = false,
+		bool 	subscribe = true)
+	:
+		procCMField(name, cm, preserveContent, subscribe)
+	{
+		std::fill(this->begin(), this->end(), value);
+	}
+
+
 	procCMField(const procCMField&) = default;
 
 	procCMField& operator = (const procCMField&) = default;
@@ -90,6 +103,12 @@ public:
 	procCMField& operator = (const std::vector<T>& src)
 	{
 		this->assign(src.begin(), src.end());
+		return *this;
+	}
+
+	procCMField& operator =(const T& value)
+	{
+		std::fill(this->begin(), this->end(), value);
 		return *this;
 	}
 
