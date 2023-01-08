@@ -208,6 +208,32 @@ public:
 		}
 	}
 
+	inline
+	bool iterate(real upToTime, real writeTime, const word& timeName)
+	{
+		if(demSystem_)
+		{
+			return demSystem_->iterate(upToTime, writeTime, timeName);
+		}
+		else
+		{
+			return true;
+		}
+	}
+
+	inline
+	bool iterate(real upToTime)
+	{
+		if(demSystem_)
+		{
+			return demSystem_->iterate(upToTime);
+		}
+		else
+		{
+			return true;
+		}
+	}
+
 };
 
 }
