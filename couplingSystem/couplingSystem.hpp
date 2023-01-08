@@ -109,6 +109,11 @@ public:
 
 	bool distributeVelocity();
 
+	bool iterate(real upToTime, real writeTime, const word& timeName)
+	{
+		return procDEMSystem_.iterate(upToTime, writeTime, timeName);
+	}
+
 	inline 
 	auto numParticles()const
 	{
