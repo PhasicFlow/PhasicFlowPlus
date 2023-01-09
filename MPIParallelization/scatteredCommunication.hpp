@@ -25,6 +25,8 @@ Licence:
 #include "procCommunication.hpp"
 #include "mpiCommunication.hpp"
 #include "procVector.hpp"
+#include "streams.hpp"
+#include "stdAlgorithms.hpp"
 
 namespace pFlow::MPI
 {
@@ -49,6 +51,8 @@ protected:
 	procVector<uniquePtr<T>>		buffers_ {true};
 
 	procVector<size_t> 				buffersSize_ {0, true};
+
+	procVector<int32> 				sortedProcessors_ {0,true};
 
 	bool createIndexTypes()
 	{
@@ -85,6 +89,9 @@ protected:
 
 	bool checkForBuffers()
 	{
+		using pairType = std::pair<int,int>;
+		procVector<pairType> sortProcessor(true);
+
 		for(size_t i = 0; i< buffers_.size(); i++)
 		{
 			if(dataMaps_[i].size() > buffersSize_[i])
@@ -93,7 +100,21 @@ protected:
 				buffers_[i].reset(new T[newSize]);
 				buffersSize_[i] = newSize;
 			}
+
+			sortProcessor[i] = {buffersSize_[i], i};
 		}
+		
+		auto compareFunc = [](const pairType& a, const pairType& b) 
+		{ return a.first < b.first; };
+
+		algorithms::STD::sort(sortProcessor.data(), sortProcessor.size(), compareFunc);
+
+
+		for(size_t i=0; i<sortedProcessors_.size(); i++)
+		{
+			sortedProcessors_[i] = sortProcessor[i].second;
+		}
+
 		return true;
 	}
 
@@ -148,10 +169,10 @@ public:
 		if(processor::isMaster())
 		{
 			bool res = true;
-			for(size_t i = 0; i<indexedMap_.size(); i++)
+			for(int32 i = indexedMap_.size()-1; i>=0; i--)
 			{
 				res = res&&CheckMPI(
-					MPI_Isend( 
+					MPI_Issend( 
 						sendBuff.data(), 
 						1, 
 						indexedMap_[i], 
@@ -165,8 +186,8 @@ public:
 			if(!res)return false;		
 		}
 
-		
-		MPI_Status stat;	
+		Status stat;
+		Request req;	
 		bool sucss = CheckMPI( 
 			MPI_Recv(
 				recvb.data(), 
@@ -177,8 +198,7 @@ public:
 				processor::worldCommunicator(),
 				&stat),
 			false);
-
-
+				
 		if(processor::isMaster())
 		{
 			CheckMPI(
@@ -186,6 +206,7 @@ public:
 				false
 				);
 		}
+		//MPI_Wait(&req, &stat);
 
 		return sucss;
 	}

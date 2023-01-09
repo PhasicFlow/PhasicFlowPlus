@@ -61,6 +61,12 @@ public:
 		return alphaMin_;
 	}
 
+	inline 
+	const auto& particleCellIndex()const
+	{
+		return parCellIndex_;
+	}
+
 	virtual
 	bool calculatePorosity(Foam::volScalarField& alpha) = 0;
 
@@ -70,6 +76,7 @@ public:
 		couplingMesh& 			cMesh, 
 		MPI::centerMassField& 	centerMass, 
 		MPI::realProcCMField& 	parDiam);
+	
 
 }; 
 
