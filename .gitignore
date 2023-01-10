@@ -37,6 +37,7 @@ testLink.C
 
 # directories
 Make/linux*/**
+Make/linux*/*
 lnInclude/**
 include/**
 bin/**
