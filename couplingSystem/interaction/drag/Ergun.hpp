@@ -18,49 +18,44 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-#ifndef __PIC_hpp__ 
-#define __PIC_hpp__
+#ifndef __Ergun_hpp__ 
+#define __Ergun_hpp__
 
-#include "virtualConstructor.hpp"
-
-// from phasicFlow-coupling
-#include "porosity.hpp"
-
+#include "drag.hpp"
 
 namespace pFlow::coupling
 {
-
-
-class PIC
-: 
-	public porosity
+class Ergun
+:
+	public drag
 {
 protected:
-
-	
 
 public:
 
 	// type info
-	TypeInfo("PIC");
+	TypeInfo("Ergun");
 
-	PIC(
+	Ergun(
 		Foam::dictionary 		dict, 
-		couplingMesh& 			cMesh, 
-		MPI::centerMassField& 	centerMass, 
-		MPI::realProcCMField& 	parDiam);
+		porosity& 				prsty);
 
-	virtual ~PIC() = default;
+	virtual ~Ergun() = default;
 
 	add_vCtor
 	(
-		porosity,
-		PIC,
+		drag,
+		Ergun,
 		dictionary
 	);
 
-	bool calculatePorosity() override;
-
+	bool calculateDragForce(
+		const Foam::volVectorField& U,
+		const MPI::realx3ProcCMField& velocity,
+		const MPI::realProcCMField& diameter,
+		MPI::realx3ProcCMField& particleForce)override;
+		
+	
 }; 
 
 } // pFlow::coupling

@@ -17,54 +17,54 @@ Licence:
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 -----------------------------------------------------------------------------*/
+// from OpenFOAM
+#include "volFields.H"
 
-#include "porosity.hpp"
+#include "drag.hpp"
 #include "processor.hpp"
 
-pFlow::coupling::porosity::porosity(
-	Foam::dictionary		dict, 
-	couplingMesh& 			cMesh, 
-	MPI::centerMassField& 	centerMass, 
-	MPI::realProcCMField& 	parDiam)
+pFlow::coupling::drag::drag(
+	Foam::dictionary 		dict, 
+	porosity& 					prsty)
 :
-	Foam::volScalarField
-	(
-		Foam::IOobject
+	residualRe_(dict.lookup<real>("residualRe")),
+	porosity_(prsty),
+	Su_(
+	    Foam::IOobject
 	    (
-	        "alpha",
-	        cMesh.mesh().time().timeName(),
-	        cMesh.mesh(),
+	        "Su",
+	        porosity_.mesh().time().timeName(),
+	        porosity_.mesh(),
 	        Foam::IOobject::READ_IF_PRESENT,
 	        Foam::IOobject::AUTO_WRITE
 	    ),
-    cMesh.mesh(),
-    Foam::dimless
-	),
-	alphaMin_(dict.lookup<real>("alphaMin")),
-	cMesh_(cMesh),
-	centerMass_(centerMass),
-	particleDiameter_(parDiam),
-	parCellIndex_(
-		"parCellIndex",
-		static_cast<Foam::label>(-1),
-		centerMass,
-		true)
+    porosity_.mesh(),
+    Foam::dimensionSet(1,-2,-2,0,0)),
+    Sp_(
+    	Foam::IOobject
+	    (
+	        "Sp",
+	        porosity_.mesh().time().timeName(),
+	        porosity_.mesh(),
+	        Foam::IOobject::READ_IF_PRESENT,
+	        Foam::IOobject::AUTO_WRITE
+	    ),
+    	porosity_.mesh(),
+    	Foam::dimensionSet(1,-3,-1,0,0))
 {
 
 }
 
 
-pFlow::uniquePtr<pFlow::coupling::porosity> 
-	pFlow::coupling::porosity::create(
-		Foam::dictionary		dict, 
-		couplingMesh& 			cMesh, 
-		MPI::centerMassField& 	centerMass, 
-		MPI::realProcCMField& 	parDiam)
+pFlow::uniquePtr<pFlow::coupling::drag> 
+	pFlow::coupling::drag::create(
+		Foam::dictionary 		dict, 
+		porosity& 				prsty)
 {
-	auto method = dict.lookup<Foam::word>("method");
-	if( dictionaryvCtorSelector_.search(method))
+	auto type = dict.lookup<Foam::word>("type");
+	if( dictionaryvCtorSelector_.search(type))
 	{
-		return dictionaryvCtorSelector_[method] (dict, cMesh, centerMass, parDiam);
+		return dictionaryvCtorSelector_[type] (dict, prsty);
 	}
 	else
 	{
@@ -72,7 +72,7 @@ pFlow::uniquePtr<pFlow::coupling::porosity>
 		{
 			printKeys
 			( 
-				fatalErrorInFunction << "Ctor Selector "<< method << " dose not exist"
+				fatalErrorInFunction << "Ctor Selector "<< type << " dose not exist"
 				" for porosity method in "<< dict.name()
 				<<"\nAvaiable ones are: \n"
 				,

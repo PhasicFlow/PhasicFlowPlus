@@ -1,3 +1,22 @@
+/*------------------------------- phasicFlow ---------------------------------
+      O        C enter of
+     O O       E ngineering and
+    O   O      M ultiscale modeling of
+   OOOOOOO     F luid flow       
+------------------------------------------------------------------------------
+  Copyright (C): www.cemf.ir
+  email: hamid.r.norouzi AT gmail.com
+------------------------------------------------------------------------------  
+Licence:
+  This file is part of phasicFlow code. It is a free software for simulating 
+  granular and multiphase flows. You can redistribute it and/or modify it under
+  the terms of GNU General Public License v3 or any other later versions. 
+ 
+  phasicFlow is distributed to help others in their research in the field of 
+  granular and multiphase flows, but WITHOUT ANY WARRANTY; without even the
+  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+-----------------------------------------------------------------------------*/
 
 // from OpenFOAM
 #include "fvCFD.H"
@@ -19,11 +38,11 @@ pFlow::coupling::PIC::PIC(
 }
 
 
-bool pFlow::coupling::PIC::calculatePorosity(Foam::volScalarField& alpha)
+bool pFlow::coupling::PIC::calculatePorosity()
 {
 	
 	auto solidVol = Foam::scalarField(
-		alpha.size(), 
+		this->size(), 
 		static_cast<Foam::scalar>(0));
 
 
@@ -41,8 +60,8 @@ bool pFlow::coupling::PIC::calculatePorosity(Foam::volScalarField& alpha)
 	}
 
 
-	alpha.field() = Foam::max(
-		1 - solidVol/alpha.mesh().V(), 
+	this->field() = Foam::max(
+		1 - solidVol/this->mesh().V(), 
 		static_cast<Foam::scalar>(this->alphaMin()) );
 
 	//alpha.ref() = 1 - solidVol/alpha.mesh().V();
