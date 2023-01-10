@@ -50,6 +50,10 @@ pFlow::MPI::procDEMSystem::procDEMSystem
 	{
 		startT = demSystem_->Control().time().startTime();
 	}
+	else
+	{
+		startT = 0;
+	}
 
 	if(!proc.distributeMasterToAll(startT, startTime_))
 	{

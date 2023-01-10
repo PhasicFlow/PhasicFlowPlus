@@ -187,7 +187,6 @@ public:
 		}
 
 		Status stat;
-		Request req;	
 		bool sucss = CheckMPI( 
 			MPI_Recv(
 				recvb.data(), 
@@ -206,7 +205,6 @@ public:
 				false
 				);
 		}
-		//MPI_Wait(&req, &stat);
 
 		return sucss;
 	}

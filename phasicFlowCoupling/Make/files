@@ -1,0 +1,16 @@
+MPIParallelization/processor.C
+MPIParallelization/procCommunication.C
+MPIParallelization/procDEMSystem.C
+
+containers/centerMassField.C
+containers/procCMFields.C
+
+couplingSystem/couplingSystem.C
+couplingSystem/couplingMesh.C
+couplingSystem/porosity/porosity.C
+couplingSystem/porosity/PIC.C
+couplingSystem/interaction/drag/drag.C
+couplingSystem/interaction/drag/Ergun.C
+
+
+LIB = $(FOAM_USER_LIBBIN)/phasicFlowCoupling
