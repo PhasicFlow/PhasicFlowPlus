@@ -1,5 +1,6 @@
 # Prerequisites
 *.d
+*.dep
 
 # files
 testLink.C
@@ -35,11 +36,11 @@ testLink.C
 *.app
 
 # directories
-Make/**
+Make/linux*/**
+lnInclude/**
 include/**
 bin/**
 lib/**
-test*/**
 # all possible time folders
 **/[0-9]
 **/[0-9][0-9]
