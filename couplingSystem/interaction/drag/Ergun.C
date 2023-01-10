@@ -17,53 +17,29 @@ Licence:
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 -----------------------------------------------------------------------------*/
+// from OpenFOAM
+#include "volFields.H"
 
-#ifndef __PIC_hpp__ 
-#define __PIC_hpp__
-
-#include "virtualConstructor.hpp"
-
-// from phasicFlow-coupling
-#include "porosity.hpp"
+#include "Ergun.hpp"
 
 
-namespace pFlow::coupling
+pFlow::coupling::Ergun::Ergun(
+	Foam::dictionary 		dict, 
+	porosity& 				prsty)
+:
+	drag(dict, prsty)
 {
 
+}
 
-class PIC
-: 
-	public porosity
+bool pFlow::coupling::Ergun::calculateDragForce(
+	const Foam::volVectorField& U,
+	const MPI::realx3ProcCMField& velocity,
+	const MPI::realProcCMField& diameter,
+	MPI::realx3ProcCMField& particleForce)
 {
-protected:
 
-	
+	notImplementedFunction;
+	return true;
+}
 
-public:
-
-	// type info
-	TypeInfo("PIC");
-
-	PIC(
-		Foam::dictionary 		dict, 
-		couplingMesh& 			cMesh, 
-		MPI::centerMassField& 	centerMass, 
-		MPI::realProcCMField& 	parDiam);
-
-	virtual ~PIC() = default;
-
-	add_vCtor
-	(
-		porosity,
-		PIC,
-		dictionary
-	);
-
-	bool calculatePorosity() override;
-
-}; 
-
-} // pFlow::coupling
-
-
-#endif

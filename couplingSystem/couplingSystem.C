@@ -84,6 +84,13 @@ pFlow::coupling::couplingSystem::couplingSystem(
 		centerMass_,
 		particleDiameter_);
 
+	Foam::Info<<"\nCreating drag model ...\n"<<Foam::endl;
+
+	drag_ = drag::create(
+		subDict("drag"),
+		porosity_()
+		);
+
 }
 
 bool pFlow::coupling::couplingSystem::getDataFromDEM(real t, real fluidDt)
@@ -155,10 +162,9 @@ bool pFlow::coupling::couplingSystem::getDataFromDEM(real t, real fluidDt)
 	return true;
 }
 
-bool pFlow::coupling::couplingSystem::calculatePorosity(
-	Foam::volScalarField& alpha)
+bool pFlow::coupling::couplingSystem::calculatePorosity()
 {
-	return porosity_->calculatePorosity(alpha);
+	return porosity_->calculatePorosity();
 }
 
 bool pFlow::coupling::couplingSystem::collectFluidForce()

@@ -30,11 +30,10 @@ Licence:
 // from phasicFlow-coupling
 #include "scatteredCommunication.hpp"
 #include "procCMFields.hpp"
-
+#include "procDEMSystem.hpp"
 #include "couplingMesh.hpp"
 #include "porosity.hpp"
-#include "procDEMSystem.hpp"
-
+#include "drag.hpp"
 
 namespace pFlow::coupling
 {
@@ -76,6 +75,8 @@ protected:
 
 	uniquePtr<porosity>			porosity_ = nullptr;
 
+	uniquePtr<drag> 			drag_ = nullptr;
+
 	bool checkForDomainUpdate(real t, real fluidDt);
 
 public:
@@ -99,7 +100,7 @@ public:
 
 	bool getDataFromDEM(real t, real dt);
 
-	bool calculatePorosity(Foam::volScalarField& alpha);
+	bool calculatePorosity();
 
 	bool collectFluidForce();
 

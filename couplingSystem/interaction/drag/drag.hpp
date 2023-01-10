@@ -18,110 +18,80 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-#ifndef __porosity_hpp__ 
-#define __porosity_hpp__
+#ifndef __drag_hpp__ 
+#define __drag_hpp__
 
 // from OpenFOAM
 #include "dictionary.H"
-#include "volFields.H"
 
 // from phasicFlow
 #include "virtualConstructor.hpp"
 
 // from phasicFlow-coupling
-#include "couplingMesh.hpp"
-#include "procCMFields.hpp"
+#include "porosity.hpp"
 
 namespace pFlow::coupling
 {
+class drag
 
-
-class porosity
-:
-	public Foam::volScalarField
 {
 protected:
 
-	real 							alphaMin_;
+	real 					residualRe_;
 
-	couplingMesh& 					cMesh_;
+	porosity& 				porosity_;
 
-	MPI::centerMassField& 			centerMass_;
+	Foam::volScalarField 	Su_;
 
-	MPI::realProcCMField&  			particleDiameter_;
-
-	MPI::procCMField<Foam::label> 	parCellIndex_;
+	Foam::volScalarField 	Sp_;
 
 public:
 
 	// type info
-	TypeInfo("porosity");
+	TypeInfo("drag");
 
-	porosity(
+	drag(
 		Foam::dictionary 		dict, 
-		couplingMesh& 			cMesh, 
-		MPI::centerMassField& 	centerMass, 
-		MPI::realProcCMField& 	parDiam);
+		porosity& 				prsty);
 
-	virtual ~porosity() = default;
+	virtual ~drag() = default;
 
 	create_vCtor
 	(
-		porosity,
+		drag,
 		dictionary,
 		(
-			Foam::dictionary		dict, 
-			couplingMesh& 			cMesh, 
-			MPI::centerMassField& 	centerMass, 
-			MPI::realProcCMField& 	parDiam
+			Foam::dictionary 		dict, 
+			porosity& 				prsty
 		),
-		(dict, cMesh, centerMass, parDiam)
+		(dict, prsty)
 	);
 
-	
-	const Foam::volScalarField& alpha()const
+	const auto& Su()const
 	{
-		return *this;
+		return Su_;
 	}
 
-	inline
-	real alphaMin()const
+	const auto& Sp()const
 	{
-		return alphaMin_;
+		return Sp_;
 	}
-
-	inline 
-	const auto& particleCellIndex()const
-	{
-		return parCellIndex_;
-	}
-
-	inline
-	const auto& centerMass()const
-	{
-		return centerMass_;
-	}
-
-	inline 
-	const auto& particleDiameter()const
-	{
-		return particleDiameter_;
-	}
-
 	
 	virtual
-	bool calculatePorosity() = 0;
+	bool calculateDragForce(
+		const Foam::volVectorField& U,
+		const MPI::realx3ProcCMField& velocity,
+		const MPI::realProcCMField& diameter,
+		MPI::realx3ProcCMField& particleForce) = 0;
 
 
 
 	static
-	uniquePtr<porosity> create(
-		Foam::dictionary		dict, 
-		couplingMesh& 			cMesh, 
-		MPI::centerMassField& 	centerMass, 
-		MPI::realProcCMField& 	parDiam);
+	uniquePtr<drag> create(
+		Foam::dictionary 		dict, 
+		porosity& 				prsty);
+		
 	
-
 }; 
 
 } // pFlow::coupling
