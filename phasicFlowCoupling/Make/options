@@ -1,4 +1,4 @@
-ptFLAGS += -std=c++17 -Wno-old-style-cast
+ptFLAGS += -std=c++17 -Wno-old-style-cast -Wno-undefined
 
 pFlow_Project = $(pFlow_PROJECT_DIR)
 pFlow_INCLUDE_DIR =$(pFlow_Project)/include
