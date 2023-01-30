@@ -6,12 +6,12 @@ pFlow_INCLUDE_DIR =$(pFlow_Project)/include
 -include $(GENERAL_RULES)/mplibType
 
 EXE_INC = \
+    -I$(LIB_SRC)/MomentumTransportModels/momentumTransportModels/lnInclude \
+    -I$(LIB_SRC)/MomentumTransportModels/incompressible/lnInclude \
+    -I$(LIB_SRC)/transportModels/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
-    -I$(LIB_SRC)/sampling/lnInclude \
-    -I$(LIB_SRC)/Pstream/mpi/lnInclude \
-    -I$(LIB_SRC)/dynamicFvMesh/lnInclude \
-    -I$(LIB_SRC)/dynamicMesh/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/sampling/lnInclude \
     -I../../phasicFlowCoupling/lnInclude \
     -I$(pFlow_INCLUDE_DIR) \
     -I$(pFlow_INCLUDE_DIR)/phasicFlow \
@@ -20,16 +20,17 @@ EXE_INC = \
     
 
 EXE_LIBS = \
+    -lmomentumTransportModels \
+    -lincompressibleMomentumTransportModels \
+    -ltransportModels \
     -lfiniteVolume \
+    -lmeshTools \
     -lfvModels \
     -lfvConstraints \
     -lsampling \
-    -ldynamicFvMesh \
-    -ltopoChangerFvMesh \
-    -ldynamicMesh \
-    -lmeshTools \
-    -L$(pFlow_Project)/lib \
+    -L$(FOAM_USER_LIBBIN)/ \
     -lphasicFlowCoupling \
+    -L$(pFlow_Project)/lib \
     -lphasicFlow \
     -lDEMSystems \
     -lUtilities
