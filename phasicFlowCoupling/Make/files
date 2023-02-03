@@ -13,4 +13,4 @@ couplingSystem/interaction/drag/drag.C
 couplingSystem/interaction/drag/Ergun.C
 
 
-LIB = $(FOAM_LIBBIN)/libphasicFlowCoupling
+LIB = $(FOAM_USER_LIBBIN)/libphasicFlowCoupling

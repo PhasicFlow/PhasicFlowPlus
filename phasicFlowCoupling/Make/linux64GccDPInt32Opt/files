@@ -13,4 +13,4 @@ SOURCE += couplingSystem/interaction/drag/drag.C
 SOURCE += couplingSystem/interaction/drag/Ergun.C
 
 
-LIB = $(FOAM_LIBBIN)/libphasicFlowCoupling
+LIB = $(FOAM_USER_LIBBIN)/libphasicFlowCoupling
