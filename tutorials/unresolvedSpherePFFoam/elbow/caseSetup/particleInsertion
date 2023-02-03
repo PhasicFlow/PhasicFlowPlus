@@ -31,7 +31,7 @@ layer0
    
    setFields
    {
-     velocity    realx3 (1 0 0); // initial velocity of inserted particles 
+     velocity    realx3 (0 0 0); // initial velocity of inserted particles 
    }
    
    mixture

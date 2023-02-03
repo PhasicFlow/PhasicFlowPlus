@@ -16,6 +16,24 @@ FoamFile
 
 numberOfSubdomains 2;
 
-method          scotch;
+method          hierarchical;
+// method          ptscotch;
+
+simpleCoeffs
+{
+    n               (4 1 1);
+}
+
+hierarchicalCoeffs
+{
+    n               (2 1 1);
+    order           xyz;
+}
+
+manualCoeffs
+{
+    dataFile        "cellDecomposition";
+}
+
 
 // ************************************************************************* //

@@ -209,11 +209,16 @@ public:
 	}
 
 	inline
-	bool iterate(real upToTime, real writeTime, const word& timeName)
+	bool iterate(real upToTime, bool writeTime, const word& timeName)
 	{
+		real writeTimeValue = largeValue;
+		if(writeTime)
+		{
+			writeTimeValue = upToTime;
+		}
 		if(demSystem_)
 		{
-			return demSystem_->iterate(upToTime, writeTime, timeName);
+			return demSystem_->iterate(upToTime, writeTimeValue, timeName);
 		}
 		else
 		{

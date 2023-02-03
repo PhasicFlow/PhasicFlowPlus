@@ -38,7 +38,7 @@ pFlow::coupling::PIC::PIC(
 }
 
 
-bool pFlow::coupling::PIC::calculatePorosity()
+bool pFlow::coupling::PIC::internalFieldUpdate()
 {
 	
 	auto solidVol = Foam::scalarField(

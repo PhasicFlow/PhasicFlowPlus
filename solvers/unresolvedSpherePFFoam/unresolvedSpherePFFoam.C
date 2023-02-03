@@ -81,11 +81,11 @@ int main(int argc, char *argv[])
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        coupling.iterate(runTime.time().value(), 1.0, runTime.timeName());
-        coupling.getDaraFromDEM();
-        coupling.calculatePorosity();
-        volScalarField& voidFraction = coupling.alpha();
+        coupling.iterate(runTime.time().value(), runTime.writeTime(), runTime.timeName());
 
+        coupling.getDataFromDEM(runTime.time().value(), runTime.deltaT().value());
+        coupling.calculatePorosity();
+        const volScalarField& voidFraction = coupling.alpha();
 
         #include "CourantNo.H"
 
@@ -104,11 +104,13 @@ int main(int argc, char *argv[])
 
         laminarTransport.correct();
         turbulence->correct();
+
         coupling.collectFluidForce();
         coupling.collectFluidTorque();
+
         // For GPU parallelization
-        coupling.sendFluidForceToDEM();
-        coupling.sendFluidTorqueToDEM();
+        // coupling.sendFluidForceToDEM();
+        // coupling.sendFluidTorqueToDEM();
 
         runTime.write();
 

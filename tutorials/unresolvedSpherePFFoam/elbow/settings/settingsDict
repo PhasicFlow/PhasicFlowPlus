@@ -17,7 +17,7 @@ saveInterval 	0.01; 		// time interval for saving the simulation
 
 timePrecision   6;			// maximum number of digits for time folder 
 
-g 				(0 -9.8 0); // gravity vector (m/s2) 
+g 				(0 0 0); // gravity vector (m/s2) 
 
 /*
 	Simulation domain 

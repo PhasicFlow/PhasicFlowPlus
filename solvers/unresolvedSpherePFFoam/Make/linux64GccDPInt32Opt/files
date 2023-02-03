@@ -1,3 +1,3 @@
-SOURCE += unresolvedPFFoam.C
+SOURCE += unresolvedSpherePFFoam.C
 
-EXE = $(FOAM_USER_APPBIN)/unresolvedPFFoam
+EXE = $(FOAM_USER_APPBIN)/unresolvedSpherePFFoam

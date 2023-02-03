@@ -100,7 +100,7 @@ public:
 
 	bool getDataFromDEM(real t, real dt);
 
-	bool calculatePorosity();
+	void calculatePorosity();
 
 	bool collectFluidForce();
 
@@ -110,9 +110,15 @@ public:
 
 	bool distributeVelocity();
 
-	bool iterate(real upToTime, real writeTime, const word& timeName)
+	bool iterate(real upToTime, bool writeTime, const word& timeName)
 	{
 		return procDEMSystem_.iterate(upToTime, writeTime, timeName);
+	}
+
+	inline 
+	const Foam::volScalarField& alpha()const
+	{
+		return porosity_->alpha();
 	}
 
 	inline 

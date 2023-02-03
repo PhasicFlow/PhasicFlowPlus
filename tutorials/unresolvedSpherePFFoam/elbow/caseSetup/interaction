@@ -7,7 +7,7 @@ objectName interaction;
 objectType dicrionary;
 
 materials   (lightMat heavyMat wallMat); // a list of materials names
-densities   (1000 1500 2500);      // density of materials [kg/m3]
+densities   (1 1.5 2.5);      // density of materials [kg/m3]
 
 contactListType   sortedContactList;
 
