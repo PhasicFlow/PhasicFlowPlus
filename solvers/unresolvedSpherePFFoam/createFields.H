@@ -27,7 +27,24 @@ volVectorField U
     mesh
 );
 
-#include "createPhi.H"
+// by default this is created on the master processor 
+Info<< "Creating sphere coupling system for unresolved solver \n" << endl;
+pFlow::coupling::couplingSystem coupling("sphereDEMSystem", mesh, argc, argv);
+
+Info<< "Reading/calculating face flux field phi\n" << endl;
+
+surfaceScalarField phi
+(
+    IOobject
+    (
+        "phi",
+        runTime.timeName(),
+        mesh,
+        IOobject::READ_IF_PRESENT,
+        IOobject::AUTO_WRITE
+    ),
+    linearInterpolate(U * coupling.alpha()) & mesh.Sf()
+);
 
 
 pressureReference pressureReference(p, piso.dict());
@@ -46,8 +63,6 @@ autoPtr<incompressible::momentumTransportModel> turbulence
 #include "createFvModels.H"
 #include "createFvConstraints.H"
 
-// by default this is created on the master processor 
-Info<< "Creating sphere coupling system for unresolved solver \n" << endl;
-pFlow::coupling::couplingSystem coupling("sphereDEMSystem", mesh, argc, argv);
+
 
 
