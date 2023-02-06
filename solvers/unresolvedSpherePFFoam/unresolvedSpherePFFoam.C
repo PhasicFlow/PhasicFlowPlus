@@ -85,7 +85,6 @@ int main(int argc, char *argv[])
 
         coupling.getDataFromDEM(runTime.time().value(), runTime.deltaT().value());
         coupling.calculatePorosity();
-        const volScalarField& voidFraction = coupling.alpha();
 
         #include "CourantNo.H"
 

@@ -1,12 +1,16 @@
 // Solve the Momentum equation
+phi = fvc::interpolate(U * coupling.alpha()) & mesh.Sf();
+
+volScalarField alphaNuEff(coupling.alpha() * turbulence->nuEff());
 
 MRF.correctBoundaryVelocity(U);
 
 fvVectorMatrix UEqn
 (
-    fvm::ddt(U) + fvm::div(phi, U)
-  + MRF.DDt(U)
-  + turbulence->divDevSigma(U)
+    fvm::ddt(coupling.alpha(), U) 
+  + fvm::div(phi, U)
+  + MRF.DDt(coupling.alpha(), U)
+  - fvc::div(alphaNuEff * dev(fvc::grad(U)().T()))
  ==
     fvModels.source(U)
 );
@@ -17,7 +21,7 @@ fvConstraints.constrain(UEqn);
 
 if (piso.momentumPredictor())
 {
-    solve(UEqn == -fvc::grad(p));
+    solve(UEqn == - coupling.alpha() * fvc::grad(p));
 
     fvConstraints.constrain(U);
 }

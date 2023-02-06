@@ -1,10 +1,11 @@
 volScalarField rAU(1.0/UEqn.A());
+surfaceScalarField rAUf("rAUf", fvc::interpolate(rAU));
 volVectorField HbyA(constrainHbyA(rAU*UEqn.H(), U, p));
 surfaceScalarField phiHbyA
 (
     "phiHbyA",
-    fvc::flux(HbyA)
-  + MRF.zeroFilter(fvc::interpolate(rAU)*fvc::ddtCorr(U, phi))
+    fvc::flux(HbyA * coupling.alpha())
+  + MRF.zeroFilter(rAUf * fvc::interpolate(coupling.alpha())*fvc::ddtCorr(U, phi))
 );
 
 MRF.makeRelative(phiHbyA);
@@ -12,7 +13,9 @@ MRF.makeRelative(phiHbyA);
 adjustPhi(phiHbyA, U, p);
 
 // Update the pressure BCs to ensure flux consistency
-constrainPressure(p, U, phiHbyA, rAU, MRF);
+constrainPressure(p, U, phiHbyA, rAU*coupling.alpha(), MRF);
+
+volScalarField rAUAlpha2("rAUAlpha2",rAU * coupling.alpha() * coupling.alpha());
 
 // Non-orthogonal pressure corrector loop
 while (piso.correctNonOrthogonal())
@@ -21,7 +24,7 @@ while (piso.correctNonOrthogonal())
 
     fvScalarMatrix pEqn
     (
-        fvm::laplacian(rAU, p) == fvc::div(phiHbyA)
+        fvm::laplacian(rAUAlpha2, p) == fvc::div(phiHbyA) + fvc::ddt(coupling.alpha())
     );
 
     pEqn.setReference
@@ -40,6 +43,6 @@ while (piso.correctNonOrthogonal())
 
 #include "continuityErrs.H"
 
-U = HbyA - rAU*fvc::grad(p);
+U = fvc::reconstruct(phi)/coupling.alpha();
 U.correctBoundaryConditions();
 fvConstraints.constrain(U);
