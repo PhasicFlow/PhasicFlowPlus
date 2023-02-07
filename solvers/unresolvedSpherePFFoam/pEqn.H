@@ -1,4 +1,5 @@
 volScalarField rAU(1.0/UEqn.A());
+volScalarField rAUAlpha("rAUAlpha",rAU * coupling.alpha());
 surfaceScalarField rAUf("rAUf", fvc::interpolate(rAU));
 volVectorField HbyA(constrainHbyA(rAU*UEqn.H(), U, p));
 surfaceScalarField phiHbyA
@@ -13,7 +14,7 @@ MRF.makeRelative(phiHbyA);
 adjustPhi(phiHbyA, U, p);
 
 // Update the pressure BCs to ensure flux consistency
-constrainPressure(p, U, phiHbyA, rAU*coupling.alpha(), MRF);
+constrainPressure(p, U, phiHbyA, rAUAlpha, MRF);
 
 volScalarField rAUAlpha2("rAUAlpha2",rAU * coupling.alpha() * coupling.alpha());
 
