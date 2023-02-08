@@ -38,8 +38,11 @@ pFlow::coupling::drag::drag(
 	        Foam::IOobject::READ_IF_PRESENT,
 	        Foam::IOobject::AUTO_WRITE
 	    ),
-    porosity_.mesh(),
-    Foam::dimensionedScalar("Su", Foam::dimensionSet(1,-2,-2,0,0), 0.0)
+    	porosity_.mesh(),
+    	Foam::dimensionedVector(
+	    	"Su",
+	    	Foam::dimensionSet(1,-2,-2,0,0),
+	    	Foam::vector(0,0,0))
 		),
     Sp_(
     	Foam::IOobject
@@ -51,7 +54,10 @@ pFlow::coupling::drag::drag(
 	        Foam::IOobject::AUTO_WRITE
 	    ),
     	porosity_.mesh(),
-    	Foam::dimensionedScalar("Sp", Foam::dimensionSet(1,-3,-1,0,0), 0.0)
+    	Foam::dimensionedScalar(
+    		"Sp", 
+    		Foam::dimensionSet(1,-3,-1,0,0), 
+    		0.0)
     	)
 {
 

@@ -10,7 +10,7 @@ SOURCE += couplingSystem/couplingMesh.C
 SOURCE += couplingSystem/porosity/porosity.C
 SOURCE += couplingSystem/porosity/PIC.C
 SOURCE += couplingSystem/interaction/drag/drag.C
-SOURCE += couplingSystem/interaction/drag/Ergun.C
+SOURCE += couplingSystem/interaction/drag/ErgunWenYu.C
 
 
 LIB = $(FOAM_USER_LIBBIN)/libphasicFlowCoupling
