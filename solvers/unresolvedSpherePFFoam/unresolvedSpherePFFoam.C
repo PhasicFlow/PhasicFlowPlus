@@ -85,6 +85,7 @@ int main(int argc, char *argv[])
 
         coupling.getDataFromDEM(runTime.time().value(), runTime.deltaT().value());
         coupling.calculatePorosity();
+        coupling.calculateFluidInteraction(U);
 
         #include "CourantNo.H"
 
@@ -104,11 +105,8 @@ int main(int argc, char *argv[])
         laminarTransport.correct();
         turbulence->correct();
 
-        coupling.collectFluidForce();
-        coupling.collectFluidTorque();
-
-        // For GPU parallelization
-        // coupling.sendFluidForceToDEM();
+        
+         coupling.sendFluidForceToDEM();
         // coupling.sendFluidTorqueToDEM();
 
         runTime.write();

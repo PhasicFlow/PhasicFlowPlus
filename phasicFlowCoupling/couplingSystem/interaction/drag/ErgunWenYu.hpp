@@ -18,38 +18,56 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-#ifndef __Ergun_hpp__ 
-#define __Ergun_hpp__
+#ifndef __ErgunWenYu_hpp__ 
+#define __ErgunWenYu_hpp__
 
 #include "drag.hpp"
 
 namespace pFlow::coupling
 {
-class Ergun
+class ErgunWenYu
 :
 	public drag
 {
 protected:
 
+	inline 
+	Foam::scalar dimlessDrag(Foam::scalar Re, Foam::scalar ep, Foam::scalar d)
+	{
+		if( ep >= 0.8 )
+		{
+			Foam::scalar Cd;
+			if(Re <= 1000.0 )
+				Cd = 24 * ( 1+0.15*Foam::pow(Re,0.687) ) / Re; 
+			else
+				Cd = 0.44;
+			return Cd/24 * Re * Foam::pow(ep, -3.65 ); 
+		}else
+		{
+			return 	(150.0*(1.0-ep)+ 1.75*Re )/(18.0*ep*ep);
+		}
+
+	}
+
 public:
 
 	// type info
-	TypeInfo("Ergun");
+	TypeInfo("ErgunWenYu");
 
-	Ergun(
+	ErgunWenYu(
 		Foam::dictionary 		dict, 
 		porosity& 				prsty);
 
-	virtual ~Ergun() = default;
+	virtual ~ErgunWenYu() = default;
 
 	add_vCtor
 	(
 		drag,
-		Ergun,
+		ErgunWenYu,
 		dictionary
 	);
 
-	bool calculateDragForce(
+	void calculateDragForce(
 		const Foam::volVectorField& U,
 		const MPI::realx3ProcCMField& velocity,
 		const MPI::realProcCMField& diameter,

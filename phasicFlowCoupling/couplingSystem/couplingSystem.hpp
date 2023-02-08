@@ -102,6 +102,10 @@ public:
 
 	void calculatePorosity();
 
+	void calculateFluidInteraction(const Foam::volVectorField& U);
+
+	void sendFluidForceToDEM();
+
 	bool collectFluidForce();
 
 	bool collectFluidTorque();
@@ -119,6 +123,18 @@ public:
 	const Foam::volScalarField& alpha()const
 	{
 		return porosity_->alpha();
+	}
+
+	inline
+	const Foam::volScalarField& Sp ()const
+	{
+		return drag_->Sp();
+	}
+
+	inline
+	const Foam::volVectorField& Su ()const
+	{
+		return drag_->Su();
 	}
 
 	inline 

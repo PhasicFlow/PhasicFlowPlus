@@ -168,10 +168,38 @@ bool pFlow::coupling::couplingSystem::getDataFromDEM(real t, real fluidDt)
 	return true;
 }
 
+void pFlow::coupling::couplingSystem::sendFluidForceToDEM()
+{
+	collectFluidForce();
+
+	if(!procDEMSystem_.sendFluidForceToDEM())
+	{
+		fatalErrorInFunction<< "could not perform sendFluidForceToDEM"<<endl;
+		MPI::processor::abort(0);	
+	}
+
+}
+
+void pFlow::coupling::couplingSystem::calculateFluidInteraction(const Foam::volVectorField& U)
+{
+
+	if(drag_)
+	{
+		drag_->calculateDragForce(
+			U, 
+			particleVelocity_,
+			particleDiameter_,
+			fluidForce_);
+	}
+	
+}
+
 void pFlow::coupling::couplingSystem::calculatePorosity()
 {
 	porosity_->calculatePorosity();
 }
+
+
 
 bool pFlow::coupling::couplingSystem::collectFluidForce()
 {

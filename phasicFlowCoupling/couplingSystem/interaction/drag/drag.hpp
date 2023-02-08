@@ -41,7 +41,7 @@ protected:
 
 	porosity& 				porosity_;
 
-	Foam::volScalarField 	Su_;
+	Foam::volVectorField 	Su_;
 
 	Foam::volScalarField 	Sp_;
 
@@ -78,7 +78,7 @@ public:
 	}
 	
 	virtual
-	bool calculateDragForce(
+	void calculateDragForce(
 		const Foam::volVectorField& U,
 		const MPI::realx3ProcCMField& velocity,
 		const MPI::realProcCMField& diameter,
