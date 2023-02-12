@@ -74,6 +74,23 @@ span<const realx3> makeSpan(const centerMassField& cmField)
 }
 
 
+inline iOstream& operator << (iOstream& os, const centerMassField& f)
+{
+
+	// start of 
+	os << token::BEGIN_LIST;
+	for(size_t i=0; i<f.size(); i++)
+	{
+		os << f[i]<<token::NL;
+	}
+    
+    os << token::END_LIST;
+
+    os.check(FUNCTION_NAME);
+
+    return os;
+}
+
 } // pFlow::MPI
 
 

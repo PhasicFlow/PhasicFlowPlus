@@ -187,6 +187,7 @@ public:
 	{
 		if(demSystem_)
 		{
+			output<<"from processor 0 sending to DEM"<<endl;
 			return demSystem_->sendFluidForceToDEM();
 		}
 		else

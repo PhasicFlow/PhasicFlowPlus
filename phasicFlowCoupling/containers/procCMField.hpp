@@ -27,6 +27,7 @@ Licence:
 #include "eventObserver.hpp"
 #include "span.hpp"
 #include "centerMassField.hpp"
+#include "iOstream.hpp"
 
 
 namespace pFlow::MPI
@@ -156,6 +157,26 @@ span<T> makeSpan(procCMField<T>& cmField)
 {
 	return span<T>(cmField.data(), cmField.size());
 }
+
+
+template<typename T>
+inline iOstream& operator << (iOstream& os, const procCMField<T>& f)
+{
+
+	// start of 
+	os << token::BEGIN_LIST;
+	for(size_t i=0; i<f.size(); i++)
+	{
+		os << f[i]<<token::NL;
+	}
+    
+    os << token::END_LIST;
+
+    os.check(FUNCTION_NAME);
+
+    return os;
+}
+
 
 
 } // pFlow::MPI
