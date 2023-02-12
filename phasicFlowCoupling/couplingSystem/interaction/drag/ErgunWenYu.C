@@ -22,6 +22,8 @@ Licence:
 #include "volFields.H"
 
 #include "ErgunWenYu.hpp"
+#include "streams.hpp"
+#include "processor.hpp"
 
 
 pFlow::coupling::ErgunWenYu::ErgunWenYu(
@@ -45,7 +47,7 @@ void pFlow::coupling::ErgunWenYu::calculateDragForce(
 	    	"Su",
 	    	Foam::dimensionSet(1,-2,-2,0,0),
 	    	Foam::vector(0,0,0));
-	
+
 	Sp_ = Foam::dimensionedScalar(
     		"Sp", 
     		Foam::dimensionSet(1,-3,-1,0,0), 
@@ -79,12 +81,19 @@ void pFlow::coupling::ErgunWenYu::calculateDragForce(
 
 			Foam::scalar sp = 3 * Foam::constant::mathematical::pi * mu * ef * dp * dimlessDrag(Re, ef, dp);
 			
+			//Foam::Pout<<" sp "<< sp << Foam::endl;
+			//Foam::Pout<<" ur "<< ur << Foam::endl;
+
 			particleForce[i] = static_cast<real>(sp) * realx3(ur.x(), ur.y(), ur.z());
 			Su_[cell] += -sp*up;
 			Sp_[cell] += sp;
 
 		}
 	}
+
+
+
+	//output<< MPI::processor::myProcessorNo()<< " -> particleForce "<< particleForce.size()<< "\n values \n" <<particleForce<<endl;
 
 }
 
