@@ -11,8 +11,10 @@ fvVectorMatrix UEqn
   + fvm::div(phi, U)
   + MRF.DDt(coupling.alpha(), U)
   - fvc::div(alphaNuEff * dev(fvc::grad(U)().T()))
+  - fvm::Sp(coupling.Sp()/rho, U)
  ==
-    fvModels.source(U)
+    coupling.Su()/rho
+  + fvModels.source(U)
 );
 
 UEqn.relax();

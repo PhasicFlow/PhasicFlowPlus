@@ -59,6 +59,12 @@ autoPtr<incompressible::momentumTransportModel> turbulence
     incompressible::momentumTransportModel::New(U, phi, laminarTransport)
 );
 
+dimensionedScalar rho
+(
+    "rho",
+    laminarTransport.lookup("rho")
+); 
+
 #include "createMRF.H"
 #include "createFvModels.H"
 #include "createFvConstraints.H"
