@@ -50,7 +50,7 @@ pFlow::coupling::couplingSystem::couplingSystem(
         IOobject
         (
             "couplingProperties",
-            mesh.time().caseConstant(),
+            mesh.time().constant(),
             mesh,
             IOobject::MUST_READ,
             IOobject::NO_WRITE
