@@ -105,7 +105,7 @@ bool pFlow::coupling::couplingSystem::getDataFromDEM(real t, real fluidDt)
 	procDEMSystem_.getDataFromDEM();
 
 	
-	if( checkForDomainUpdate(t-fluidDt, fluidDt) )
+	//if( checkForDomainUpdate(t-fluidDt, fluidDt) )
 	{
 		Foam::Info<<"Sub-domains have been updated at time "<< t<<Foam::endl;
 
