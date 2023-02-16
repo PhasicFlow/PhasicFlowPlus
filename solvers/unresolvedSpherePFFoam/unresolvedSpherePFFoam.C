@@ -68,6 +68,9 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createMesh.H"
     #include "createControl.H"
+
+    pFlow::MPI::processor::initMPI(argc, argv);
+
     #include "createFields.H"
     #include "initContinuityErrs.H"
 
@@ -117,6 +120,8 @@ int main(int argc, char *argv[])
     }
 
     Info<< "End\n" << endl;
+
+    pFlow::MPI::processor::finalizeMPI();
 
     return 0;
 }

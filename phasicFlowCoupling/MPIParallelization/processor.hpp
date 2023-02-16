@@ -48,19 +48,16 @@ namespace pFlow::MPI
 
 class processor
 {
-private:
-	
-
-	/*struct TypeInitializer
-	{
-		TypeInitializer();
-		~TypeInitializer();
-	};
-
-	static inline 
-	TypeInitializer types_{};*/
-
 public:
+	
+	static inline 
+	bool isSelfInitialized_ = false;
+
+	static 
+	void initMPI(int argc, char *argv[]);
+
+	static
+	void finalizeMPI();
 
 	processor();
 	
@@ -80,6 +77,9 @@ public:
 	
 	static
 	bool isInitialized();
+	
+	static
+	bool isFinalized();
 	
 	static
 	bool isMaster();

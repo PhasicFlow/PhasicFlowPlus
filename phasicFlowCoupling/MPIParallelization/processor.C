@@ -35,6 +35,22 @@ pFlow::MPI::DataType pFlow::MPI::realx3Type__;
 pFlow::MPI::DataType pFlow::MPI::int32x3Type__;
 
 
+void pFlow::MPI::processor::initMPI(int argc, char *argv[])
+{
+	if(!processor::isInitialized())
+	{
+		CheckMPI(MPI_Init(&argc, &argv), true);
+		isSelfInitialized_ = true;
+	}
+}
+
+void pFlow::MPI::processor::finalizeMPI()
+{
+	if(isSelfInitialized_ && !isFinalized())
+	{
+		CheckMPI(MPI_Finalize(), true);
+	}
+}
 
 pFlow::MPI::processor::processor()
 {
@@ -93,6 +109,13 @@ bool pFlow::MPI::processor::isInitialized()
 {
 	int res;
 	MPI_Initialized(&res);
+	return res;
+}
+
+bool pFlow::MPI::processor::isFinalized()
+{
+	int res;
+	MPI_Finalized(&res);
 	return res;
 }
 
