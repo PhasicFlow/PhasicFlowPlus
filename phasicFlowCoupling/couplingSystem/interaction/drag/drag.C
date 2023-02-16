@@ -19,16 +19,23 @@ Licence:
 -----------------------------------------------------------------------------*/
 // from OpenFOAM
 #include "volFields.H"
+#include "fvc.H"
 
 #include "drag.hpp"
 #include "processor.hpp"
 
 pFlow::coupling::drag::drag(
 	Foam::dictionary 		dict, 
-	porosity& 					prsty)
+	porosity& 				prsty)
 :
 	residualRe_(dict.lookup<real>("residualRe")),
 	porosity_(prsty),
+	p_(
+		porosity_.mesh().lookupObject<Foam::volScalarField>("p")
+	),
+	U_(
+		porosity_.mesh().lookupObject<Foam::volVectorField>("U")
+		),
 	Su_(
 	    Foam::IOobject
 	    (
@@ -63,6 +70,11 @@ pFlow::coupling::drag::drag(
 
 }
 
+Foam::tmp<Foam::volVectorField> 
+pFlow::coupling::drag::pressureGradient()const
+{
+	return Foam::fvc::grad(p_);
+}
 
 pFlow::uniquePtr<pFlow::coupling::drag> 
 	pFlow::coupling::drag::create(

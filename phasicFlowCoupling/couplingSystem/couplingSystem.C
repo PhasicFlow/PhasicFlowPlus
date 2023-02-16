@@ -61,6 +61,10 @@ pFlow::coupling::couplingSystem::couplingSystem(
 	couplingMesh_(mesh),
 	processorComm_(),
 	procDEMSystem_(demSystemName, argc, argv),
+	couplingTimers_("coupling", procDEMSystem_.getTimers()),
+	getDataTimer_("get data from DEM", &couplingTimers_),
+	porosityTimer_("porosity", &couplingTimers_),
+	interactionTimer_("interaction", &couplingTimers_),
 	centerMass_(),
 	particleDiameter_("diameter",centerMass_),
 	particleVelocity_("velocity", centerMass_),
@@ -104,6 +108,7 @@ bool pFlow::coupling::couplingSystem::getDataFromDEM(real t, real fluidDt)
 	// this updates data on host side
 
 	Foam::Info<<"Obtaining data from DEM to processor#0"<<Foam::endl;
+	getDataTimer_.start();
 	procDEMSystem_.getDataFromDEM();
 	
 	//if( checkForDomainUpdate(t-fluidDt, fluidDt) )
@@ -166,6 +171,7 @@ bool pFlow::coupling::couplingSystem::getDataFromDEM(real t, real fluidDt)
 	// update velocity in each processor
 	distributeVelocity();
 
+	getDataTimer_.end();
 	return true;
 }
 
@@ -181,23 +187,26 @@ void pFlow::coupling::couplingSystem::sendFluidForceToDEM()
 
 }
 
-void pFlow::coupling::couplingSystem::calculateFluidInteraction(const Foam::volVectorField& U)
+void pFlow::coupling::couplingSystem::calculateFluidInteraction()
 {
 
+	interactionTimer_.start();
 	if(drag_)
 	{
 		drag_->calculateDragForce(
-			U, 
 			particleVelocity_,
 			particleDiameter_,
 			fluidForce_);
 	}
+	interactionTimer_.end();
 	
 }
 
 void pFlow::coupling::couplingSystem::calculatePorosity()
 {
+	porosityTimer_.start();
 	porosity_->calculatePorosity();
+	porosityTimer_.end();
 }
 
 

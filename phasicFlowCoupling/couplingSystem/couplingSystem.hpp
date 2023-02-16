@@ -34,6 +34,7 @@ Licence:
 #include "couplingMesh.hpp"
 #include "porosity.hpp"
 #include "drag.hpp"
+#include "Timers.hpp"
 
 namespace pFlow::coupling
 {
@@ -62,6 +63,14 @@ protected:
 	MPI::scatteredCommunication<realx3> realx3ScatteredComm_;
 
 	MPI::procDEMSystem 			procDEMSystem_;
+
+	Timers 						couplingTimers_;
+
+	Timer 						getDataTimer_;
+
+	Timer 						porosityTimer_;
+
+	Timer 						interactionTimer_;
 
 	MPI::centerMassField 		centerMass_;
 
@@ -102,7 +111,7 @@ public:
 
 	void calculatePorosity();
 
-	void calculateFluidInteraction(const Foam::volVectorField& U);
+	void calculateFluidInteraction();
 
 	void sendFluidForceToDEM();
 

@@ -36,7 +36,6 @@ pFlow::coupling::ErgunWenYu::ErgunWenYu(
 }
 
 void pFlow::coupling::ErgunWenYu::calculateDragForce(
-	const Foam::volVectorField& U,
 	const MPI::realx3ProcCMField& velocity,
 	const MPI::realProcCMField& diameter,
 	MPI::realx3ProcCMField& particleForce)
@@ -55,14 +54,18 @@ void pFlow::coupling::ErgunWenYu::calculateDragForce(
 
 	particleForce = realx3(0,0,0);
 
+	const auto& parCells =  porosity_.particleCellIndex();
+
+	if(parCells.size() == 0 ) return;
+
 	//const auto& mu = porosity_.mesh().lookupObject<Foam::volScalarField>("mu");
 	//const auto& rho = porosity_.mesh().lookupObject<Foam::volScalarField>("rho");
 
 	Foam::scalar mu = 1.8e-5;
 	Foam::scalar rho = 1.2;
-
-	const auto& parCells =  porosity_.particleCellIndex();
-
+	
+	auto pGrad = pressureGradient();
+	auto& pGradRef = pGrad();
 
 	for(size_t i=0; i<parCells.size(); i++)
 	{
@@ -70,11 +73,13 @@ void pFlow::coupling::ErgunWenYu::calculateDragForce(
 
 		if(cell >= 0 )
 		{
-			auto Uf = U[cell];
+			auto Uf = U_[cell];
 			auto ef = porosity_[cell];
 
 			Foam::vector up = {velocity[i].x(), velocity[i].y(),velocity[i].z()};
 			Foam::scalar dp = diameter[i];
+
+			auto vp = Foam::constant::mathematical::pi/6 * Foam::pow(dp,3.0);
 			
 			Foam::vector ur = Uf-up;
 			Foam::scalar Re = Foam::max(ef * rho * Foam::mag(ur) * dp /mu, residualRe_);
@@ -83,8 +88,8 @@ void pFlow::coupling::ErgunWenYu::calculateDragForce(
 			
 			//Foam::Pout<<" sp "<< sp << Foam::endl;
 			//Foam::Pout<<" ur "<< ur << Foam::endl;
-
-			particleForce[i] = static_cast<real>(sp) * realx3(ur.x(), ur.y(), ur.z());
+			Foam::vector pf = static_cast<real>(sp)*ur + vp*pGradRef[cell];
+			particleForce[i] = realx3(pf.x(), pf.y(), pf.z());
 			Su_[cell] += -sp*up;
 			Sp_[cell] += sp;
 
