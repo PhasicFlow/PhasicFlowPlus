@@ -30,6 +30,11 @@ Licence:
 // from coupling-phasicFlow
 #include "procVector.hpp"
 
+namespace pFlow
+{
+class Timers;
+}
+
 namespace pFlow::MPI
 {
 
@@ -237,6 +242,19 @@ public:
 		else
 		{
 			return true;
+		}
+	}
+
+	inline
+	Timers* getTimers()
+	{
+		if(demSystem_)
+		{
+			return &demSystem_->Control().timers();
+		}
+		else
+		{
+			return nullptr;
 		}
 	}
 

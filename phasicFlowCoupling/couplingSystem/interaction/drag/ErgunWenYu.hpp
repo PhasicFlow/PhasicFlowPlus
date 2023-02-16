@@ -68,7 +68,6 @@ public:
 	);
 
 	void calculateDragForce(
-		const Foam::volVectorField& U,
 		const MPI::realx3ProcCMField& velocity,
 		const MPI::realProcCMField& diameter,
 		MPI::realx3ProcCMField& particleForce)override;

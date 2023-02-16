@@ -41,6 +41,10 @@ protected:
 
 	porosity& 				porosity_;
 
+	const Foam::volScalarField& 	p_;
+
+	const Foam::volVectorField&		U_;
+
 	Foam::volVectorField 	Su_;
 
 	Foam::volScalarField 	Sp_;
@@ -67,6 +71,9 @@ public:
 		(dict, prsty)
 	);
 
+	Foam::tmp<Foam::volVectorField> 
+	pressureGradient()const;
+
 	const auto& Su()const
 	{
 		return Su_;
@@ -79,7 +86,6 @@ public:
 	
 	virtual
 	void calculateDragForce(
-		const Foam::volVectorField& U,
 		const MPI::realx3ProcCMField& velocity,
 		const MPI::realProcCMField& diameter,
 		MPI::realx3ProcCMField& particleForce) = 0;

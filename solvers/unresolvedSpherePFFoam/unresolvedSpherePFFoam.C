@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
         
         coupling.getDataFromDEM(runTime.time().value(), runTime.deltaT().value());
         coupling.calculatePorosity();
-        coupling.calculateFluidInteraction(U);
+        coupling.calculateFluidInteraction();
         coupling.sendFluidForceToDEM();
 
         coupling.iterate(runTime.time().value(), runTime.writeTime(), runTime.timeName());
