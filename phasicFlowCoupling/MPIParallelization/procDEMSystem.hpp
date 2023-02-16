@@ -39,9 +39,9 @@ protected:
 
 	// this will be nullptr for all processors except 
 	// the main processor 
-	uniquePtr<DEMSystem> 		demSystem_ = nullptr;
+	uniquePtr<DEMSystem> demSystem_ = nullptr;
 
-	real 						startTime_= 0;
+	real 				 startTime_= 0;
 public:
 
 	procDEMSystem(
@@ -187,7 +187,7 @@ public:
 	{
 		if(demSystem_)
 		{
-			output<<"from processor 0 sending to DEM"<<endl;
+			output<<"Sending fluid force data from processor#0 to DEM"<<endl;
 			return demSystem_->sendFluidForceToDEM();
 		}
 		else
@@ -201,6 +201,7 @@ public:
 	{
 		if(demSystem_)
 		{
+			output<<"Sending fluid torque data from processor#0 to DEM"<<endl;
 			return demSystem_->sendFluidTorqueToDEM();
 		}
 		else
@@ -212,14 +213,13 @@ public:
 	inline
 	bool iterate(real upToTime, bool writeTime, const word& timeName)
 	{
-		real writeTimeValue = largeValue;
-		if(writeTime)
-		{
-			writeTimeValue = upToTime;
-		}
+		
 		if(demSystem_)
 		{
-			return demSystem_->iterate(upToTime, writeTimeValue, timeName);
+			if(writeTime)
+				return demSystem_->iterate(upToTime, upToTime, timeName);
+			else
+				return demSystem_->iterate(upToTime);
 		}
 		else
 		{
