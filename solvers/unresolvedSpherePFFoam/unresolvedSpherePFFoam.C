@@ -68,6 +68,9 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createMesh.H"
     #include "createControl.H"
+
+    pFlow::MPI::processor::initMPI(argc, argv);
+
     #include "createFields.H"
     #include "initContinuityErrs.H"
 
@@ -81,11 +84,13 @@ int main(int argc, char *argv[])
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        coupling.iterate(runTime.time().value(), runTime.writeTime(), runTime.timeName());
-
+        
         coupling.getDataFromDEM(runTime.time().value(), runTime.deltaT().value());
         coupling.calculatePorosity();
         coupling.calculateFluidInteraction(U);
+        coupling.sendFluidForceToDEM();
+
+        coupling.iterate(runTime.time().value(), runTime.writeTime(), runTime.timeName());
 
         #include "CourantNo.H"
 
@@ -105,10 +110,6 @@ int main(int argc, char *argv[])
         laminarTransport.correct();
         turbulence->correct();
 
-        
-         coupling.sendFluidForceToDEM();
-        // coupling.sendFluidTorqueToDEM();
-
         runTime.write();
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
@@ -117,6 +118,8 @@ int main(int argc, char *argv[])
     }
 
     Info<< "End\n" << endl;
+
+    pFlow::MPI::processor::finalizeMPI();
 
     return 0;
 }

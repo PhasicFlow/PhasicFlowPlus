@@ -36,7 +36,7 @@ bool pFlow::MPI::centerMassField::checkForNewSize(size_t newSize)
 		if(newSize == this->size()) return true;
 		
 		eventMessage msg;
-		if(newSize < this->capacity() )
+		if(newSize <= this->capacity() )
 		{
 			// enough space is avaiable
 			// only resize the container

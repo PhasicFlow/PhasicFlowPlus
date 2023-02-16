@@ -102,12 +102,13 @@ pFlow::coupling::couplingSystem::couplingSystem(
 bool pFlow::coupling::couplingSystem::getDataFromDEM(real t, real fluidDt)
 {
 	// this updates data on host side
-	procDEMSystem_.getDataFromDEM();
 
+	Foam::Info<<"Obtaining data from DEM to processor#0"<<Foam::endl;
+	procDEMSystem_.getDataFromDEM();
 	
-	if( checkForDomainUpdate(t-fluidDt, fluidDt) )
+	//if( checkForDomainUpdate(t-fluidDt, fluidDt) )
 	{
-		Foam::Info<<"Sub-domains have been updated at time "<< t<<Foam::endl;
+		Foam::Info<<"Sub-domains have been updated at time "<< t <<Foam::endl;
 
 		if(!procDEMSystem_.updateParticleDistribution(
 			 subDomainExpansionFraction_, 
