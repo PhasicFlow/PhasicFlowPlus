@@ -55,11 +55,8 @@ void pFlow::coupling::ErgunWenYu::calculateDragForce(
 
 	particleForce = realx3(0,0,0);
 
-	//const auto& mu = porosity_.mesh().lookupObject<Foam::volScalarField>("mu");
-	//const auto& rho = porosity_.mesh().lookupObject<Foam::volScalarField>("rho");
-
-	Foam::scalar mu = 1.8e-5;
-	Foam::scalar rho = 1.2;
+	const auto& nu = porosity_.mesh().lookupObject<Foam::volScalarField>("nu");
+	const auto& rho = porosity_.mesh().lookupObject<Foam::volScalarField>("rho");
 
 	const auto& parCells =  porosity_.particleCellIndex();
 
@@ -70,6 +67,7 @@ void pFlow::coupling::ErgunWenYu::calculateDragForce(
 
 		if(cell >= 0 )
 		{
+			auto mu = nu[cell]*rho[cell];
 			auto Uf = U[cell];
 			auto ef = porosity_[cell];
 
@@ -77,7 +75,9 @@ void pFlow::coupling::ErgunWenYu::calculateDragForce(
 			Foam::scalar dp = diameter[i];
 			
 			Foam::vector ur = Uf-up;
-			Foam::scalar Re = Foam::max(ef * rho * Foam::mag(ur) * dp /mu, residualRe_);
+			Foam::scalar Re = Foam::max(ef * rho[cell] * Foam::mag(ur) * dp /mu, residualRe_);
+
+			Foam::Info << cell << Foam::endl;
 
 			Foam::scalar sp = 3 * Foam::constant::mathematical::pi * mu * ef * dp * dimlessDrag(Re, ef, dp);
 			

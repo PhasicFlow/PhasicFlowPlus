@@ -105,7 +105,7 @@ bool pFlow::coupling::couplingSystem::getDataFromDEM(real t, real fluidDt)
 	procDEMSystem_.getDataFromDEM();
 
 	
-	if( checkForDomainUpdate(t-fluidDt, fluidDt) )
+	//if( checkForDomainUpdate(t-fluidDt, fluidDt) )
 	{
 		Foam::Info<<"Sub-domains have been updated at time "<< t<<Foam::endl;
 
@@ -118,7 +118,13 @@ bool pFlow::coupling::couplingSystem::getDataFromDEM(real t, real fluidDt)
 			return false;
 		}
 
+		Foam::Info<<"Check point getDataFromDEM 00 "<<Foam::endl;
+
 		auto numParsInDomains = procDEMSystem_.numParInDomainMaster();
+
+		//Foam::Pout << "numParsInDomains: " << numParsInDomains << Foam::endl;
+
+		Foam::Info<<"Check point getDataFromDEM 001 "<<Foam::endl;
 
 		if( auto [thisNoPars, success] =  
 			processorComm_.distributeMasterToAll(numParsInDomains); !success)
@@ -128,8 +134,13 @@ bool pFlow::coupling::couplingSystem::getDataFromDEM(real t, real fluidDt)
 			MPI::processor::abort(0);
 			return false;
 		}
+
+		
+
 		else
 		{
+			output << MPI::processor::myProcessorNo() << ": " << thisNoPars << endl;
+
 			if(!centerMass_.checkForNewSize(thisNoPars))
 			{
 				fatalErrorInFunction<<
@@ -139,8 +150,12 @@ bool pFlow::coupling::couplingSystem::getDataFromDEM(real t, real fluidDt)
 			}
 		}
 
+		Foam::Info<<"Check point getDataFromDEM 002 "<<Foam::endl;
+
 		// first cunstructs index distribution
 		auto parIndexInDomains = procDEMSystem_.parIndexInDomainsMaster();
+
+		Foam::Info<<"Check point getDataFromDEM 003 "<<Foam::endl;
 		if(!realScatteredComm_.changeDataMaps(parIndexInDomains))
 		{
 			fatalErrorInFunction<<
@@ -148,6 +163,8 @@ bool pFlow::coupling::couplingSystem::getDataFromDEM(real t, real fluidDt)
 			MPI::processor::abort(0);
 			return false;
 		}
+
+		Foam::Info<<"Check point getDataFromDEM 004 "<<Foam::endl;
 
 		if(!realx3ScatteredComm_.changeDataMaps(parIndexInDomains))
 		{
@@ -157,13 +174,19 @@ bool pFlow::coupling::couplingSystem::getDataFromDEM(real t, real fluidDt)
 			return false;
 		}
 
+		Foam::Info<<"Check point getDataFromDEM 005 "<<Foam::endl;
+
 	}
 
 	// update position and diameter in each processor
 	distributeParticles();
 
+	Foam::Info<<"Check point getDataFromDEM 006 "<<Foam::endl;
+
 	// update velocity in each processor
 	distributeVelocity();
+
+	Foam::Info<<"Check point getDataFromDEM 007 "<<Foam::endl;
 
 	return true;
 }

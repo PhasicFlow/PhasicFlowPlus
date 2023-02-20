@@ -6,15 +6,13 @@ surfaceScalarField phiHbyA
 (
     "phiHbyA",
     fvc::flux(HbyA * coupling.alpha())
-  + MRF.zeroFilter(rAUf * fvc::interpolate(coupling.alpha())*fvc::ddtCorr(U, phi))
+  + rAUf * fvc::interpolate(coupling.alpha())*fvc::ddtCorr(U, phi)
 );
-
-MRF.makeRelative(phiHbyA);
 
 adjustPhi(phiHbyA, U, p);
 
 // Update the pressure BCs to ensure flux consistency
-constrainPressure(p, U, phiHbyA, rAUAlpha, MRF);
+constrainPressure(p, U, phiHbyA, rAUAlpha);
 
 volScalarField rAUAlpha2("rAUAlpha2",rAU * coupling.alpha() * coupling.alpha());
 

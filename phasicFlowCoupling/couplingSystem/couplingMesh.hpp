@@ -79,6 +79,9 @@ public:
 			auto sample = Foam::point(p.x(), p.y(), p.z());
 		#endif
 
+		Foam::Pout << "Cell ID: " << mesh_.findCell(sample) << Foam::endl;
+
+
 		return mesh_.findCell(sample);
 	}
 

@@ -19,7 +19,8 @@ Licence:
 -----------------------------------------------------------------------------*/
 
 #include "centerMassField.hpp"
-
+#include "processor.hpp"
+#include "streams.hpp"
 
 pFlow::MPI::centerMassField::centerMassField(size_t size, size_t capacity)
 :
@@ -51,9 +52,10 @@ bool pFlow::MPI::centerMassField::checkForNewSize(size_t newSize)
 			msg.add(eventMessage::CAP_CHANGED);
 			this->resize(newSize);
 		}
-
+		output << "centerMassField 00" << endl;
 		if( !msg.isNull() )
 		{
+			output << MPI::processor::myProcessorNo() << "Notify is running" << endl;
 			return this->notify(msg);
 		}
 

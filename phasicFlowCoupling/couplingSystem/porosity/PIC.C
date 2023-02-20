@@ -45,6 +45,7 @@ bool pFlow::coupling::PIC::internalFieldUpdate()
 		this->size(), 
 		static_cast<Foam::scalar>(0));
 
+	Foam::Pout << "Number of particles on processor: " << centerMass_.size() << Foam::endl;
 
 	for(size_t i=0; i<centerMass_.size(); i++)
 	{
