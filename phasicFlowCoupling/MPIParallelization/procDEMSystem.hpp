@@ -30,9 +30,11 @@ Licence:
 // from coupling-phasicFlow
 #include "procVector.hpp"
 
+
 namespace pFlow
 {
 class Timers;
+class Timer;
 }
 
 namespace pFlow::MPI

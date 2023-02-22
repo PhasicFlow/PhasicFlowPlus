@@ -9,6 +9,6 @@ echo "\nCompiling phasicFlowCoupling library"
 wmake ./phasicFlowCoupling 
 
 echo "\nCompiling solvers"
-solvers/Allwmake
+solvers/wmake
 
 #------------------------------------------------------------------------------
