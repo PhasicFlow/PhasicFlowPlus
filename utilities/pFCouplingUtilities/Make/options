@@ -1,0 +1,30 @@
+ptFLAGS += -std=c++17 -Wno-old-style-cast 
+
+pFlow_Project = $(pFlow_PROJECT_DIR)
+pFlow_INCLUDE_DIR =$(pFlow_Project)/include
+
+CUDA_PATH =/usr/local/cuda
+
+-include $(GENERAL_RULES)/mplibType
+
+EXE_INC = \
+    -I$(pFlow_INCLUDE_DIR) \
+    -I$(pFlow_INCLUDE_DIR)/phasicFlow \
+    -I$(pFlow_INCLUDE_DIR)/Geometry \
+    -I$(pFlow_INCLUDE_DIR)/Utilities \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/Pstream/mpi/lnInclude
+
+LIB_LIBS = \
+    -L$(pFlow_Project)/lib \
+    -lphasicFlow \
+    -lGeometry \
+    -lUtilities \
+    -lOpenFOAM \
+    -L$(FOAM_LIBBIN)/openmpi-system -lPstream \
+    -lfiniteVolume \
+    -lmeshTools
+
+EXE_INC  += $(PFLAGS) $(PINC)
+LIB_LIBS += $(PLIBS)
