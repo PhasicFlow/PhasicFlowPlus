@@ -11,4 +11,6 @@ wmake ./phasicFlowCoupling
 echo "\nCompiling solvers"
 solvers/wmake
 
+echo "\nCompiling utilities"
+utilities/wmake
 #------------------------------------------------------------------------------
