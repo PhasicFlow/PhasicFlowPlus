@@ -37,6 +37,7 @@ testLink.C
 
 # directories
 Make/linux*/**
+Make/linux*/**/*
 Make/linux*/*
 lnInclude/**
 # all possible time folders

@@ -2,8 +2,11 @@
 cd ${0%/*} || exit 1    # Run from this directory
 
 
-wclean ./phasicFlowCoupling 
-solvers/wclean
-utilities/wclean
+# Compile OpenFOAM libraries and applications
+echo "  -> building pFCouplingUtilities"
+wmake ./pFCouplingUtilities
+
+
+
 
 #------------------------------------------------------------------------------
