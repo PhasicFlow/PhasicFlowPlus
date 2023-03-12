@@ -65,15 +65,21 @@ pFlow::coupling::drag::drag(
     		"Sp", 
     		Foam::dimensionSet(1,-3,-1,0,0), 
     		0.0)
+    	),
+    isCompressible_(
+    	p_.dimensions() == Foam::dimPressure
     	)
 {
 
 }
 
 Foam::tmp<Foam::volVectorField> 
-pFlow::coupling::drag::pressureGradient()const
+pFlow::coupling::drag::pressureGradient(const Foam::volScalarField& rho)const
 {
-	return Foam::fvc::grad(p_);
+	if(isCompressible_)
+		return Foam::fvc::grad(p_);
+	else
+		return Foam::fvc::grad(p_)*rho;
 }
 
 pFlow::uniquePtr<pFlow::coupling::drag> 
