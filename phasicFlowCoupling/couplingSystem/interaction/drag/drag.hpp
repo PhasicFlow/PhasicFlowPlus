@@ -49,6 +49,8 @@ protected:
 
 	Foam::volScalarField 	Sp_;
 
+	bool 					isCompressible_ = false;
+
 public:
 
 	// type info
@@ -72,7 +74,7 @@ public:
 	);
 
 	Foam::tmp<Foam::volVectorField> 
-	pressureGradient()const;
+	pressureGradient(const Foam::volScalarField& rho)const;
 
 	const auto& Su()const
 	{
@@ -84,6 +86,12 @@ public:
 		return Sp_;
 	}
 	
+	inline
+	bool isCompressible()const
+	{
+		return isCompressible_;
+	}
+
 	virtual
 	void calculateDragForce(
 		const MPI::realx3ProcCMField& velocity,

@@ -41,9 +41,14 @@ pFlow::coupling::PIC::PIC(
 bool pFlow::coupling::PIC::internalFieldUpdate()
 {
 	
-	auto solidVol = Foam::scalarField(
-		this->size(), 
-		static_cast<Foam::scalar>(0));
+	auto solidVoldTmp = Foam::volScalarField::Internal::New(
+		"solidVol",
+		this->mesh(),
+		 Foam::dimensioned("solidVol", Foam::dimVol, Foam::scalar(0))
+		 	);
+	
+	auto& solidVol = solidVoldTmp.ref();
+	
 
 
 	for(size_t i=0; i<centerMass_.size(); i++)
@@ -60,7 +65,7 @@ bool pFlow::coupling::PIC::internalFieldUpdate()
 	}
 
 
-	this->field() = Foam::max(
+	this->ref() = Foam::max(
 		1 - solidVol/this->mesh().V(), 
 		static_cast<Foam::scalar>(this->alphaMin()) );
 
