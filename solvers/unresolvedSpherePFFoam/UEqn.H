@@ -10,7 +10,7 @@ fvVectorMatrix UEqn
   - fvc::div(alphaNuEff * dev(fvc::grad(U)().T()))
   + fvm::Sp(coupling.Sp()/rho, U)
  ==
-    coupling.Su()/rho
+  - coupling.Su()/rho
   + fvModels.source(U)
 );
 
