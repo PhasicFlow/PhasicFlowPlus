@@ -8,7 +8,7 @@ fvVectorMatrix UEqn
     fvm::ddt(coupling.alpha(), U) 
   + fvm::div(phi, U)
   - fvc::div(alphaNuEff * dev(fvc::grad(U)().T()))
-  - fvm::Sp(coupling.Sp()/rho, U)
+  + fvm::Sp(coupling.Sp()/rho, U)
  ==
     coupling.Su()/rho
   + fvModels.source(U)

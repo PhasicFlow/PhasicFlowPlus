@@ -86,10 +86,16 @@ void pFlow::coupling::ErgunWenYu::calculateDragForce(
 			Foam::scalar sp = 3 * Foam::constant::mathematical::pi * mui * ef * dp * dimlessDrag(Re, ef, dp);
 			
 			Foam::vector pf = static_cast<real>(sp)*ur - vp*pGradRef[cell];
+			
+			if(i>0 && i<20)
+				Foam::Info << pf << Foam::endl;
+
 			particleForce[i] = realx3(pf.x(), pf.y(), pf.z());
 			Su_[cell] += (-sp*up)/Vcell[cell];
 			Sp_[cell] += sp/Vcell[cell];
 		}
 	}
+
+	output<< particleForce << endl;
 
 }
