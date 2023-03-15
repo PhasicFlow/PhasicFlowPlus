@@ -37,7 +37,7 @@ class PIC
 {
 protected:
 
-	
+	int32 numInMesh_;
 
 public:
 
@@ -60,6 +60,11 @@ public:
 	);
 
 	bool internalFieldUpdate() override;
+
+	int32 numInMesh()const override
+	{
+		return numInMesh_;
+	}
 
 }; 
 
