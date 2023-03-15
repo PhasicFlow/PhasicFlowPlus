@@ -114,6 +114,10 @@ public:
 	virtual
 	bool internalFieldUpdate() = 0;
 
+	virtual
+	int32 numInMesh()const = 0;
+
+
 	static
 	uniquePtr<porosity> create(
 		Foam::dictionary		dict, 

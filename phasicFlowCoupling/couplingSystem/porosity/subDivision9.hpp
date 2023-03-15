@@ -18,55 +18,57 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-// from OpenFOAM
-#include "fvCFD.H"
+#ifndef __subDivision9_hpp__ 
+#define __subDivision9_hpp__
+
+#include "virtualConstructor.hpp"
+
+// from phasicFlow-coupling
+#include "porosity.hpp"
 
 
-#include "PIC.hpp"
-
-
-pFlow::coupling::PIC::PIC(
-	Foam::dictionary 		dict, 
-	couplingMesh& 			cMesh, 
-	MPI::centerMassField& 	centerMass, 
-	MPI::realProcCMField& 	parDiam)
-:
-	porosity(dict, cMesh, centerMass, parDiam)
+namespace pFlow::coupling
 {
 
-}
 
-
-bool pFlow::coupling::PIC::internalFieldUpdate()
+class subDivision9
+: 
+	public porosity
 {
-	
-	auto solidVoldTmp = Foam::volScalarField::Internal::New(
-		"solidVol",
-		this->mesh(),
-		 Foam::dimensioned("solidVol", Foam::dimVol, Foam::scalar(0))
-		 	);
-	
-	auto& solidVol = solidVoldTmp.ref();
-	numInMesh_ = 0;
+protected:
 
-	for(size_t i=0; i<centerMass_.size(); i++)
+	int32 numInMesh_;
+
+public:
+
+	// type info
+	TypeInfo("subDivision9");
+
+	subDivision9(
+		Foam::dictionary 		dict, 
+		couplingMesh& 			cMesh, 
+		MPI::centerMassField& 	centerMass, 
+		MPI::realProcCMField& 	parDiam);
+
+	virtual ~subDivision9() = default;
+
+	add_vCtor
+	(
+		porosity,
+		subDivision9,
+		dictionary
+	);
+
+	bool internalFieldUpdate() override;
+
+	int32 numInMesh()const override
 	{
-		
-		auto cellId = cMesh_.findCellTree(centerMass_[i], parCellIndex_[i]);
-		if( cellId >= 0 )
-		{
-			solidVol[cellId] += 
-				static_cast<real>(3.14159265358979/6)*
-				pFlow::pow(particleDiameter_[i], static_cast<real>(3.0));
-				numInMesh_++;
-		}
-		parCellIndex_[i] = cellId;
-		
+		return numInMesh_;
 	}
 
-	this->ref() = Foam::max(
-		1 - solidVol/this->mesh().V(), 
-		static_cast<Foam::scalar>(this->alphaMin()) );
+}; 
 
-	return true;
-}
+} // pFlow::coupling
+
+
+#endif
