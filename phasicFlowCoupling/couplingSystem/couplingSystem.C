@@ -215,6 +215,9 @@ bool pFlow::coupling::couplingSystem::collectFluidForce()
 {
 	// realx3 scatteredComm is used 
 	auto allForce = procDEMSystem_.particlesFluidForceAllMaster();
+	for(size_t i=0; i<allForce.size(); i++)
+		allForce[i] = zero3;
+
 	auto thisForce = makeSpan(fluidForce_);
 	
 	if(!realx3ScatteredComm_.collectSum(thisForce, allForce))
@@ -231,6 +234,8 @@ bool pFlow::coupling::couplingSystem::collectFluidTorque()
 {
 	// realx3 scatteredComm is used 
 	auto allTorque = procDEMSystem_.particlesFluidTorqueAllMaster();
+	for(size_t i=0; i<allTorque.size(); i++)
+		allTorque[i] = zero3;
 	auto thisTorque = makeSpan(fluidTorque_);
 	if(!realx3ScatteredComm_.collectSum(thisTorque, allTorque))
 	{
