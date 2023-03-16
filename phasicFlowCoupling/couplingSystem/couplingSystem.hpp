@@ -66,11 +66,15 @@ protected:
 
 	Timers 						couplingTimers_;
 
+	Timers 						cfdTimers_;
+
 	Timer 						getDataTimer_;
 
 	Timer 						porosityTimer_;
 
 	Timer 						interactionTimer_;
+
+	Timer 						sendDataTimer_;
 
 	MPI::centerMassField 		centerMass_;
 
@@ -109,11 +113,15 @@ public:
 
 	bool getDataFromDEM(real t, real dt);
 
+	bool sendDataToDEM();
+
 	void calculatePorosity();
 
 	void calculateFluidInteraction();
 
 	void sendFluidForceToDEM();
+
+	void sendFluidTorqueToDEM();
 
 	bool collectFluidForce();
 
@@ -186,6 +194,12 @@ public:
 	const auto& meshBoxes()const
 	{
 		return meshBoxes_;
+	}
+
+	inline 
+	auto& cfdTimers()
+	{
+		return cfdTimers_;
 	}
 
 
