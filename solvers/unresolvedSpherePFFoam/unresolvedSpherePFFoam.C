@@ -88,10 +88,12 @@ int main(int argc, char *argv[])
         coupling.getDataFromDEM(runTime.time().value(), runTime.deltaT().value());
         coupling.calculatePorosity();
         coupling.calculateFluidInteraction();
-        coupling.sendFluidForceToDEM();
+        coupling.sendDataToDEM();
 
+        Info<<"Iterating DEM up to time "<< runTime.time().value()<<endl;
         coupling.iterate(runTime.time().value(), runTime.writeTime(), runTime.timeName());
 
+        coupling.cfdTimers().start();
         #include "CourantNo.H"
 
         // Pressure-velocity PISO corrector
@@ -112,6 +114,8 @@ int main(int argc, char *argv[])
 
         runTime.write();
 
+        coupling.cfdTimers().end();
+        
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"
             << nl << endl;

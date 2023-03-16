@@ -62,9 +62,11 @@ pFlow::coupling::couplingSystem::couplingSystem(
 	processorComm_(),
 	procDEMSystem_(demSystemName, argc, argv),
 	couplingTimers_("coupling", procDEMSystem_.getTimers()),
+	cfdTimers_("CFD", procDEMSystem_.getTimers()),
 	getDataTimer_("get data from DEM", &couplingTimers_),
 	porosityTimer_("porosity", &couplingTimers_),
 	interactionTimer_("interaction", &couplingTimers_),
+	sendDataTimer_("send data to DEM", &couplingTimers_),
 	centerMass_(),
 	particleDiameter_("diameter",centerMass_),
 	particleVelocity_("velocity", centerMass_),
@@ -75,7 +77,8 @@ pFlow::coupling::couplingSystem::couplingSystem(
 	// polyMesh class of OpenFOAM (polyMesh.C - line 848), otherwise it cannot 
 	// initilalize and hangs!
 	// Should be checked for dynamic and chaging meshes.
-	mesh.findCell(mesh.C()[0]);
+	//(void)mesh.tetBasePtIs();
+	//mesh.findCell(mesh.C()[0]);
 
 	auto domain = couplingMesh_.meshBox();
 
@@ -175,6 +178,15 @@ bool pFlow::coupling::couplingSystem::getDataFromDEM(real t, real fluidDt)
 	return true;
 }
 
+bool pFlow::coupling::couplingSystem::sendDataToDEM()
+{
+	sendDataTimer_.start();
+		sendFluidForceToDEM();
+		sendFluidTorqueToDEM();
+	sendDataTimer_.end();
+	return true;
+}
+
 void pFlow::coupling::couplingSystem::sendFluidForceToDEM()
 {
 	collectFluidForce();
@@ -184,7 +196,17 @@ void pFlow::coupling::couplingSystem::sendFluidForceToDEM()
 		fatalErrorInFunction<< "could not perform sendFluidForceToDEM"<<endl;
 		MPI::processor::abort(0);	
 	}
+}
 
+void pFlow::coupling::couplingSystem::sendFluidTorqueToDEM()
+{
+	collectFluidTorque();
+	
+	if(!procDEMSystem_.sendFluidTorqueToDEM())
+	{
+		fatalErrorInFunction<< "could not perform sendFluidTorqueToDEM"<<endl;
+		MPI::processor::abort(0);	
+	}	
 }
 
 void pFlow::coupling::couplingSystem::calculateFluidInteraction()
