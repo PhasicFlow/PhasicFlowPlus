@@ -6,5 +6,13 @@ auto subCellId = cMesh_.findCellTree(subPoint, cellId);
 
 if(subCellId >= 0 )
 {
-	solidVol[subCellId] += pSubVol;
+	if(cellId == subCellId )
+	{
+		numInCenter++;
+	}
+	else
+	{
+		solidVol[subCellId] += pSubVol;	
+	}
+	
 }
