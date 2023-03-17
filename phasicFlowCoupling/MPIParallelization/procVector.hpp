@@ -2,9 +2,10 @@
 #define __procVector_hpp__
 
 // from std
-#include <vector>
+
 
 // from PhasicFlow
+#include "phasicFlowOverloads.hpp"
 #include "iIstream.hpp"
 #include "iOstream.hpp"
 #include "processor.hpp"
@@ -164,9 +165,7 @@ public:
 		os << token::BEGIN_LIST;
 		for(const auto& vi: *this)
 		{
-			os << vi;
-			if(vi != this->end())
-				os<< token::NL;
+			os << vi<<token::SPACE;
 		}
 
 		os << token::END_LIST;
@@ -189,16 +188,6 @@ span<const T> makeSpan(const procVector<T>& vec)
 	return span(vec.data(), vec.size());
 }
 
-/*template<typename T>
-inline iIstream& operator >> (iIstream & is, procVector<T> & ivec )
-{
-	if( !ivec.read(is) )
-	{
-		ioErrorInFile (is.name(), is.lineNumber());
-		fatalExit;
-	}
-	return is;
-}*/
 
 template<typename T> 
 inline iOstream& operator << (iOstream& os, const procVector<T>& ovec )

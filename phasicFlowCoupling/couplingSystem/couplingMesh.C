@@ -12,8 +12,12 @@ void pFlow::coupling::couplingMesh::calculateBox()
 	auto upper = Foam::max(p);
 
 	meshBox_ = box(
-		{lower[0], lower[1], lower[2]},
-		{upper[0], upper[1], upper[2]});
+		{static_cast<real>(lower[0]), 
+         static_cast<real>(lower[1]), 
+         static_cast<real>(lower[2])},
+		{static_cast<real>(upper[0]), 
+         static_cast<real>(upper[1]), 
+         static_cast<real>(upper[2])});
 }
 
 Foam::label 

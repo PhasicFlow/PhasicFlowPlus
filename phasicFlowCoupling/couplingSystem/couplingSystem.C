@@ -73,12 +73,7 @@ pFlow::coupling::couplingSystem::couplingSystem(
 	fluidForce_("fluidForce",centerMass_),
 	fluidTorque_("fluidTorque",centerMass_)
 {
-	// This is neccesary for the initialization of the tetBasePtIsPtr_ pointer in the 
-	// polyMesh class of OpenFOAM (polyMesh.C - line 848), otherwise it cannot 
-	// initilalize and hangs!
-	// Should be checked for dynamic and chaging meshes.
-	//(void)mesh.tetBasePtIs();
-	//mesh.findCell(mesh.C()[0]);
+	
 
 	auto domain = couplingMesh_.meshBox();
 
@@ -114,7 +109,7 @@ bool pFlow::coupling::couplingSystem::getDataFromDEM(real t, real fluidDt)
 	getDataTimer_.start();
 	procDEMSystem_.getDataFromDEM();
 	
-	//if( checkForDomainUpdate(t-fluidDt, fluidDt) )
+	if( checkForDomainUpdate(t-fluidDt, fluidDt) )
 	{
 		Foam::Info<<"Sub-domains have been updated at time "<< t <<Foam::endl;
 
@@ -228,6 +223,7 @@ void pFlow::coupling::couplingSystem::calculatePorosity()
 {
 	porosityTimer_.start();
 	porosity_->calculatePorosity();
+	porosity_->reportNumInMesh();
 	porosityTimer_.end();
 }
 

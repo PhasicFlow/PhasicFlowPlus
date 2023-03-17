@@ -63,11 +63,12 @@ bool pFlow::coupling::subDivision9::internalFieldUpdate()
 					pFlow::pow(pRad, static_cast<real>(3.0));
 
 		realx3 offset(0,0,0);	
-		
+
+		int32 numInCenter = 0;
 		auto cellId = cMesh_.findCellTree(pPos, parCellIndex_[i]);
 		if( cellId >= 0 )
 		{
-			solidVol[cellId] += pSubVol;
+			numInCenter++;
 			numInMesh_++;	
 		}
 		parCellIndex_[i] = cellId;
@@ -86,6 +87,11 @@ bool pFlow::coupling::subDivision9::internalFieldUpdate()
 
 				#include "subDivCheck.hpp"
 			}
+		}
+
+		if(numInCenter>0)
+		{
+			solidVol[cellId] += numInCenter*pSubVol;
 		}
 
 	}
