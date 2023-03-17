@@ -20,6 +20,9 @@ Licence:
 
 #include "porosity.hpp"
 #include "processor.hpp"
+#include "procVector.hpp"
+#include "procCommunication.hpp"
+#include "streams.hpp"
 
 pFlow::coupling::porosity::porosity(
 	Foam::dictionary		dict, 
@@ -89,4 +92,22 @@ void pFlow::coupling::porosity::calculatePorosity()
 {
 	this->internalFieldUpdate();
 	this->correctBoundaryConditions();
+}
+
+void pFlow::coupling::porosity::reportNumInMesh()
+{
+	MPI::procCommunication comm;
+	if( auto [numInMeshAll, success] = comm.collectAllToMaster(numInMesh()); success)
+	{
+		if(MPI::processor::isMaster())
+		{
+			int32 s=0;
+			for(auto v:numInMeshAll) s += v;
+
+			output<<"> Particles located in mesh parts: " << numInMeshAll<<endl;
+			output<<"> Total number of located particles: "<< s<<endl;
+		}
+	}
+
+	
 }

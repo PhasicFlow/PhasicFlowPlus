@@ -21,7 +21,7 @@ Licence:
 #ifndef __centerMassField_hpp__ 
 #define __centerMassField_hpp__
 
-#include <vector>
+#include "phasicFlowOverloads.hpp"
 
 #include "eventSubscriber.hpp"
 #include "span.hpp"

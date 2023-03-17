@@ -117,6 +117,9 @@ public:
 	virtual
 	int32 numInMesh()const = 0;
 
+	virtual
+	void reportNumInMesh();
+
 
 	static
 	uniquePtr<porosity> create(

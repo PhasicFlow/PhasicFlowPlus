@@ -223,6 +223,7 @@ void pFlow::coupling::couplingSystem::calculatePorosity()
 {
 	porosityTimer_.start();
 	porosity_->calculatePorosity();
+	porosity_->reportNumInMesh();
 	porosityTimer_.end();
 }
 
