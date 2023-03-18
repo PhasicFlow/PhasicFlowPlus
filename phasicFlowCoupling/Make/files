@@ -12,6 +12,7 @@ couplingSystem/porosity/PIC.C
 couplingSystem/porosity/subDivision9.C
 couplingSystem/interaction/drag/drag.C
 couplingSystem/interaction/drag/ErgunWenYu.C
+couplingSystem/interaction/drag/DiFelice.C
 
 
 LIB = $(FOAM_USER_LIBBIN)/libphasicFlowCoupling
