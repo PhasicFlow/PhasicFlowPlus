@@ -24,6 +24,20 @@ Licence:
 #include "drag.hpp"
 #include "processor.hpp"
 
+void pFlow::coupling::drag::setSuSpToZero()
+{
+	// initialize all terms to zero
+	Su_ = Foam::dimensionedVector(
+    	Su_.name(),
+    	Su_.dimensions(),
+    	Foam::vector(0,0,0));
+
+	Sp_ = Foam::dimensionedScalar(
+		Sp_.name(), 
+		Sp_.dimensions(), 
+		0.0);
+}
+
 pFlow::coupling::drag::drag(
 	Foam::dictionary 		dict, 
 	porosity& 				prsty)
