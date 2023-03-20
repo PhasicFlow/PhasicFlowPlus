@@ -1,3 +1,4 @@
+#include "createRDeltaT.H"
 
 Info<< "Reading field p\n" << endl;
 volScalarField p
@@ -46,8 +47,7 @@ surfaceScalarField phi
     linearInterpolate(U * coupling.alpha()) & mesh.Sf()
 );
 
-
-pressureReference pressureReference(p, piso.dict());
+pressureReference pressureReference(p, pimple.dict());
 
 mesh.setFluxRequired(p.name());
 
@@ -75,4 +75,22 @@ volScalarField rho
 #include "createFvModels.H"
 #include "createFvConstraints.H"
 
+autoPtr<surfaceVectorField> Uf;
 
+if (mesh.dynamic())
+{
+    Info<< "Constructing face velocity Uf\n" << endl;
+
+    Uf = new surfaceVectorField
+    (
+        IOobject
+        (
+            "Uf",
+            runTime.timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        fvc::interpolate(U * coupling.alpha())
+    );
+}

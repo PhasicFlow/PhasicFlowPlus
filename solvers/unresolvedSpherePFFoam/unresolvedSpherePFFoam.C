@@ -43,20 +43,23 @@ Description
     Transient incompressible solver for unresolved simulation of spherical 
     fluid-particle systems.
 
-
 \*---------------------------------------------------------------------------*/
 
 // OpenFOAM
 #include "fvCFD.H"
+#include "dynamicFvMesh.H"
 #include "singlePhaseTransportModel.H"
 #include "kinematicMomentumTransportModel.H"
-#include "pisoControl.H"
+#include "pimpleControl.H"
 #include "pressureReference.H"
+#include "CorrectPhi.H"
 #include "fvModels.H"
 #include "fvConstraints.H"
+#include "localEulerDdtScheme.H"
+#include "fvcSmooth.H"
 
 // phasicFlow
-#include "couplingSystem.hpp"
+#include "couplingSystem.hpp" 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -66,25 +69,33 @@ int main(int argc, char *argv[])
 
     #include "setRootCaseLists.H"
     #include "createTime.H"
-    #include "createMesh.H"
-    #include "createControl.H"
+    #include "createDynamicFvMesh.H"
+    #include "initContinuityErrs.H"
+    #include "createDyMControls.H"
 
     pFlow::MPI::processor::initMPI(argc, argv);
 
     #include "createFields.H"
-    #include "initContinuityErrs.H"
 
     turbulence->validate();
+
+    #include "CourantNo.H"
+    #include "setInitialDeltaT.H"
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
-    while (runTime.loop())
+    while (pimple.run(runTime))
     {
+        #include "readDyMControls.H"
+        #include "CourantNo.H"
+        #include "setDeltaT.H"
+
+        runTime++;
+
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        
         coupling.getDataFromDEM(runTime.time().value(), runTime.deltaT().value());
         coupling.calculatePorosity();
         coupling.calculateFluidInteraction();
@@ -92,25 +103,48 @@ int main(int argc, char *argv[])
 
         Info<<"Iterating DEM up to time "<< runTime.time().value()<<endl;
         coupling.iterate(runTime.time().value(), runTime.writeTime(), runTime.timeName());
-
         coupling.cfdTimers().start();
-        #include "CourantNo.H"
-
-        // Pressure-velocity PISO corrector
+        
+        
+        // --- Pressure-velocity PIMPLE corrector loop
+        while (pimple.loop())
         {
+            if (pimple.firstPimpleIter() || moveMeshOuterCorrectors)
+            {
+                fvModels.preUpdateMesh();
+
+                mesh.update();
+
+                if (mesh.changing())
+                {
+                    if (correctPhi)
+                    {
+                        #include "correctPhi.H"
+                    }
+
+                    if (checkMeshCourantNo)
+                    {
+                        #include "meshCourantNo.H"
+                    }
+                }
+            }
+
             fvModels.correct();
 
             #include "UEqn.H"
 
-            // --- PISO loop
-            while (piso.correct())
+            // --- Pressure corrector loop
+            while (pimple.correct())
             {
                 #include "pEqn.H"
             }
-        }
 
-        laminarTransport.correct();
-        turbulence->correct();
+            if (pimple.turbCorr())
+            {
+                laminarTransport.correct();
+                turbulence->correct();
+            }
+        }
 
         runTime.write();
 
