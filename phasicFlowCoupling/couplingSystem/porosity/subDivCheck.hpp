@@ -1,18 +1,21 @@
-realx3 subPoint = pPos + offset;
-
-// cell id of subPoint
-auto subCellId = cMesh_.findCellTree(subPoint, cellId);
-
-
-if(subCellId >= 0 )
 {
-	if(cellId == subCellId )
+	realx3 subPoint = pPos + offset;
+
+	// cell id of subPoint
+	auto subCellId = cMesh_.findCellTree(subPoint, cellId);
+
+
+	if(subCellId >= 0 )
 	{
-		numInCenter++;
+		if(cellId == subCellId )
+		{
+			numInCenter++;
+		}
+		else
+		{
+			solidVol[subCellId] += pSubVol;	
+		}
+		
 	}
-	else
-	{
-		solidVol[subCellId] += pSubVol;	
-	}
-	
+
 }
