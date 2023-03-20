@@ -23,7 +23,10 @@ Licence:
 
 // from OpneFOAM
 #include "fvMesh.H"
+#include "indexedOctree.H"
+#include "treeDataCell.H"
 
+// phasicFlow
 #include "box.hpp"
 
 
@@ -34,20 +37,27 @@ class couplingMesh
 {
 protected:
 
-	Foam::fvMesh& 							 mesh_;
+	const Foam::fvMesh& 					mesh_;
 
-	const 
-	Foam::indexedOctree<Foam::treeDataCell>& cellTreeSearch_;
+	Foam::polyMesh::cellDecomposition 		cellDecompMode_;
+
+	mutable uniquePtr<Foam::indexedOctree<Foam::treeDataCell>>
+		cellTreeSearch_ = nullptr;
 
 	box 			meshBox_;
-
-
 	
 	void calculateBox();
 
+	Foam::label findCellSeed(
+		const Foam::point& loc,
+    	const Foam::label seedCellId);
+
 public:
 
-	couplingMesh(Foam::fvMesh& mesh);
+	couplingMesh(
+		Foam::fvMesh& mesh, 
+		const Foam::polyMesh::cellDecomposition 
+				decompMode = Foam::polyMesh::CELL_TETS);
 
 	~couplingMesh()=default;
 
@@ -71,16 +81,11 @@ public:
 
 	
 	Foam::label 
-	findCell(const realx3& p, Foam::label cellCheck)
-	{
-		#if useDouble
-			const auto& sample = reinterpret_cast<const Foam::point&>(p);
-		#else
-			auto sample = Foam::point(p.x(), p.y(), p.z());
-		#endif
+	findCell(const realx3& p, Foam::label cellCheck);
 
-		return mesh_.findCell(sample);
-	}
+	Foam::label
+	findCellTree(const realx3& p, Foam::label cellId);
+
 
 
 

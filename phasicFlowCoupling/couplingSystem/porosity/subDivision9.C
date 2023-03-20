@@ -22,10 +22,14 @@ Licence:
 #include "fvCFD.H"
 
 
-#include "PIC.hpp"
+#include "subDivision9.hpp"
+
+const pFlow::real sin_45[] = {0.7071067811865475,  0.7071067811865475, -0.7071067811865475, -0.7071067811865475};
+const pFlow::real cos_45[] = {0.7071067811865475, -0.7071067811865475, -0.7071067811865475,  0.7071067811865475};
 
 
-pFlow::coupling::PIC::PIC(
+
+pFlow::coupling::subDivision9::subDivision9(
 	Foam::dictionary 		dict, 
 	couplingMesh& 			cMesh, 
 	MPI::centerMassField& 	centerMass, 
@@ -37,7 +41,7 @@ pFlow::coupling::PIC::PIC(
 }
 
 
-bool pFlow::coupling::PIC::internalFieldUpdate()
+bool pFlow::coupling::subDivision9::internalFieldUpdate()
 {
 	
 	auto solidVoldTmp = Foam::volScalarField::Internal::New(
@@ -51,17 +55,45 @@ bool pFlow::coupling::PIC::internalFieldUpdate()
 
 	for(size_t i=0; i<centerMass_.size(); i++)
 	{
-		
-		auto cellId = cMesh_.findCellTree(centerMass_[i], parCellIndex_[i]);
+
+		realx3 pPos = centerMass_[i];
+		real pRad = particleDiameter_[i]/2;
+		// 4*Pi/3
+		real pSubVol = static_cast<real>(4.1887902047864/9.0) *
+					pFlow::pow(pRad, static_cast<real>(3.0));
+
+		realx3 offset(0,0,0);	
+
+		int32 numInCenter = 0;
+		auto cellId = cMesh_.findCellTree(pPos, parCellIndex_[i]);
 		if( cellId >= 0 )
 		{
-			solidVol[cellId] += 
-				static_cast<real>(3.14159265358979/6)*
-				pFlow::pow(particleDiameter_[i], static_cast<real>(3.0));
-				numInMesh_++;
+			numInCenter++;
+			numInMesh_++;	
 		}
 		parCellIndex_[i] = cellId;
+
+		real r = static_cast<real>(0.5*1.48075) * pRad;
 		
+		// 8 subdivisions of particle
+		for(int32 i_alp =0; i_alp<4; i_alp++)
+		{
+			for(int32 i_bet=0; i_bet<2;i_bet++)
+			{
+				offset = {  
+					r*sin_45[i_alp]*cos_45[i_bet],
+					r*sin_45[i_alp]*sin_45[i_bet],
+					r*cos_45[i_alp] };
+
+				#include "subDivCheck.hpp"
+			}
+		}
+
+		if(numInCenter>0)
+		{
+			solidVol[cellId] += numInCenter*pSubVol;
+		}
+
 	}
 
 	this->ref() = Foam::max(
@@ -70,3 +102,6 @@ bool pFlow::coupling::PIC::internalFieldUpdate()
 
 	return true;
 }
+
+
+	

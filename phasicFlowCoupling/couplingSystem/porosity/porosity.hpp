@@ -114,6 +114,13 @@ public:
 	virtual
 	bool internalFieldUpdate() = 0;
 
+	virtual
+	int32 numInMesh()const = 0;
+
+	virtual
+	void reportNumInMesh();
+
+
 	static
 	uniquePtr<porosity> create(
 		Foam::dictionary		dict, 

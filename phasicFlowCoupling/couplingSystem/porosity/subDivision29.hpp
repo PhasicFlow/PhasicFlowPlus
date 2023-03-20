@@ -18,96 +18,54 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-#ifndef __drag_hpp__ 
-#define __drag_hpp__
+#ifndef __subDivision29_hpp__ 
+#define __subDivision29_hpp__
 
-// from OpenFOAM
-#include "dictionary.H"
-
-// from phasicFlow
 #include "virtualConstructor.hpp"
 
 // from phasicFlow-coupling
 #include "porosity.hpp"
 
+
 namespace pFlow::coupling
 {
-class drag
 
+
+class subDivision29
+: 
+	public porosity
 {
 protected:
 
-	real 					residualRe_;
-
-	porosity& 				porosity_;
-
-	const Foam::volScalarField& 	p_;
-
-	const Foam::volVectorField&		U_;
-
-	Foam::volVectorField 	Su_;
-
-	Foam::volScalarField 	Sp_;
-
-	bool 					isCompressible_ = false;
-
-	void setSuSpToZero();
+	int32 numInMesh_;
 
 public:
 
 	// type info
-	TypeInfo("drag");
+	TypeInfo("subDivision29");
 
-	drag(
+	subDivision29(
 		Foam::dictionary 		dict, 
-		porosity& 				prsty);
+		couplingMesh& 			cMesh, 
+		MPI::centerMassField& 	centerMass, 
+		MPI::realProcCMField& 	parDiam);
 
-	virtual ~drag() = default;
+	virtual ~subDivision29() = default;
 
-	create_vCtor
+	add_vCtor
 	(
-		drag,
-		dictionary,
-		(
-			Foam::dictionary 		dict, 
-			porosity& 				prsty
-		),
-		(dict, prsty)
+		porosity,
+		subDivision29,
+		dictionary
 	);
 
-	Foam::tmp<Foam::volVectorField> 
-	pressureGradient(const Foam::volScalarField& rho)const;
+	bool internalFieldUpdate() override;
 
-	const auto& Su()const
+	int32 numInMesh()const override
 	{
-		return Su_;
+		return numInMesh_;
 	}
 
-	const auto& Sp()const
-	{
-		return Sp_;
-	}
-	
-	inline
-	bool isCompressible()const
-	{
-		return isCompressible_;
-	}
-
-	virtual
-	void calculateDragForce(
-		const MPI::realx3ProcCMField& velocity,
-		const MPI::realProcCMField& diameter,
-		MPI::realx3ProcCMField& particleForce) = 0;
-
-
-
-	static
-	uniquePtr<drag> create(
-		Foam::dictionary 		dict, 
-		porosity& 				prsty);
-		
-	
 }; 
 
 } // pFlow::coupling

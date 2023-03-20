@@ -18,94 +18,53 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-#ifndef __drag_hpp__ 
-#define __drag_hpp__
+#ifndef __DiFelice_hpp__ 
+#define __DiFelice_hpp__
 
-// from OpenFOAM
-#include "dictionary.H"
-
-// from phasicFlow
-#include "virtualConstructor.hpp"
-
-// from phasicFlow-coupling
-#include "porosity.hpp"
+#include "drag.hpp"
 
 namespace pFlow::coupling
 {
-class drag
-
+class DiFelice
+:
+	public drag
 {
 protected:
 
-	real 					residualRe_;
+	inline 
+	Foam::scalar dimlessDrag(Foam::scalar Re, Foam::scalar ep)
+	{
 
-	porosity& 				porosity_;
+		auto Rec = Foam::max(Re,residualRe_);
+		Foam::scalar xi = 3.7 - 0.65*Foam::exp(-0.5*Foam::pow(1.5-Foam::log10(Rec),2));
+		Foam::scalar Cd = Foam::pow(0.63-4.8/Foam::sqrt(Rec),2);
 
-	const Foam::volScalarField& 	p_;
-
-	const Foam::volVectorField&		U_;
-
-	Foam::volVectorField 	Su_;
-
-	Foam::volScalarField 	Sp_;
-
-	bool 					isCompressible_ = false;
-
-	void setSuSpToZero();
+		return Cd/24 * Re * Foam::pow(ep, -xi ); 
+		
+	}
 
 public:
 
 	// type info
-	TypeInfo("drag");
+	TypeInfo("DiFelice");
 
-	drag(
+	DiFelice(
 		Foam::dictionary 		dict, 
 		porosity& 				prsty);
 
-	virtual ~drag() = default;
+	virtual ~DiFelice() = default;
 
-	create_vCtor
+	add_vCtor
 	(
 		drag,
-		dictionary,
-		(
-			Foam::dictionary 		dict, 
-			porosity& 				prsty
-		),
-		(dict, prsty)
+		DiFelice,
+		dictionary
 	);
 
-	Foam::tmp<Foam::volVectorField> 
-	pressureGradient(const Foam::volScalarField& rho)const;
-
-	const auto& Su()const
-	{
-		return Su_;
-	}
-
-	const auto& Sp()const
-	{
-		return Sp_;
-	}
-	
-	inline
-	bool isCompressible()const
-	{
-		return isCompressible_;
-	}
-
-	virtual
 	void calculateDragForce(
 		const MPI::realx3ProcCMField& velocity,
 		const MPI::realProcCMField& diameter,
-		MPI::realx3ProcCMField& particleForce) = 0;
-
-
-
-	static
-	uniquePtr<drag> create(
-		Foam::dictionary 		dict, 
-		porosity& 				prsty);
+		MPI::realx3ProcCMField& particleForce)override;
 		
 	
 }; 
