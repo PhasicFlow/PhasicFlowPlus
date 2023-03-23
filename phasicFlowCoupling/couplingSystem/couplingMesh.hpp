@@ -57,7 +57,7 @@ public:
 	couplingMesh(
 		Foam::fvMesh& mesh, 
 		const Foam::polyMesh::cellDecomposition 
-				decompMode = Foam::polyMesh::CELL_TETS);
+				decompMode = Foam::polyMesh::FACE_PLANES);
 
 	~couplingMesh()=default;
 
