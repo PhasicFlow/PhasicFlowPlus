@@ -40,6 +40,10 @@ Make/linux*/**
 Make/linux*/**/*
 Make/linux*/*
 lnInclude/**
+**/lnInclude/
+**/Make/linux*/
+test/
+
 # all possible time folders
 **/[0-9]
 **/[0-9][0-9]

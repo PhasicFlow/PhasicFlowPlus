@@ -58,7 +58,7 @@ pFlow::coupling::couplingSystem::couplingSystem(
     ),
     subDomainExpansionFraction_(lookup<pFlow::real>("subDomainExpansionFraction")),
     subDomainUpdateInterval_(lookup<pFlow::real>("subDomainUpdateInterval")),
-	couplingMesh_(mesh),
+	couplingMesh_(mesh, Foam::polyMesh::FACE_PLANES),
 	processorComm_(),
 	procDEMSystem_(demSystemName, argc, argv),
 	couplingTimers_("coupling", procDEMSystem_.getTimers()),
