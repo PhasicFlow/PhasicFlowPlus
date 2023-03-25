@@ -1,9 +1,9 @@
+containers/centerMassField.C
+containers/procCMFields.C
+
 MPIParallelization/processor.C
 MPIParallelization/procCommunication.C
 MPIParallelization/procDEMSystem.C
-
-containers/centerMassField.C
-containers/procCMFields.C
 
 couplingSystem/couplingSystem.C
 couplingSystem/couplingMesh.C

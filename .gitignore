@@ -43,6 +43,8 @@ lnInclude/**
 **/lnInclude/
 **/Make/linux*/
 test/
+doc/code-documentation/
+doc/DTAGS
 
 # all possible time folders
 **/[0-9]
