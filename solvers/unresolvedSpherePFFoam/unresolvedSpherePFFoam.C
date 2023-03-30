@@ -86,6 +86,7 @@ int main(int argc, char *argv[])
 
     Info<< "\nStarting time loop\n" << endl;
 
+
     while (pimple.run(runTime))
     {
         #include "readDyMControls.H"
@@ -94,15 +95,8 @@ int main(int argc, char *argv[])
 
         runTime++;
 
-        Info<< "Time = " << runTime.timeName() << nl << endl;
+        Info<< "Time = " << runTime.timeName() << nl << endl;        
 
-        coupling.getDataFromDEM(runTime.time().value(), runTime.deltaT().value());
-        coupling.calculatePorosity();
-        coupling.calculateFluidInteraction();
-        coupling.sendDataToDEM();
-
-        Info<<"Iterating DEM up to time "<< runTime.time().value()<<endl;
-        coupling.iterate(runTime.time().value(), runTime.writeTime(), runTime.timeName());
         coupling.cfdTimers().start();
         
         
@@ -111,9 +105,17 @@ int main(int argc, char *argv[])
         {
             if (pimple.firstPimpleIter() || moveMeshOuterCorrectors)
             {
+                
                 fvModels.preUpdateMesh();
 
                 mesh.update();
+                coupling.cMesh().update(runTime.time().value(), runTime.deltaT().value());
+                coupling.updateMeshBoxes();
+                coupling.getDataFromDEM(runTime.time().value(), runTime.deltaT().value());
+                coupling.calculatePorosity();
+                coupling.calculateFluidInteraction();
+                coupling.sendDataToDEM();
+                coupling.iterate(runTime.time().value(), runTime.writeTime(), runTime.timeName());
 
                 if (mesh.changing())
                 {
