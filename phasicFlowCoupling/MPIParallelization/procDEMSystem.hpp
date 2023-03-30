@@ -194,7 +194,6 @@ public:
 	{
 		if(demSystem_)
 		{
-			output<<"Sending fluid force data from processor#0 to DEM"<<endl;
 			return demSystem_->sendFluidForceToDEM();
 		}
 		else
@@ -208,7 +207,6 @@ public:
 	{
 		if(demSystem_)
 		{
-			output<<"Sending fluid torque data from processor#0 to DEM"<<endl;
 			return demSystem_->sendFluidTorqueToDEM();
 		}
 		else

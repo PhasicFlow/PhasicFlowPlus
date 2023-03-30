@@ -30,7 +30,14 @@ Licence:
 namespace pFlow::coupling
 {
 
-
+/**
+ * Particle In Cell (PIC) model for porosity calculation
+ * 
+ * This model only considers the particle center and if the particle center 
+ * resides inside a cell, it is assumed that the whole volume of the particle
+ * is located in that cell.
+ * 
+ */
 class PIC
 : 
 	public porosity
@@ -41,17 +48,20 @@ protected:
 
 public:
 
-	// type info
+	/// Type info
 	TypeInfo("PIC");
 
+	/// Construc from dictionary 
 	PIC(
 		Foam::dictionary 		dict, 
 		couplingMesh& 			cMesh, 
 		MPI::centerMassField& 	centerMass, 
 		MPI::realProcCMField& 	parDiam);
 
+	/// Destructor
 	virtual ~PIC() = default;
 
+	/// Add this constructor to the list of virtual constructors
 	add_vCtor
 	(
 		porosity,

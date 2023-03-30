@@ -21,8 +21,6 @@ Licence:
 #ifndef __subDivision29_hpp__ 
 #define __subDivision29_hpp__
 
-#include "virtualConstructor.hpp"
-
 // from phasicFlow-coupling
 #include "porosity.hpp"
 
@@ -30,28 +28,39 @@ Licence:
 namespace pFlow::coupling
 {
 
-
+/**
+ * sub-division model for calculating fluid porosity
+ * 
+ * This model divides a sphere into 29 equal parts and locate each of these 
+ * parts in the cells. The volume of each part located in each cell is 
+ * considered as the solid volume in that cell. 
+ * 
+ */
 class subDivision29
 : 
 	public porosity
 {
 protected:
 
+	/// number of center mass points located in this mesh (processor)
 	int32 numInMesh_;
 
 public:
 
-	// type info
+	/// Type info
 	TypeInfo("subDivision29");
 
+	/// Construct from dictionary
 	subDivision29(
 		Foam::dictionary 		dict, 
 		couplingMesh& 			cMesh, 
 		MPI::centerMassField& 	centerMass, 
 		MPI::realProcCMField& 	parDiam);
 
+	/// Destructor
 	virtual ~subDivision29() = default;
 
+	/// Add this constructor to the list of virtual constructors
 	add_vCtor
 	(
 		porosity,

@@ -42,21 +42,18 @@ namespace pFlow::coupling
 
 class couplingSystem
 :
-	public Foam::IOdictionary
+	public Foam::IOdictionary,
+	public MPI::procCommunication
 {
 protected:
-
-	pFlow::real					subDomainExpansionFraction_;
-
-	pFlow::real 				subDomainUpdateInterval_;
-
-	pFlow::real 				lastTimeUpdated_;
 	
 	couplingMesh 				couplingMesh_;
+
+	uniquePtr<porosity>			porosity_ = nullptr;
+
+	uniquePtr<drag> 			drag_ = nullptr;
 	
 	MPI::procVector<box> 		meshBoxes_;
-
-	MPI::procCommunication 		processorComm_;
 
 	MPI::scatteredCommunication<real> 	realScatteredComm_;
 
@@ -86,11 +83,6 @@ protected:
 
 	MPI::realx3ProcCMField   	fluidTorque_;
 
-	uniquePtr<porosity>			porosity_ = nullptr;
-
-	uniquePtr<drag> 			drag_ = nullptr;
-
-	bool checkForDomainUpdate(real t, real fluidDt);
 
 public:
 
@@ -110,6 +102,8 @@ public:
 	couplingSystem& operator=(couplingSystem&&) = delete;
 
 	virtual ~couplingSystem() =default;
+
+	bool updateMeshBoxes();
 
 	bool getDataFromDEM(real t, real dt);
 
@@ -133,7 +127,14 @@ public:
 
 	bool iterate(real upToTime, bool writeTime, const word& timeName)
 	{
+		Foam::Info<<blueText("Iterating DEM upto time ") << yellowText(upToTime)<<Foam::endl;
 		return procDEMSystem_.iterate(upToTime, writeTime, timeName);
+	}
+
+	inline
+	auto& cMesh()
+	{
+		return couplingMesh_;
 	}
 
 	inline 

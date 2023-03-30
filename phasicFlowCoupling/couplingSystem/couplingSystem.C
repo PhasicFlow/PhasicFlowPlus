@@ -20,23 +20,19 @@ Licence:
 
 #include "couplingSystem.hpp"
 
-bool pFlow::coupling::couplingSystem::checkForDomainUpdate(real t, real fluidDt)
+
+bool pFlow::coupling::couplingSystem::updateMeshBoxes()
 {
-	real sT = procDEMSystem_.startTime();
-	if( pFlow::equal(t, sT) ) 
+
+	auto domain = couplingMesh_.meshBox();
+
+	if(! collectAllToAll(domain, meshBoxes_))
 	{
-		lastTimeUpdated_ = t;
-		return true;
+		fatalErrorInFunction<<"could not corrlect meshBox into the master"<<endl;
+		return false;
 	}
 
-	if( abs(t-(lastTimeUpdated_+subDomainUpdateInterval_)) < 0.98*fluidDt)
-	{
-		lastTimeUpdated_ = t;
-		return true;
-	}
-
-	return false;
-
+	return true;
 }
 
 pFlow::coupling::couplingSystem::couplingSystem(
@@ -56,10 +52,8 @@ pFlow::coupling::couplingSystem::couplingSystem(
             IOobject::NO_WRITE
         )
     ),
-    subDomainExpansionFraction_(lookup<pFlow::real>("subDomainExpansionFraction")),
-    subDomainUpdateInterval_(lookup<pFlow::real>("subDomainUpdateInterval")),
-	couplingMesh_(mesh, Foam::polyMesh::FACE_PLANES),
-	processorComm_(),
+    MPI::procCommunication(),
+	couplingMesh_(subDict("particleMapping"), mesh),
 	procDEMSystem_(demSystemName, argc, argv),
 	couplingTimers_("coupling", procDEMSystem_.getTimers()),
 	cfdTimers_("CFD", procDEMSystem_.getTimers()),
@@ -74,10 +68,9 @@ pFlow::coupling::couplingSystem::couplingSystem(
 	fluidTorque_("fluidTorque",centerMass_)
 {
 	
-
 	auto domain = couplingMesh_.meshBox();
 
-	if(! processorComm_.collectAllToAll(domain, meshBoxes_))
+	if(! collectAllToAll(domain, meshBoxes_))
 	{
 		fatalErrorInFunction<<"could not corrlect meshBox into the master"<<endl;
 		MPI::processor::abort(0);
@@ -105,16 +98,16 @@ bool pFlow::coupling::couplingSystem::getDataFromDEM(real t, real fluidDt)
 {
 	// this updates data on host side
 
-	Foam::Info<<"Obtaining data from DEM to processor#0"<<Foam::endl;
+	Foam::Info<<blueText("Obtaining data from DEM to master processor")<<Foam::endl;
 	getDataTimer_.start();
 	procDEMSystem_.getDataFromDEM();
-	
-	if( checkForDomainUpdate(t-fluidDt, fluidDt) )
+
+	if( couplingMesh_.checkForDomainUpdate(t, fluidDt) )
 	{
-		Foam::Info<<"Sub-domains have been updated at time "<< t <<Foam::endl;
+		Foam::Info<<blueText("Sub-domains have been updated at time ")<< yellowText(t) <<Foam::endl;
 
 		if(!procDEMSystem_.updateParticleDistribution(
-			 subDomainExpansionFraction_, 
+			couplingMesh_.domainExpansionRatio(), 
 			meshBoxes_))
 		{
 			fatalErrorInFunction;
@@ -125,7 +118,7 @@ bool pFlow::coupling::couplingSystem::getDataFromDEM(real t, real fluidDt)
 		auto numParsInDomains = procDEMSystem_.numParInDomainMaster();
 
 		if( auto [thisNoPars, success] =  
-			processorComm_.distributeMasterToAll(numParsInDomains); !success)
+			distributeMasterToAll(numParsInDomains); !success)
 		{
 			fatalErrorInFunction<<
 			"failed to distribute particle numbers among processors"<<endl;
@@ -185,6 +178,8 @@ bool pFlow::coupling::couplingSystem::sendDataToDEM()
 void pFlow::coupling::couplingSystem::sendFluidForceToDEM()
 {
 	collectFluidForce();
+	
+	Foam::Info<<blueText("Sending fluid force from master processor to DEM")<<Foam::endl;
 
 	if(!procDEMSystem_.sendFluidForceToDEM())
 	{
@@ -197,6 +192,8 @@ void pFlow::coupling::couplingSystem::sendFluidTorqueToDEM()
 {
 	collectFluidTorque();
 	
+	Foam::Info<<blueText("Sending fluid torque from master processor to DEM")<<Foam::endl;
+
 	if(!procDEMSystem_.sendFluidTorqueToDEM())
 	{
 		fatalErrorInFunction<< "could not perform sendFluidTorqueToDEM"<<endl;

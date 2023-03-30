@@ -19,7 +19,6 @@ Licence:
 -----------------------------------------------------------------------------*/
 
 #include "porosity.hpp"
-#include "processor.hpp"
 #include "procVector.hpp"
 #include "procCommunication.hpp"
 #include "streams.hpp"
@@ -40,28 +39,53 @@ pFlow::coupling::porosity::porosity(
 	        Foam::IOobject::MUST_READ,
 	        Foam::IOobject::AUTO_WRITE
 	    ),
-    cMesh.mesh()
+    	cMesh.mesh()
 	),
-	alphaMin_(dict.lookup<real>("alphaMin")),
+	alphaMin_(dict.lookup<Foam::scalar>("alphaMin")),
 	cMesh_(cMesh),
 	centerMass_(centerMass),
 	particleDiameter_(parDiam),
-	parCellIndex_(
+	parCellIndex_
+	(
 		"parCellIndex",
 		static_cast<Foam::label>(-1),
 		centerMass,
-		true)
+		true
+	)
 {
 
 }
 
+void pFlow::coupling::porosity::calculatePorosity()
+{
+	this->internalFieldUpdate();
+	this->correctBoundaryConditions();
+}
+
+void pFlow::coupling::porosity::reportNumInMesh()
+{
+	MPI::procCommunication comm;
+	if( auto [numInMeshAll, success] = comm.collectAllToMaster(numInMesh()); success)
+	{
+		if(MPI::processor::isMaster())
+		{
+			int32 s=0;
+			for(auto v:numInMeshAll) s += v;
+
+			output<<blueText("Particles located in processor meshes:") << yellowText(numInMeshAll)<<
+			" => "<< yellowText(s)<< endl;
+		}
+	}
+}
 
 pFlow::uniquePtr<pFlow::coupling::porosity> 
-	pFlow::coupling::porosity::create(
-		Foam::dictionary		dict, 
-		couplingMesh& 			cMesh, 
-		MPI::centerMassField& 	centerMass, 
-		MPI::realProcCMField& 	parDiam)
+pFlow::coupling::porosity::create
+(
+	Foam::dictionary		dict, 
+	couplingMesh& 			cMesh, 
+	MPI::centerMassField& 	centerMass, 
+	MPI::realProcCMField& 	parDiam
+)
 {
 	auto method = dict.lookup<Foam::word>("method");
 	if( dictionaryvCtorSelector_.search(method))
@@ -85,29 +109,4 @@ pFlow::uniquePtr<pFlow::coupling::porosity>
 	}
 
 	return nullptr;
-}
-
-
-void pFlow::coupling::porosity::calculatePorosity()
-{
-	this->internalFieldUpdate();
-	this->correctBoundaryConditions();
-}
-
-void pFlow::coupling::porosity::reportNumInMesh()
-{
-	MPI::procCommunication comm;
-	if( auto [numInMeshAll, success] = comm.collectAllToMaster(numInMesh()); success)
-	{
-		if(MPI::processor::isMaster())
-		{
-			int32 s=0;
-			for(auto v:numInMeshAll) s += v;
-
-			output<<"> Particles located in mesh parts: " << numInMeshAll<<endl;
-			output<<"> Total number of located particles: "<< s<<endl;
-		}
-	}
-
-	
 }
