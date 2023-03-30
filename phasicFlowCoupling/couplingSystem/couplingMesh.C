@@ -2,10 +2,11 @@
 // from OpenFOAM
 
 
-
 #include "couplingMesh.hpp"
+#include "processor.hpp"
+#include "streams.hpp"
 
-void pFlow::coupling::couplingMesh::calculateBox()
+void pFlow::coupling::couplingMesh::calculateBox()const
 {
 	const auto& p = mesh_.points();
 	auto lower = Foam::min(p);
@@ -18,27 +19,191 @@ void pFlow::coupling::couplingMesh::calculateBox()
 		{static_cast<real>(upper[0]), 
          static_cast<real>(upper[1]), 
          static_cast<real>(upper[2])});
+
+    Foam::Info<< blueText("Bounding box has been updated.")<<Foam::endl;
+
 }
 
-Foam::label 
-pFlow::coupling::couplingMesh::findCell
+void pFlow::coupling::couplingMesh::resetTree()const
+{
+    cellTreeSearch_.reset
+    (
+        new Foam::indexedOctree<Foam::treeDataCell>
+        (
+            Foam::treeDataCell
+            (
+                false,      // not cache bb
+                mesh_,
+                cellDecompositionMode_   // use tet-decomposition for any inside test
+            ),
+            Foam::treeBoundBox
+            (
+                Foam::point(
+                    meshBox_.minPoint().x(),
+                    meshBox_.minPoint().y(),
+                    meshBox_.minPoint().z()),
+                Foam::point(
+                    meshBox_.maxPoint().x(),
+                    meshBox_.maxPoint().y(),
+                    meshBox_.maxPoint().z())
+            ).extend(1e-4),
+            8,              // maxLevel
+            10,             // leafsize
+            6.0             // duplicity
+        )
+    );
+
+    Foam::Info<< blueText("Search tree has been reset.")<<Foam::endl;
+}
+
+
+pFlow::coupling::couplingMesh::couplingMesh
 (
-	const realx3& p, 
-	Foam::label cellCheck
+	const Foam::dictionary& dict,
+    Foam::fvMesh& mesh
+) 
+:
+	mesh_(mesh),
+    meshStatic_(!mesh.dynamic()),
+    domainExpansionRatio_
+    (
+        Foam::max(dict.lookup<Foam::scalar>("domainExpansionRatio"), 0.5)
+    ),
+    domainUpdateInterval_
+    (
+        dict.lookup<Foam::scalar>("domainUpdateInterval")
+    ),
+    decompositionMode_
+    (
+        dict.lookup<Foam::word>("decompositionMode")
+    )
+{
+
+    if(decompositionMode_ == "facePlanes") 
+        cellDecompositionMode_ = Foam::polyMesh::FACE_PLANES;
+    else if(decompositionMode_ == "cellTets")
+        cellDecompositionMode_ = Foam::polyMesh::CELL_TETS;
+    else if(decompositionMode_ == "faceDiagonalTriangles")
+        cellDecompositionMode_ = Foam::polyMesh::FACE_DIAG_TRIS;
+    else if(decompositionMode_ == "faceCenterTriangles")
+        cellDecompositionMode_ = Foam::polyMesh::FACE_CENTRE_TRIS;
+    else
+    {
+        fatalErrorInFunction<<
+        "Wrong deompositionMode"<< decompositionMode_ <<
+        " in dictionary "<< dict.name() <<endl;
+        MPI::processor::abort(0);
+        return;
+    }
+
+	if
+    (
+        cellDecompositionMode_ == Foam::polyMesh::FACE_DIAG_TRIS
+     || cellDecompositionMode_ == Foam::polyMesh::CELL_TETS
+    )
+    {
+        (void)mesh.tetBasePtIs();
+    }
+
+    calculateBox();
+}
+
+
+void pFlow::coupling::couplingMesh::update(Foam::scalar t, Foam::scalar fluidDt)
+{
+    
+    checkForDomainUpdate(t, fluidDt);
+    
+    // for the first time, they should be constructed anyway
+    if(!firstConstruction_) 
+    {
+        firstConstruction_ = true;
+        calculateBox();
+        resetTree();
+    }
+
+    // for dynamic mesh, bounding box and search tree should be 
+    // updated every time step
+    if( dynamic() )
+    {
+        calculateBox();
+        resetTree();
+    }
+    
+}
+
+bool pFlow::coupling::couplingMesh::checkForDomainUpdate
+(
+    Foam::scalar t, 
+    Foam::scalar fluidDt,
+    bool insideFluidLoop
 )
 {
-	return mesh_.findCell(Foam::point(p.x(), p.y(), p.z()));
+    if(insideFluidLoop) t -= fluidDt;
+
+    if( !firstConstruction_ )
+    {
+        lastTimeUpdated_ = t;
+        return true;
+    }
+
+    if( abs(t-lastTimeUpdated_) < 0.98*fluidDt )
+    {
+        lastTimeUpdated_ = t;
+        return true;
+    }
+    
+    if( abs(t-(lastTimeUpdated_+domainUpdateInterval_)) < 0.98*fluidDt)
+    {
+        lastTimeUpdated_ = t;
+        return true;
+    }
+
+    return false;
 }
 
 
-Foam::label 
+Foam::label
+pFlow::coupling::couplingMesh::findCellTree
+(
+    const realx3& p, 
+    Foam::label cellId
+)const
+{
+    if (cellId == -1)
+    {
+        return cellTreeSearch_().findInside(
+            Foam::point(p.x(), p.y(), p.z())
+            );
+    }
+    else
+    {
+        if (mesh_.pointInCell(
+            Foam::point(p.x(), p.y(), p.z()),
+            cellId,
+            cellDecompositionMode_))
+        {
+            return cellId;
+        }
+        else
+        {
+            return cellTreeSearch_().findInside(
+            Foam::point(p.x(), p.y(), p.z())
+            );     
+        }
+    }
+
+    return -1;
+}
+
+/*Foam::label 
 pFlow::coupling::couplingMesh::findCellSeed
 (
-	const Foam::point& loc,
+    const Foam::point& loc,
     const Foam::label seedCellId
 )
 {
-	if (mesh_.pointInCell(loc, seedCellId, cellDecompMode_))
+    if (mesh_.pointInCell(loc, seedCellId, cellDecompMode_))
     {
         return seedCellId;
     }
@@ -93,64 +258,4 @@ pFlow::coupling::couplingMesh::findCellSeed
     }
 
     return -1;
-}
-
-
-pFlow::coupling::couplingMesh::couplingMesh(
-	Foam::fvMesh& mesh,
-	const Foam::polyMesh::cellDecomposition decompMode) 
-:
-	mesh_(mesh),
-	cellDecompMode_(decompMode)
-{
-
-	if
-    (
-        decompMode == Foam::polyMesh::FACE_DIAG_TRIS
-     || decompMode == Foam::polyMesh::CELL_TETS)
-    {
-        (void)mesh.tetBasePtIs();
-    }
-
-    if(!cellTreeSearch_)
-    {
-    	cellTreeSearch_.reset
-        (
-            new Foam::indexedOctree<Foam::treeDataCell>
-            (
-                Foam::treeDataCell
-                (
-                    false,      // not cache bb
-                    mesh,
-                    decompMode   // use tet-decomposition for any inside test
-                ),
-                Foam::treeBoundBox(mesh.points()).extend(1e-4),
-                8,              // maxLevel
-                10,             // leafsize
-                6.0             // duplicity
-            )
-        );
-    }
-
-	calculateBox();
-}
-
-Foam::label
-pFlow::coupling::couplingMesh::findCellTree(
-	const realx3& p, 
-	Foam::label cellId)
-{
-	if (cellId == -1)
-    {
-        return cellTreeSearch_().findInside(
-        	Foam::point(p.x(), p.y(), p.z())
-        	);
-    }
-    else
-    {
-        return findCellSeed(
-        	Foam::point(p.x(), p.y(), p.z()), cellId
-        	);
-    }
-}
-
+}*/

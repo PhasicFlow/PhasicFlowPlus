@@ -17,7 +17,6 @@ Licence:
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 -----------------------------------------------------------------------------*/
-
 #ifndef __porosity_hpp__ 
 #define __porosity_hpp__
 
@@ -35,92 +34,131 @@ Licence:
 namespace pFlow::coupling
 {
 
-
+/**
+ * Interface class for porosity calculation models 
+ * 
+ * Interface class for calculating porosity of fluid in each fluid cell
+ * based on the various models
+ */
 class porosity
 :
 	public Foam::volScalarField
 {
 protected:
 
-	real 							alphaMin_;
+	/// Minimum fluid porosity allowed in each cell
+	Foam::scalar					alphaMin_;
 
+	/// Reference to couplingMesh
 	couplingMesh& 					cMesh_;
 
+	/// Reference to center mass position of particles in this processor
 	MPI::centerMassField& 			centerMass_;
 
-	MPI::realProcCMField&  			particleDiameter_;
+	/// Reference to diameter of particles in this processor 
+	MPI::realProcCMField&  			particleDiameter_;	
 
+	/// cell indices of particles in this processor 
 	MPI::procCMField<Foam::label> 	parCellIndex_;
 
 public:
 
-	// type info
+	/// Type info
 	TypeInfo("porosity");
 
-	porosity(
-		Foam::dictionary 		dict, 
-		couplingMesh& 			cMesh, 
-		MPI::centerMassField& 	centerMass, 
-		MPI::realProcCMField& 	parDiam);
+	// - Construcotrs 
 
-	virtual ~porosity() = default;
-
-	create_vCtor
-	(
-		porosity,
-		dictionary,
-		(
-			Foam::dictionary		dict, 
+		/// Construct from dictionary
+		porosity(
+			Foam::dictionary 		dict, 
 			couplingMesh& 			cMesh, 
 			MPI::centerMassField& 	centerMass, 
-			MPI::realProcCMField& 	parDiam
-		),
-		(dict, cMesh, centerMass, parDiam)
-	);
+			MPI::realProcCMField& 	parDiam);
 
-	
-	const Foam::volScalarField& alpha()const
-	{
-		return *this;
-	}
+		/// No copy
+		porosity(const porosity&) = delete;
 
-	inline
-	real alphaMin()const
-	{
-		return alphaMin_;
-	}
+		/// No copy assignment
+		porosity& operator=(const porosity&) = delete;
 
-	inline 
-	const auto& particleCellIndex()const
-	{
-		return parCellIndex_;
-	}
+		/// No move
+		porosity(porosity&&) = delete;
 
-	inline
-	const auto& centerMass()const
-	{
-		return centerMass_;
-	}
+		/// No move assignment
+		porosity& operator=(porosity&&) = delete;
 
-	inline 
-	const auto& particleDiameter()const
-	{
-		return particleDiameter_;
-	}
+		/// Destructor 
+		virtual ~porosity() = default;
 
-	
-	void calculatePorosity();
+		/// Virtual constructor 
+		create_vCtor
+		(
+			porosity,
+			dictionary,
+			(
+				Foam::dictionary		dict, 
+				couplingMesh& 			cMesh, 
+				MPI::centerMassField& 	centerMass, 
+				MPI::realProcCMField& 	parDiam
+			),
+			(dict, cMesh, centerMass, parDiam)
+		);
 
-	virtual
-	bool internalFieldUpdate() = 0;
+	// - Methods
+		
+		/// Const access to alpha
+		inline
+		const Foam::volScalarField& alpha()const
+		{
+			return *this;
+		}
 
-	virtual
-	int32 numInMesh()const = 0;
+		/// Return alphaMin
+		inline
+		real alphaMin()const
+		{
+			return alphaMin_;
+		}
 
-	virtual
-	void reportNumInMesh();
+		/// Return cell index of particles 
+		inline 
+		const auto& particleCellIndex()const
+		{
+			return parCellIndex_;
+		}
+
+		/// Retrun center mass position of particles 
+		inline
+		const auto& centerMass()const
+		{
+			return centerMass_;
+		}
+
+		/// Retrun diameter of particles
+		inline 
+		const auto& particleDiameter()const
+		{
+			return particleDiameter_;
+		}
+
+		/// Calculate porosity based on particles positions 
+		void calculatePorosity();
+
+		/// Fill the internal field of alpha
+		virtual
+		bool internalFieldUpdate() = 0;
+
+		/// Return number of center mass points found in this mesh (processor)
+		virtual
+		int32 numInMesh()const = 0;
+
+		/// Report (output) number of center mass points found in all processors 
+		/// It is effective only in master processor 
+		virtual
+		void reportNumInMesh();
 
 
+	/// Construct the class based on input in dict 
 	static
 	uniquePtr<porosity> create(
 		Foam::dictionary		dict, 

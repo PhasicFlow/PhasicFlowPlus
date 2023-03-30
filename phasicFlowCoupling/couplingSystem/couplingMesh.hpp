@@ -37,57 +37,147 @@ class couplingMesh
 {
 protected:
 
-	const Foam::fvMesh& 					mesh_;
+	// - protected data members
 
-	Foam::polyMesh::cellDecomposition 		cellDecompMode_;
+		/// Reference to fvMesh
+		Foam::fvMesh& 		mesh_;
 
-	mutable uniquePtr<Foam::indexedOctree<Foam::treeDataCell>>
-		cellTreeSearch_ = nullptr;
+		/// Is mesh static
+		bool 				meshStatic_;
 
-	box 			meshBox_;
-	
-	void calculateBox();
+		/// Cctree for cell search
+		mutable uniquePtr<Foam::indexedOctree<Foam::treeDataCell>>
+							cellTreeSearch_ = nullptr;
 
-	Foam::label findCellSeed(
+		/// The mesh domain expansion ratio
+		/// Number of times the largest particle in the simulation
+		Foam::scalar		domainExpansionRatio_;
+
+		/// Time intervals between domain updates
+		Foam::scalar 		domainUpdateInterval_;
+
+		/// Last time of domain update
+		Foam::scalar 		lastTimeUpdated_ = 0;
+
+		/// Mesh decomposition mode for locating points in the mesh
+		/// Options are: 
+		/// 	1) facePlanes
+		/// 	2) cellTets
+		/// 	3) faceDiagonalTriangles
+		/// 	4) faceCenterTriangles
+		Foam::word 			decompositionMode_;
+		
+		/// Actual bounding box around mesh points
+		mutable box 		meshBox_;
+
+		/// cell decomposition mode
+		Foam::polyMesh::cellDecomposition 		cellDecompositionMode_;
+
+		/// If everything is constructed for the first time
+		bool 				firstConstruction_ = false;
+		
+
+	// - protected member functions
+
+		/// Calculate the actual bounding box mesh based on points
+		void calculateBox()const;
+
+		/// Reset the search tree structure
+		void resetTree()const;
+
+
+	/*Foam::label findCellSeed(
 		const Foam::point& loc,
-    	const Foam::label seedCellId);
+    	const Foam::label seedCellId);*/
 
 public:
 
-	couplingMesh(
-		Foam::fvMesh& mesh, 
-		const Foam::polyMesh::cellDecomposition 
-				decompMode = Foam::polyMesh::FACE_PLANES);
+	// - Constructors
 
-	~couplingMesh()=default;
+		couplingMesh(
+			const Foam::dictionary& dict,
+			Foam::fvMesh& mesh
+			);
 
-	inline
-	auto& mesh()
-	{
-		return mesh_;
-	}
+		couplingMesh(const couplingMesh&)=delete;
 
-	inline
-	const auto& mesh()const
-	{
-		return mesh_;
-	}
+		couplingMesh(couplingMesh&&)=delete;
 
-	inline
-	const auto& meshBox()const
-	{
-		return meshBox_;
-	}
+		couplingMesh& operator = (const couplingMesh&)=delete;
 
-	
-	Foam::label 
-	findCell(const realx3& p, Foam::label cellCheck);
+		couplingMesh& operator = (couplingMesh&&)=delete;		
 
-	Foam::label
-	findCellTree(const realx3& p, Foam::label cellId);
+		~couplingMesh()=default;
 
 
+	// - Methods 
 
+		/// Retrun const ref to mesh
+		inline
+		const auto& mesh()const
+		{
+			return mesh_;
+		}
+
+		/// Domain extension ratio
+		inline
+		auto domainExpansionRatio()const
+		{
+			return domainExpansionRatio_;
+		}
+
+		/// Return cosnt ref to mesh box
+		inline
+		const auto& meshBox()const
+		{
+			return meshBox_;
+		}
+		
+		/// Is mesh dynamic?
+		inline 
+		auto dynamic()const
+		{
+			return mesh_.dynamic();
+		}
+		
+		/// Is mesh moving?
+		inline 
+		auto moving()const
+		{
+			return mesh_.moving();
+		}
+		
+		/// Is topology of the mesh is changing?
+		inline 
+		auto topoChanging()const
+		{
+			return mesh_.topoChanging();
+		}
+		
+		/// Is mesh changing
+		inline
+		auto changing()const
+		{
+			return mesh_.changing();
+		}
+		
+		/// Update the coupling mesh components
+		/// This should always be called before any mesh querries
+		/// and after mesh motion (if any).
+		void update(Foam::scalar t, Foam::scalar fluidDt);
+
+		/// Check if the domain should be updated at time t
+		/// In fluid loop, the current time is dt ahead of coupling time, 
+		/// so the function is notified to consider this. 
+		bool checkForDomainUpdate
+		(
+			Foam::scalar t, 
+			Foam::scalar fluidDt, 
+			bool insideFluidLoop = true
+		);
+
+		Foam::label
+		findCellTree(const realx3& p, Foam::label cellId)const;
 
 };
 
