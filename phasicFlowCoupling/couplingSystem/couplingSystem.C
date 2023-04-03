@@ -104,7 +104,8 @@ bool pFlow::coupling::couplingSystem::getDataFromDEM(real t, real fluidDt)
 
 	if( couplingMesh_.checkForDomainUpdate(t, fluidDt) )
 	{
-		Foam::Info<<blueText("Sub-domains have been updated at time ")<< yellowText(t) <<Foam::endl;
+		Foam::Info<<blueText("Sub-domains have been updated at time ")<< 
+		yellowText(t) <<Foam::endl;
 
 		if(!procDEMSystem_.updateParticleDistribution(
 			couplingMesh_.domainExpansionRatio(), 
@@ -130,14 +131,17 @@ bool pFlow::coupling::couplingSystem::getDataFromDEM(real t, real fluidDt)
 			if(!centerMass_.checkForNewSize(thisNoPars))
 			{
 				fatalErrorInFunction<<
-				"cannot change the size of containers to new size "<< thisNoPars<<endl;
+				"cannot change the size of containers to new size "<< 
+				thisNoPars<<endl;
 				MPI::processor::abort(0);
 				return false;
 			}
+			
 		}
-
+		
 		// first cunstructs index distribution
 		auto parIndexInDomains = procDEMSystem_.parIndexInDomainsMaster();
+
 		if(!realScatteredComm_.changeDataMaps(parIndexInDomains))
 		{
 			fatalErrorInFunction<<
@@ -153,7 +157,6 @@ bool pFlow::coupling::couplingSystem::getDataFromDEM(real t, real fluidDt)
 			MPI::processor::abort(0);
 			return false;
 		}
-
 	}
 
 	// update position and diameter in each processor

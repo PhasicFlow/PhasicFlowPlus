@@ -98,8 +98,7 @@ int main(int argc, char *argv[])
         Info<< "Time = " << runTime.timeName() << nl << endl;        
 
         coupling.cfdTimers().start();
-        
-        
+                
         // --- Pressure-velocity PIMPLE corrector loop
         while (pimple.loop())
         {
@@ -109,13 +108,22 @@ int main(int argc, char *argv[])
                 fvModels.preUpdateMesh();
 
                 mesh.update();
-                coupling.cMesh().update(runTime.time().value(), runTime.deltaT().value());
-                coupling.updateMeshBoxes();
-                coupling.getDataFromDEM(runTime.time().value(), runTime.deltaT().value());
-                coupling.calculatePorosity();
-                coupling.calculateFluidInteraction();
-                coupling.sendDataToDEM();
-                coupling.iterate(runTime.time().value(), runTime.writeTime(), runTime.timeName());
+
+                if(pimple.firstPimpleIter())
+                {
+                    // DEM and coupling calculations should be done only once
+                    // This is an explicit coupling, 
+                    // fluid data from previous time step
+                    // DEM data from previous time step 
+                    coupling.cMesh().update(runTime.time().value(), runTime.deltaT().value());
+                    coupling.updateMeshBoxes();
+                    coupling.getDataFromDEM(runTime.time().value(), runTime.deltaT().value());
+                    coupling.calculatePorosity();
+                    coupling.calculateFluidInteraction();
+                    coupling.sendDataToDEM();
+                    coupling.iterate(runTime.time().value(), runTime.writeTime(), runTime.timeName());    
+                }
+                
 
                 if (mesh.changing())
                 {
