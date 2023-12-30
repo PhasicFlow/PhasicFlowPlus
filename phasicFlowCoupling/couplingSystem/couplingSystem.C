@@ -70,6 +70,8 @@ pFlow::coupling::couplingSystem::couplingSystem(
 	
 	auto domain = couplingMesh_.meshBox();
 
+	output<< " domain " << domain <<endl;
+
 	if(! collectAllToAll(domain, meshBoxes_))
 	{
 		fatalErrorInFunction<<"could not corrlect meshBox into the master"<<endl;
