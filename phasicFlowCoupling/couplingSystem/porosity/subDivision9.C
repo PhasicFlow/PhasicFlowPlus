@@ -24,6 +24,8 @@ Licence:
 
 #include "subDivision9.hpp"
 
+#include "streams.hpp"
+
 const pFlow::real sin_45[] = {0.7071067811865475,  0.7071067811865475, -0.7071067811865475, -0.7071067811865475};
 const pFlow::real cos_45[] = {0.7071067811865475, -0.7071067811865475, -0.7071067811865475,  0.7071067811865475};
 
@@ -71,6 +73,11 @@ bool pFlow::coupling::subDivision9::internalFieldUpdate()
 			numInCenter++;
 			numInMesh_++;	
 		}
+		else
+		{
+			output<<"par index "<< i << " with pos "<< pPos<<endl;
+		}
+
 		parCellIndex_[i] = cellId;
 
 		real r = static_cast<real>(0.5*1.48075) * pRad;

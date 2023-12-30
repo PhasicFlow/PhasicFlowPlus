@@ -104,7 +104,7 @@ pFlow::coupling::couplingMesh::couplingMesh
     {
         (void)mesh.tetBasePtIs();
     }
-
+    resetTree();
     calculateBox();
 }
 

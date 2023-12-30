@@ -37,7 +37,7 @@ protected:
 
 		auto Rec = Foam::max(Re,residualRe_);
 		Foam::scalar xi = 3.7 - 0.65*Foam::exp(-0.5*Foam::pow(1.5-Foam::log10(Rec),2));
-		Foam::scalar Cd = Foam::pow(0.63-4.8/Foam::sqrt(Rec),2);
+		Foam::scalar Cd = Foam::pow(0.63+4.8/Foam::sqrt(Rec),2);
 
 		return Cd/24 * Re * Foam::pow(ep, -xi ); 
 		

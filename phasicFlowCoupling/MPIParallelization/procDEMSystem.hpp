@@ -80,6 +80,10 @@ public:
 	{
 		if(demSystem_)
 		{
+			/*demSystem_->updateParticleDistribution(extentFraction, domains);
+			output<<"numProcessos "<< domains.size()<<endl;
+			output<<" num in Proc0 "<<demSystem_->numParInDomain(0)<<endl;*/
+			
 			return demSystem_->updateParticleDistribution(extentFraction, domains);
 		}
 		else
