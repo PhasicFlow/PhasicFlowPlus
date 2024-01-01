@@ -5,15 +5,19 @@ cd ${0%/*} || exit 1    # Run from this directory
 # First run OpenFoam Aplication
 
 echo "\n<--------------------------------------------------------------------->"
-echo "1) Creating Block Mesh"
+echo "1) Running blockmesh"
 echo "<--------------------------------------------------------------------->\n"
 blockMesh
 
 echo "\n<--------------------------------------------------------------------->"
 echo "2) Running Step 1 (0-2 DEM) "
 echo "<--------------------------------------------------------------------->\n"
+
+echo " 2.1) add Particle "
 particlesPhasicFlow
+echo " 2.2) add Geometry "
 geometryPhasicFlow
+echo " 2.3) Running "
 sphereGranFlow
 
 
