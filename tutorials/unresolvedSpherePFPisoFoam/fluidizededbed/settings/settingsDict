@@ -12,9 +12,9 @@ libs ("libpFCouplingUtilities.so");
 
 dt 				0.00001; 	// time step for integration (s)
 
-startTime 		2; 			// start time for simulation 
+startTime 		0; 			// start time for simulation 
 
-endTime 		10;	 		// end time for simulation 
+endTime 		2;	 		// end time for simulation 
 
 saveInterval 	0.05; 		// time interval for saving the simulation
 
