@@ -55,7 +55,16 @@ bool pFlow::coupling::subDivision9::internalFieldUpdate()
 	auto& solidVol = solidVoldTmp.ref();
 	numInMesh_ = 0;
 
-	for(size_t i=0; i<centerMass_.size(); i++)
+	size_t numPar = centerMass_.size();
+
+#pragma omp parallel reduction (+:numInMesh_)
+{
+
+	Foam::FixedList<realx3, 8> points;
+	Foam::FixedList<Foam::label, 8> cellIds;
+
+	#pragma omp for 
+	for(size_t i=0; i<numPar; i++)
 	{
 
 		realx3 pPos = centerMass_[i];
@@ -66,20 +75,20 @@ bool pFlow::coupling::subDivision9::internalFieldUpdate()
 
 		realx3 offset(0,0,0);	
 
-		int32 numInCenter = 0;
-		auto cellId = cMesh_.findCellTree(pPos, parCellIndex_[i]);
-		if( cellId >= 0 )
+		Foam::label cntrCellId = cMesh_.findCellTree(pPos, parCellIndex_[i]);
+		
+		parCellIndex_[i] = cntrCellId;
+
+		if( cntrCellId >= 0 )
 		{
-			numInCenter++;
 			numInMesh_++;	
 		}
 		else
 		{
-			output<<"par index "<< i << " with pos "<< pPos<<endl;
+			continue;
 		}
 
-		parCellIndex_[i] = cellId;
-
+		Foam::label n = 0;
 		real r = static_cast<real>(0.5*1.48075) * pRad;
 		
 		// 8 subdivisions of particle
@@ -92,16 +101,25 @@ bool pFlow::coupling::subDivision9::internalFieldUpdate()
 					r*sin_45[i_alp]*sin_45[i_bet],
 					r*cos_45[i_alp] };
 
-				#include "subDivCheck.hpp"
+				points[n++] = pPos + offset;
 			}
 		}
 
-		if(numInCenter>0)
+		Foam::label nCellIds = 0;
+		cMesh_.findPointsInCells(points, cntrCellId,nCellIds, cellIds );
+		
+		for(auto ci=0; ci<nCellIds; ci++ )
 		{
-			solidVol[cellId] += numInCenter*pSubVol;
+			#pragma omp atomic
+			solidVol[cellIds[ci]] += pSubVol;	
 		}
 
+		#pragma omp atomic
+		solidVol[cntrCellId] += (9-nCellIds)*pSubVol;
+
 	}
+
+} // omp parallel
 
 	this->ref() = Foam::max(
 		1 - solidVol/this->mesh().V(), 

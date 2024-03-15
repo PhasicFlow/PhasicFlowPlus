@@ -32,7 +32,7 @@ void pFlow::coupling::couplingMesh::resetTree()const
         (
             Foam::treeDataCell
             (
-                false,      // not cache bb
+                true,      // not cache bb
                 mesh_,
                 cellDecompositionMode_   // use tet-decomposition for any inside test
             ),
@@ -46,7 +46,7 @@ void pFlow::coupling::couplingMesh::resetTree()const
                     meshBox_.maxPoint().x(),
                     meshBox_.maxPoint().y(),
                     meshBox_.maxPoint().z())
-            ).extend(1e-4),
+            ).extend(1e-3),
             8,              // maxLevel
             10,             // leafsize
             6.0             // duplicity
@@ -172,6 +172,7 @@ pFlow::coupling::couplingMesh::findCellTree
 {
     if (cellId == -1)
     {
+        //output<<"cellId \n";
         return cellTreeSearch_().findInside(
             Foam::point(p.x(), p.y(), p.z())
             );
@@ -192,8 +193,14 @@ pFlow::coupling::couplingMesh::findCellTree
             );     
         }
     }
+    /*Foam::point pt(p.x(), p.y(), p.z());
 
-    return -1;
+    if(cellId != -1 && 
+        mesh_.pointInCell(pt, cellId, cellDecompositionMode_)
+        ) return cellId;
+
+    return mesh_.findCell(pt, Foam::polyMesh::CELL_TETS);*/
+
 }
 
 /*Foam::label 
