@@ -26,6 +26,8 @@ Licence:
 #include "indexedOctree.H"
 #include "treeDataCell.H"
 
+#include <map>
+
 // phasicFlow
 #include "box.hpp"
 
@@ -178,6 +180,52 @@ public:
 
 		Foam::label
 		findCellTree(const realx3& p, Foam::label cellId)const;
+
+		template<unsigned Size>
+		void findPointsInCells(
+			const Foam::FixedList<realx3, Size>& points, 
+			Foam::label cntrCellId, 
+			Foam::label& nCellIds,
+			Foam::FixedList<Foam::label, Size>& cellIds)
+		{
+			nCellIds = 0;
+			for(auto i=0; i<Size; i++)
+			{
+				if(auto id = findCellTree(points[i], cntrCellId); cntrCellId!=id && id !=-1)
+				{
+					cellIds[nCellIds] = id;
+					nCellIds++;
+				}
+			}
+		}
+
+		template<unsigned Size>
+		void findPointsInCellsMap(
+			const Foam::FixedList<realx3, Size>& points, 
+			Foam::label cntrCellId, 
+			Foam::label& nCellIds,
+			std::map<Foam::label, Foam::label>& cellIds)
+		{
+			nCellIds = 0;
+			cellIds.clear();
+			for(auto i=0; i<Size; i++)
+			{
+				if(auto id = findCellTree(points[i], cntrCellId); cntrCellId!=id && id !=-1)
+				{
+					if( auto cIdIter = cellIds.find(id); cIdIter != cellIds.end())
+					{
+						cIdIter->second++;
+					}
+					else
+					{
+						cellIds.insert({id,1});
+					}
+					
+					
+					nCellIds++;
+				}
+			}
+		}
 
 };
 

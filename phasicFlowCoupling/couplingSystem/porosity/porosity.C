@@ -22,6 +22,7 @@ Licence:
 #include "procVector.hpp"
 #include "procCommunication.hpp"
 #include "streams.hpp"
+#include "Timer.hpp"
 
 pFlow::coupling::porosity::porosity(
 	Foam::dictionary		dict, 
@@ -58,8 +59,14 @@ pFlow::coupling::porosity::porosity(
 
 void pFlow::coupling::porosity::calculatePorosity()
 {
+	Timer t;
+	t.start();
 	this->internalFieldUpdate();
+	t.end();
+	output<<"mapping execution time " << t.lastTime()<<endl;
+	
 	this->correctBoundaryConditions();
+	
 }
 
 void pFlow::coupling::porosity::reportNumInMesh()

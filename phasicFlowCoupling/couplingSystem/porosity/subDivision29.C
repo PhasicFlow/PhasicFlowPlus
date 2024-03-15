@@ -21,8 +21,10 @@ Licence:
 // from OpenFOAM
 #include "fvCFD.H"
 
+#include "omp.h"
 
 #include "subDivision29.hpp"
+#include "streams.hpp"
 
 const pFlow::real sin_45[] = {0.7071067811865475,  0.7071067811865475, -0.7071067811865475, -0.7071067811865475};
 const pFlow::real cos_45[] = {0.7071067811865475, -0.7071067811865475, -0.7071067811865475,  0.7071067811865475};
@@ -52,26 +54,43 @@ bool pFlow::coupling::subDivision29::internalFieldUpdate()
 	
 	auto& solidVol = solidVoldTmp.ref();
 	numInMesh_ = 0;
+	
+	size_t numPar = centerMass_.size();
 
-	for(size_t i=0; i<centerMass_.size(); i++)
+#pragma omp parallel reduction (+:numInMesh_)
+{
+
+	Foam::FixedList<realx3, 28> points;
+	Foam::FixedList<Foam::label, 28> cellIds;
+
+	#pragma omp for 
+	for(size_t i=0; i<numPar; i++)
 	{
 
 		realx3 	pPos = centerMass_[i];
 		real 	pRad = particleDiameter_[i]/2;
+		
 		// 4*Pi/3
 		real pSubVol = static_cast<real>(4.1887902047864/29.0) *
 					pFlow::pow(pRad, static_cast<real>(3.0));
 
 		realx3 offset(0,0,0);	
 
-		int32 numInCenter = 0;
-		auto cellId = cMesh_.findCellTree(pPos, parCellIndex_[i]);
-		if( cellId >= 0 )
+		
+		Foam::label cntrCellId = cMesh_.findCellTree(pPos, parCellIndex_[i]);
+		
+		parCellIndex_[i] = cntrCellId;
+
+		if( cntrCellId >= 0 )
 		{
-			numInCenter++;
 			numInMesh_++;	
 		}
-		parCellIndex_[i] = cellId;
+		else
+		{
+			continue;
+		}
+		
+		Foam::label n = 0;
 
 		for (real r=0.62392*pRad; r<pRad; r+=static_cast<real>(0.293976*pRad) )
 		{
@@ -85,30 +104,41 @@ bool pFlow::coupling::subDivision29::internalFieldUpdate()
 						r*sin_45[i_alp]*sin_45[i_bet],
 						r*cos_45[i_alp] };
 
-					#include "subDivCheck.hpp"
+					points[n++] = pPos + offset;
 				}
 			}
 
 			for( int j=-1; j<=1; j+=2 )
 			{
-	            offset= {r*j, 0.0, 0.0};
-	            #include "subDivCheck.hpp"   
+	        	offset= {r*j, 0.0, 0.0};
+	          	
+	          	points[n++] = pPos + offset;
 	            
 	            offset = {0.0, r*j, 0.0};
-	            #include "subDivCheck.hpp"   
+	            points[n++] = pPos + offset;
+	            
 
 	            offset = {0.0, 0.0, r*j};
-	            #include "subDivCheck.hpp"   
+	            points[n++] = pPos + offset;
+	            
 			}
 		}
 
-		if(numInCenter>0)
+		Foam::label nCellIds = 0;
+		cMesh_.findPointsInCells(points, cntrCellId,nCellIds, cellIds );
+		
+		for(auto ci=0; ci<nCellIds; ci++ )
 		{
-			solidVol[cellId] += numInCenter*pSubVol;
+			#pragma omp atomic
+			solidVol[cellIds[ci]] += pSubVol;	
 		}
 
+		#pragma omp atomic
+		solidVol[cntrCellId] += (29-nCellIds)*pSubVol;
 	}
+} // omp parallel 
 
+	
 	this->ref() = Foam::max(
 		1 - solidVol/this->mesh().V(), 
 		static_cast<Foam::scalar>(this->alphaMin()) );
