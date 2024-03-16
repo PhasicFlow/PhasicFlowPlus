@@ -96,6 +96,73 @@ pFlow::coupling::drag::pressureGradient(const Foam::volScalarField& rho)const
 		return Foam::fvc::grad(p_)*rho;
 }
 
+
+void pFlow::coupling::drag::calculateDragForce(
+	const MPI::realx3ProcCMField& velocity,
+	const MPI::realProcCMField& diameter,
+	MPI::realx3ProcCMField& particleForce)
+{
+
+	setSuSpToZero();
+	particleForce = realx3(0,0,0);
+
+
+	const auto& parCells =  porosity_.particleCellIndex();
+
+	const auto& nu = porosity_.mesh().lookupObject<Foam::volScalarField>("nu");
+	const auto& rho = porosity_.mesh().lookupObject<Foam::volScalarField>("rho");
+
+	// gets pressure gradient 
+	auto pGrad = pressureGradient(rho);
+	auto& pGradRef = pGrad();
+	const auto& Vcell = Su_.mesh().V();
+
+	size_t numPar = parCells.size();
+
+#pragma omp parallel for
+	for(size_t i=0; i<numPar; i++)
+	{
+		auto cell = parCells[i];
+
+		if(cell >= 0 )
+		{
+			auto rhoi = rho[cell];
+			auto mui = nu[cell]* rhoi;
+			auto Uf = U_[cell];
+			auto ef = porosity_[cell];
+			auto dp = diameter[i];
+
+			Foam::vector up = {velocity[i].x(), velocity[i].y(),velocity[i].z()};
+
+			auto vp = Foam::constant::mathematical::pi/6 * Foam::pow(dp,3.0);
+			
+			Foam::vector ur = Uf-up;
+			Foam::scalar Re = Foam::max(ef * rhoi * Foam::mag(ur) * dp /mui, residualRe_);
+
+			Foam::scalar sp = 3 * Foam::constant::mathematical::pi * mui * ef * dp * dimlessDrag(Re, ef);
+			
+			Foam::vector pf = static_cast<real>(sp)*ur - vp*pGradRef[cell];
+			
+			
+			particleForce[i] = realx3(pf.x(), pf.y(), pf.z());
+			
+			Foam::vector suu = (-sp*up)/Vcell[cell];
+			#pragma omp atomic
+			Su_[cell].x() += suu.x(); 
+
+			#pragma omp atomic
+			Su_[cell].y() += suu.y(); 
+
+			#pragma omp atomic
+			Su_[cell].z() += suu.z(); 
+			
+			#pragma omp atomic
+			Sp_[cell] += sp/Vcell[cell];
+		}
+	}
+
+}
+
 pFlow::uniquePtr<pFlow::coupling::drag> 
 	pFlow::coupling::drag::create(
 		Foam::dictionary 		dict, 
