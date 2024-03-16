@@ -35,7 +35,7 @@ pFlow::coupling::Rong::Rong(
 
 }
 
-void pFlow::coupling::Rong::calculateDragForce(
+/*void pFlow::coupling::Rong::calculateDragForce(
 	const MPI::realx3ProcCMField& velocity,
 	const MPI::realProcCMField& diameter,
 	MPI::realx3ProcCMField& particleForce)
@@ -86,4 +86,4 @@ void pFlow::coupling::Rong::calculateDragForce(
 	}
 
 	
-}
+}*/

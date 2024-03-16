@@ -35,7 +35,7 @@ pFlow::coupling::ErgunWenYu::ErgunWenYu(
 
 }
 
-void pFlow::coupling::ErgunWenYu::calculateDragForce(
+/*void pFlow::coupling::ErgunWenYu::calculateDragForce(
 	const MPI::realx3ProcCMField& velocity,
 	const MPI::realProcCMField& diameter,
 	MPI::realx3ProcCMField& particleForce)
@@ -74,7 +74,7 @@ void pFlow::coupling::ErgunWenYu::calculateDragForce(
 			Foam::vector ur = Uf-up;
 			Foam::scalar Re = Foam::max(ef * rhoi * Foam::mag(ur) * dp /mui, residualRe_);
 
-			Foam::scalar sp = 3 * Foam::constant::mathematical::pi * mui * ef * dp * dimlessDrag(Re, ef, dp);
+			Foam::scalar sp = 3 * Foam::constant::mathematical::pi * mui * ef * dp * dimlessDrag(Re, ef);
 			
 			Foam::vector pf = static_cast<real>(sp)*ur - vp*pGradRef[cell];
 			
@@ -86,4 +86,4 @@ void pFlow::coupling::ErgunWenYu::calculateDragForce(
 	}
 
 	
-}
+}*/

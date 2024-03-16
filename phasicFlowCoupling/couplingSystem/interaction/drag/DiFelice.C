@@ -35,7 +35,7 @@ pFlow::coupling::DiFelice::DiFelice(
 
 }
 
-void pFlow::coupling::DiFelice::calculateDragForce(
+/*void pFlow::coupling::DiFelice::calculateDragForce(
 	const MPI::realx3ProcCMField& velocity,
 	const MPI::realProcCMField& diameter,
 	MPI::realx3ProcCMField& particleForce)
@@ -86,4 +86,4 @@ void pFlow::coupling::DiFelice::calculateDragForce(
 	}
 
 	
-}
+}*/

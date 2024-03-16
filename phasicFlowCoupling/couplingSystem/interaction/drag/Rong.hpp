@@ -31,8 +31,8 @@ class Rong
 {
 protected:
 
-	inline 
-	Foam::scalar dimlessDrag(Foam::scalar Re, Foam::scalar ep)
+	
+	Foam::scalar dimlessDrag(Foam::scalar Re, Foam::scalar ep)override
 	{
 
 		auto Rec = Foam::max(Re,residualRe_);
@@ -61,10 +61,10 @@ public:
 		dictionary
 	);
 
-	void calculateDragForce(
+	/*void calculateDragForce(
 		const MPI::realx3ProcCMField& velocity,
 		const MPI::realProcCMField& diameter,
-		MPI::realx3ProcCMField& particleForce)override;
+		MPI::realx3ProcCMField& particleForce)override;*/
 		
 	
 }; 
