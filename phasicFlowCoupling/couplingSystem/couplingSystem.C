@@ -218,6 +218,8 @@ void pFlow::coupling::couplingSystem::calculateFluidInteraction()
 			fluidForce_);
 	}
 	interactionTimer_.end();
+
+	output<<">>> Inteeraction time  "<<interactionTimer_.lastTime()<<endl;
 	
 }
 

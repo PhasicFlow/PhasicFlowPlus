@@ -178,8 +178,67 @@ public:
 			bool insideFluidLoop = true
 		);
 
+		
+		
+		
+		bool pointInCell(
+			const Foam::point& p, 
+			Foam::label celli)const;
+
+		bool pointSphereInCell(
+			const Foam::point& p, 
+			Foam::scalar rad, 
+			Foam::label celli, 
+			bool& sphereInCell) const;
+
+		bool pointSphereInCell(
+			const Foam::point& p, 
+			Foam::scalar smallRad, 
+			Foam::scalar largeRad, 
+			Foam::label celli,
+			bool& smallInCell, 
+			bool& largeInCell)const;
+
+
+		Foam::label findPointInCellTree(
+			const Foam::point& p, 
+			Foam::label cellId)const;
+
+		Foam::label findPointSphereInCellTree(
+			const Foam::point& p,
+			Foam::scalar rad,
+			Foam::label cellId,
+			bool& sphereInCell)const;
+
+		Foam::label findPointSphereInCellTree(
+			const Foam::point& p,
+			Foam::scalar radSmall,
+			Foam::scalar radLarge,
+			Foam::label cellId,
+			bool& smallInCell,
+			bool& largeInCell)const;
+
 		Foam::label
 		findCellTree(const realx3& p, Foam::label cellId)const;
+
+		template<unsigned Size>
+		void findPointsInCells(
+			const Foam::FixedList<Foam::point, Size>& points, 
+			Foam::label cntrCellId, 
+			Foam::label& nCellIds,
+			Foam::FixedList<Foam::label, Size>& cellIds)
+		{
+			nCellIds = 0;
+			for(auto i=0u; i<Size; i++)
+			{
+				if(auto id = findPointInCellTree(points[i], cntrCellId); cntrCellId!=id && id !=-1)
+				{
+					cellIds[nCellIds] = id;
+					nCellIds++;
+				}
+			}
+		}
+		
 
 		template<unsigned Size>
 		void findPointsInCells(
@@ -189,7 +248,7 @@ public:
 			Foam::FixedList<Foam::label, Size>& cellIds)
 		{
 			nCellIds = 0;
-			for(auto i=0; i<Size; i++)
+			for(auto i=0u; i<Size; i++)
 			{
 				if(auto id = findCellTree(points[i], cntrCellId); cntrCellId!=id && id !=-1)
 				{
@@ -199,7 +258,17 @@ public:
 			}
 		}
 
-		template<unsigned Size>
+};
+
+}
+
+
+
+#endif //__couplingMesh_hpp__
+
+
+
+/*template<unsigned Size>
 		void findPointsInCellsMap(
 			const Foam::FixedList<realx3, Size>& points, 
 			Foam::label cntrCellId, 
@@ -225,12 +294,4 @@ public:
 					nCellIds++;
 				}
 			}
-		}
-
-};
-
-}
-
-
-
-#endif //__couplingMesh_hpp__
+		}*/
