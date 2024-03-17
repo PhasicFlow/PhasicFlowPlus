@@ -162,6 +162,233 @@ bool pFlow::coupling::couplingMesh::checkForDomainUpdate
     return false;
 }
 
+bool pFlow::coupling::couplingMesh::pointInCell
+(
+	const Foam::point& p, 
+	Foam::label celli
+)const
+{
+	const Foam::labelList& f = mesh_.cells()[celli];
+    const Foam::labelList& owner = mesh_.faceOwner();
+    const Foam::vectorField& cf = mesh_.faceCentres();
+    const Foam::vectorField& Sf = mesh_.faceAreas();
+    
+
+    Foam::scalar dist;
+    forAll(f, facei)
+    {
+        Foam::label nFace = f[facei];
+        Foam::vector proj = p - cf[nFace];
+        
+        if (owner[nFace] != celli)
+        {
+        	dist = Sf[nFace] & proj;
+        }
+        else
+        {
+        	dist = -(Sf[nFace] & proj);
+        }
+        
+        if(dist < 0 )
+        {
+        	return false;
+        }
+    }
+
+    return true;
+}
+
+bool pFlow::coupling::couplingMesh::pointSphereInCell
+(
+	const Foam::point& p, 
+	Foam::scalar rad, 
+	Foam::label celli, 
+	bool& sphereInCell
+) const
+{
+
+	const Foam::labelList& f = mesh_.cells()[celli];
+    const Foam::labelList& owner = mesh_.faceOwner();
+    const Foam::vectorField& cf = mesh_.faceCentres();
+    const Foam::vectorField& Sf = mesh_.faceAreas();
+    
+    sphereInCell = true;
+    
+
+    Foam::scalar dist;
+    forAll(f, facei)
+    {
+        Foam::label nFace = f[facei];
+        Foam::vector proj = p - cf[nFace];
+        Foam::vector normal = normalised(Sf[nFace]);
+        
+        if (owner[nFace] != celli)
+        {
+        	dist = normal & proj;
+        }
+        else
+        {
+        	dist = -(normal & proj);
+        }
+        
+        if(dist < rad ) sphereInCell = false;
+        if(dist < 0 )
+        {
+        	return false;
+        }
+    }
+
+    return true;
+}
+
+
+
+bool pFlow::coupling::couplingMesh::pointSphereInCell
+(
+	const Foam::point& p, 
+	Foam::scalar smallRad, 
+	Foam::scalar largeRad,
+	Foam::label celli, 
+	bool& smallInCell, 
+	bool& largeInCell
+)const
+{
+	
+	const Foam::labelList& f = mesh_.cells()[celli];
+    const Foam::labelList& owner = mesh_.faceOwner();
+    const Foam::vectorField& cf = mesh_.faceCentres();
+    const Foam::vectorField& Sf = mesh_.faceAreas();
+    
+    smallInCell = true;
+    largeInCell = true;
+
+    Foam::scalar dist;
+    forAll(f, facei)
+    {
+        Foam::label nFace = f[facei];
+        Foam::vector proj = p - cf[nFace];
+        Foam::vector normal = normalised(Sf[nFace]);
+        
+        if (owner[nFace] != celli)
+        {
+        	dist = normal & proj;
+        }
+        else
+        {
+        	dist = -(normal & proj);
+        }
+        
+        if(dist < smallRad ) smallInCell = false;
+        if(dist < largeRad ) largeInCell = false;
+        if(dist < 0 )
+        {
+        	return false;
+        }
+    }
+
+    return true;
+}
+
+Foam::label 
+pFlow::coupling::couplingMesh::findPointInCellTree
+(
+	const Foam::point& p, 
+	Foam::label cellId
+)const
+{
+	if (cellId == -1)
+    {
+        
+        return cellTreeSearch_().findInside(p);
+    }
+    else
+    {
+        if (pointInCell(p, cellId))
+        {
+            return cellId;
+        }
+        else
+        {
+            return cellTreeSearch_().findInside(p);
+        }
+    }
+}
+
+Foam::label 
+pFlow::coupling::couplingMesh::findPointSphereInCellTree
+(
+	const Foam::point& p,
+	Foam::scalar rad,
+	Foam::label cellId,
+	bool& sphereInCell
+)const
+{
+	// first find the cellId if not known
+	if (cellId == -1)
+    {
+        cellId = cellTreeSearch_().findInside(p);
+
+        // point is not in mesh
+        if(cellId ==-1)
+        {
+        	sphereInCell = false;
+        	return cellId;
+        }
+    }
+   
+    if(pointSphereInCell(p, rad, cellId, sphereInCell)) return cellId;
+    
+    // the point may have been moved to another cell, find new cell
+    cellId = cellTreeSearch_().findInside(p);
+    if(cellId ==-1)
+    {
+    	sphereInCell = false;
+    	return cellId;
+    }
+    if(pointSphereInCell(p, rad, cellId, sphereInCell)) return cellId;
+    return -1;
+    
+}
+
+Foam::label 
+pFlow::coupling::couplingMesh::findPointSphereInCellTree
+(
+	const Foam::point& p,
+	Foam::scalar radSmall,
+	Foam::scalar radLarge,
+	Foam::label cellId,
+	bool& smallInCell,
+	bool& largeInCell
+)const
+{
+	// first find the cellId if not known
+	if (cellId == -1)
+    {
+        cellId = cellTreeSearch_().findInside(p);
+
+        // point is not in mesh
+        if(cellId ==-1)
+        {
+        	smallInCell = false;
+        	largeInCell = false;
+        	return cellId;
+        }
+    }
+   
+    if(pointSphereInCell(p, radSmall, radLarge, cellId, smallInCell, largeInCell)) return cellId;
+    
+    // the point may have been moved to another cell, find new cell
+    cellId = cellTreeSearch_().findInside(p);
+    if(cellId ==-1)
+    {
+    	smallInCell = false;
+        largeInCell = false;
+        return cellId;
+    }
+    if(pointSphereInCell(p, radSmall, radLarge, cellId, smallInCell, largeInCell)) return cellId;
+    return -1;
+}
+
 
 Foam::label
 pFlow::coupling::couplingMesh::findCellTree
