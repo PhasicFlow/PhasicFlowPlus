@@ -11,8 +11,11 @@ Here, DEM calculations are handled using features of [PhasicFlow](https://github
 Based on the above configuration, PhasicFlowPlus can use the computational resources of a multi-core CPU or use the computational resource of both CPU and GPU. 
 
 ## How to build
-You need to first [install PhasicFlow](https://github.com/PhasicFlow/phasicFlow/wiki/How-to-Build-PhasicFlow) and OpenFoam (For now, it is only tested with [OpenFOAM-v9](https://openfoam.org/download/9-source/)) on your computer. After that, clone PhasicFlowPlus on your computer and navigate to the root directory of the code and enter the following command to install the code.
+You need to first [install PhasicFlow](https://github.com/PhasicFlow/phasicFlow/wiki/How-to-Build-PhasicFlow) and OpenFoam (For now, it is only tested with [OpenFOAM-v9](https://openfoam.org/download/9-source/)) on your computer. After that, clone/copy PhasicFlowPlus on your computer. The `PhasicFlowPlus` folder shoule be located beside `phasicFlow` folder on your computer (in ~/PhasicFlow/ folder). Navigate to the root directory of the code and enter the following command to install the code.
 
-`> ./Allwmake`
+```
+cd ~/PhasicFlow/PhasicFlowPlus/ 
+./Allwmake
+```
 
 
