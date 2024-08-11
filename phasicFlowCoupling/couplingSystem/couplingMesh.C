@@ -147,13 +147,13 @@ bool pFlow::coupling::couplingMesh::checkForDomainUpdate
         return true;
     }
 
-    if( abs(t-lastTimeUpdated_) < 0.98*fluidDt )
+    if( std::abs(t-lastTimeUpdated_) < static_cast<real>(0.98*fluidDt) )
     {
         lastTimeUpdated_ = t;
         return true;
     }
     
-    if( abs(t-(lastTimeUpdated_+domainUpdateInterval_)) < 0.98*fluidDt)
+    if( std::abs(t-(lastTimeUpdated_+domainUpdateInterval_)) < static_cast<real>(0.98*fluidDt))
     {
         lastTimeUpdated_ = t;
         return true;

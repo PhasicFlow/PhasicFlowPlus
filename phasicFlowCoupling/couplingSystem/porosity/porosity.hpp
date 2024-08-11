@@ -62,6 +62,10 @@ protected:
 	/// cell indices of particles in this processor 
 	MPI::procCMField<Foam::label> 	parCellIndex_;
 
+	int32 										numInMesh_ = 0;
+
+	void mapCenters();
+
 public:
 
 	/// Type info
@@ -150,8 +154,10 @@ public:
 		bool internalFieldUpdate() = 0;
 
 		/// Return number of center mass points found in this mesh (processor)
-		virtual
-		int32 numInMesh()const = 0;
+		int32 numInMesh()const
+		{
+			return numInMesh_;
+		}
 
 		/// Report (output) number of center mass points found in all processors 
 		/// It is effective only in master processor 

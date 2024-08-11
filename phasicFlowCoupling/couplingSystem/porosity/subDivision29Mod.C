@@ -52,67 +52,47 @@ bool pFlow::coupling::subDivision29Mod::internalFieldUpdate()
 		 	);
 	
 	auto& solidVol = solidVoldTmp.ref();
-	numInMesh_ = 0;
-	
-	
+		
 	size_t numPar = centerMass_.size();
+	
 
-#pragma omp parallel reduction (+:numInMesh_)
-{
-
-	Foam::FixedList<Foam::point, 28> points;
-	Foam::FixedList<Foam::label, 28> cellIds;
-	Foam::FixedList<Foam::point, 14> hpoints;
-	Foam::FixedList<Foam::label, 14> hcellIds;
-	bool fullInside;
-	bool halfInside;
-
-	#pragma omp for schedule (dynamic)
+	#pragma omp parallel for schedule (dynamic)
 	for(size_t i=0; i<numPar; i++)
 	{
+		const Foam::label cntrCellId = parCellIndex_[i];
+		if( cntrCellId < 0 )continue;
 
-		Foam::point 	pPos{centerMass_[i].x(),centerMass_[i].y(),centerMass_[i].z()};
-		Foam::scalar 	pRad = particleDiameter_[i]/2;
+		bool fullInside;
+		bool halfInside;
+
+		const Foam::point 	pPos{centerMass_[i].x(),centerMass_[i].y(),centerMass_[i].z()};
+		const Foam::scalar 	pRad = particleDiameter_[i]/2;
 		
-		// 4*Pi/3
-		real pSubVol = static_cast<real>(4.1887902047864/29.0) *
+		// 4*Pi/3 = 4.1887902047864
+		const real pSubVol = static_cast<real>(4.1887902047864/29.0) *
 					pFlow::pow(pRad, static_cast<real>(3.0));
 
 		
-
-		
-		Foam::label cntrCellId = cMesh_.findPointSphereInCellTree(
+		cMesh_.pointSphereInCell(
 			pPos, 
 			0.62392*pRad, 
 			0.917896*pRad, 
-			parCellIndex_[i], 
+			cntrCellId, 
 			halfInside, 
-			fullInside);
-		
-		parCellIndex_[i] = cntrCellId;
-
-		if( cntrCellId >= 0 )
-		{
-			numInMesh_++;	
-		}
-		else
-		{
-			continue;
-		}
+			fullInside);	
 
 		if(fullInside)
 		{
 			#pragma omp atomic
 			solidVol[cntrCellId] += 29*pSubVol;
-			continue;
-		}
-		
-		
-		Foam::point offset(0,0,0);	
 
-		if(halfInside)
+		}		
+		else if(halfInside)
 		{
-			
+			Foam::point offset(0,0,0);
+			Foam::FixedList<Foam::point, 14> hpoints;
+			Foam::FixedList<Foam::label, 14> hcellIds;
+
 			Foam::label n = 0;
 
 			Foam::scalar r = 0.917896*pRad;
@@ -145,7 +125,6 @@ bool pFlow::coupling::subDivision29Mod::internalFieldUpdate()
 			}
 
 
-
 			Foam::label nCellIds = 0;
 			cMesh_.findPointsInCells(hpoints, cntrCellId,nCellIds, hcellIds );
 			
@@ -160,52 +139,57 @@ bool pFlow::coupling::subDivision29Mod::internalFieldUpdate()
 
 			continue;
 		}
-		
-		Foam::label n=0;
-		for (Foam::scalar r=0.62392*pRad; r<pRad; r+=0.293976*pRad) 
+		else
 		{
-			// 8 subdivisions of particle
-			for(int32 i_alp =0; i_alp<4; i_alp++)
+			Foam::point offset(0,0,0);
+			Foam::FixedList<Foam::point, 28> points;
+			Foam::FixedList<Foam::label, 28> cellIds;
+			Foam::label n=0;
+			for (Foam::scalar r=0.62392*pRad; r<pRad; r+=0.293976*pRad) 
 			{
-				for(int32 i_bet=0; i_bet<2;i_bet++)
+				// 8 subdivisions of particle
+				for(int32 i_alp =0; i_alp<4; i_alp++)
 				{
-					offset = {  
-						r*sin_45[i_alp]*cos_45[i_bet],
-						r*sin_45[i_alp]*sin_45[i_bet],
-						r*cos_45[i_alp] };
+					for(int32 i_bet=0; i_bet<2;i_bet++)
+					{
+						offset = {  
+							r*sin_45[i_alp]*cos_45[i_bet],
+							r*sin_45[i_alp]*sin_45[i_bet],
+							r*cos_45[i_alp] };
 
-					points[n++] = pPos + offset;
+						points[n++] = pPos + offset;
+					}
+				}
+
+				for( int j=-1; j<=1; j+=2 )
+				{
+		        	offset= {r*j, 0.0, 0.0};
+		          	
+		          	points[n++] = pPos + offset;
+		            
+		            offset = {0.0, r*j, 0.0};
+		            points[n++] = pPos + offset;
+		            
+
+		            offset = {0.0, 0.0, r*j};
+		            points[n++] = pPos + offset;
 				}
 			}
 
-			for( int j=-1; j<=1; j+=2 )
+			Foam::label nCellIds = 0;
+			cMesh_.findPointsInCells(points, cntrCellId,nCellIds, cellIds);
+			
+			for(auto ci=0; ci<nCellIds; ci++ )
 			{
-	        	offset= {r*j, 0.0, 0.0};
-	          	
-	          	points[n++] = pPos + offset;
-	            
-	            offset = {0.0, r*j, 0.0};
-	            points[n++] = pPos + offset;
-	            
-
-	            offset = {0.0, 0.0, r*j};
-	            points[n++] = pPos + offset;
+				#pragma omp atomic
+				solidVol[cellIds[ci]] += pSubVol;	
 			}
-		}
 
-		Foam::label nCellIds = 0;
-		cMesh_.findPointsInCells(points, cntrCellId,nCellIds, cellIds );
-		
-		for(auto ci=0; ci<nCellIds; ci++ )
-		{
 			#pragma omp atomic
-			solidVol[cellIds[ci]] += pSubVol;	
+			solidVol[cntrCellId] += (29-nCellIds)*pSubVol;
 		}
-
-		#pragma omp atomic
-		solidVol[cntrCellId] += (29-nCellIds)*pSubVol;
-	}
-} // omp parallel 
+	
+	}// omp parallel for
 	
 	
 	this->ref() = Foam::max(
