@@ -71,10 +71,6 @@ public:
 
 	bool internalFieldUpdate() override;
 
-	int32 numInMesh()const override
-	{
-		return numInMesh_;
-	}
 
 }; 
 

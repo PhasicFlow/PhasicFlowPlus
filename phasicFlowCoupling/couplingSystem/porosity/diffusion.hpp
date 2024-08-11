@@ -18,58 +18,71 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-#ifndef __subDivision29Mod_hpp__ 
-#define __subDivision29Mod_hpp__
+#ifndef __diffusion_hpp__ 
+#define __diffusion_hpp__
+
+#include "virtualConstructor.hpp"
 
 // from phasicFlow-coupling
-#include "porosity.hpp"
+#include "PIC.hpp"
 
 
 namespace pFlow::coupling
 {
 
 /**
- * sub-division model for calculating fluid porosity
+ * Particle In Cell (diffusion) model for porosity calculation
  * 
- * This model divides a sphere into 29 equal parts and locate each of these 
- * parts in the cells. The volume of each part located in each cell is 
- * considered as the solid volume in that cell. 
+ * This model only considers the particle center and if the particle center 
+ * resides inside a cell, it is assumed that the whole volume of the particle
+ * is located in that cell.
  * 
  */
-class subDivision29Mod
+class diffusion
 : 
-	public porosity
+	public PIC
 {
-protected:
+private:
 
-	/// number of center mass points located in this mesh (processor)
-	int32 numInMesh_;
+	Foam::label 			  nSteps_;
+
+	Foam::scalar 			  intTime_;
+
+	Foam::dimensionedScalar   dt_;
+
+	Foam::dictionary          picSolDict_;
+
+	Foam::tmp<Foam::fvMatrix<Foam::scalar>> fvmDdt
+    (
+        const Foam::volScalarField& sField
+    );
 
 public:
 
 	/// Type info
-	TypeInfo("subDivision29Mod");
+	TypeInfo("diffusion");
 
-	/// Construct from dictionary
-	subDivision29Mod(
+	/// Construc from dictionary 
+	diffusion(
 		Foam::dictionary 		dict, 
 		couplingMesh& 			cMesh, 
 		MPI::centerMassField& 	centerMass, 
 		MPI::realProcCMField& 	parDiam);
 
 	/// Destructor
-	virtual ~subDivision29Mod() = default;
+	virtual ~diffusion() = default;
 
 	/// Add this constructor to the list of virtual constructors
 	add_vCtor
 	(
 		porosity,
-		subDivision29Mod,
+		diffusion,
 		dictionary
 	);
 
 	bool internalFieldUpdate() override;
 
+	
 }; 
 
 } // pFlow::coupling

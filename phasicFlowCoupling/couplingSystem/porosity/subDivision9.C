@@ -53,40 +53,27 @@ bool pFlow::coupling::subDivision9::internalFieldUpdate()
 		 	);
 	
 	auto& solidVol = solidVoldTmp.ref();
-	numInMesh_ = 0;
-
+	
 	size_t numPar = centerMass_.size();
 
-#pragma omp parallel reduction (+:numInMesh_)
-{
-
-	Foam::FixedList<realx3, 8> points;
-	Foam::FixedList<Foam::label, 8> cellIds;
-
-	#pragma omp for 
+	#pragma omp parallel for 
 	for(size_t i=0; i<numPar; i++)
 	{
 
-		realx3 pPos = centerMass_[i];
-		real pRad = particleDiameter_[i]/2;
-		// 4*Pi/3
-		real pSubVol = static_cast<real>(4.1887902047864/9.0) *
+		const Foam::label cntrCellId = parCellIndex_[i];
+		if( cntrCellId < 0 )continue;
+
+		Foam::FixedList<realx3, 8> points;
+		Foam::FixedList<Foam::label, 8> cellIds;
+
+		const realx3 pPos = centerMass_[i];
+		const real pRad = particleDiameter_[i]/2;
+		
+		// 4*Pi/3 = 4.1887902047864
+		const real pSubVol = static_cast<real>(4.1887902047864/9.0) *
 					pFlow::pow(pRad, static_cast<real>(3.0));
 
-		realx3 offset(0,0,0);	
-
-		Foam::label cntrCellId = cMesh_.findCellTree(pPos, parCellIndex_[i]);
-		
-		parCellIndex_[i] = cntrCellId;
-
-		if( cntrCellId >= 0 )
-		{
-			numInMesh_++;	
-		}
-		else
-		{
-			continue;
-		}
+		realx3 offset(0,0,0);
 
 		Foam::label n = 0;
 		real r = static_cast<real>(0.5*1.48075) * pRad;
@@ -106,7 +93,7 @@ bool pFlow::coupling::subDivision9::internalFieldUpdate()
 		}
 
 		Foam::label nCellIds = 0;
-		cMesh_.findPointsInCells(points, cntrCellId,nCellIds, cellIds );
+		cMesh_.findPointsInCells(points, cntrCellId, nCellIds, cellIds );
 		
 		for(auto ci=0; ci<nCellIds; ci++ )
 		{
@@ -117,9 +104,7 @@ bool pFlow::coupling::subDivision9::internalFieldUpdate()
 		#pragma omp atomic
 		solidVol[cntrCellId] += (9-nCellIds)*pSubVol;
 
-	}
-
-} // omp parallel
+	} // omp parallel for
 
 	this->ref() = Foam::max(
 		1 - solidVol/this->mesh().V(), 

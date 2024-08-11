@@ -12,6 +12,7 @@ couplingSystem/porosity/PIC.C
 couplingSystem/porosity/subDivision9.C
 couplingSystem/porosity/subDivision29.C
 couplingSystem/porosity/subDivision29Mod.C
+couplingSystem/porosity/diffusion.C
 couplingSystem/interaction/drag/drag.C
 couplingSystem/interaction/drag/ErgunWenYu.C
 couplingSystem/interaction/drag/DiFelice.C

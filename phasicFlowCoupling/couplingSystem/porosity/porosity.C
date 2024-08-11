@@ -24,6 +24,23 @@ Licence:
 #include "streams.hpp"
 #include "Timer.hpp"
 
+
+void pFlow::coupling::porosity::mapCenters()
+{
+	numInMesh_ = 0;
+	size_t numPar = centerMass_.size();
+
+	
+	#pragma omp parallel for reduction(+:numInMesh_)
+	for(size_t i = 0; i<numPar; i++)
+	{
+		auto cellId = cMesh_.findCellTree(centerMass_[i], parCellIndex_[i]);
+		parCellIndex_[i] = cellId;
+		if( cellId >= 0 ) numInMesh_++;	
+	}
+}
+
+
 pFlow::coupling::porosity::porosity(
 	Foam::dictionary		dict, 
 	couplingMesh& 			cMesh, 
@@ -61,6 +78,7 @@ void pFlow::coupling::porosity::calculatePorosity()
 {
 	Timer t;
 	t.start();
+	mapCenters();
 	this->internalFieldUpdate();
 	t.end();
 	output<<"mapping execution time " << t.lastTime()<<endl;

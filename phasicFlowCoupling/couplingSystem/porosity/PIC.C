@@ -48,24 +48,20 @@ bool pFlow::coupling::PIC::internalFieldUpdate()
 	
 	auto& solidVol = solidVoldTmp.ref();
 	
-	numInMesh_ = 0;
 	size_t numPar = centerMass_.size();
 
-#pragma omp parallel for reduction(+:numInMesh_)
+	#pragma omp parallel for
 	for(size_t i=0; i<numPar; i++)
 	{
-		
-		auto cellId = cMesh_.findCellTree(centerMass_[i], parCellIndex_[i]);
+		const auto cellId = parCellIndex_[i];
 		if( cellId >= 0 )
 		{
 			#pragma omp atomic
 			solidVol[cellId] += 
 				static_cast<real>(3.14159265358979/6)*
 				pFlow::pow(particleDiameter_[i], static_cast<real>(3.0));
-				numInMesh_++;
+				
 		}
-		parCellIndex_[i] = cellId;
-		
 	}
 
 	this->ref() = Foam::max(
