@@ -148,7 +148,8 @@ pFlow::coupling::statistical::statistical(
 	        Foam::IOobject::NO_READ,
 	        Foam::IOobject::AUTO_WRITE
 	    ),
-   		cMesh.mesh()
+   		cMesh.mesh(),
+   		Foam::dimless
 	)
 {
 }
