@@ -81,7 +81,7 @@ void pFlow::coupling::porosity::calculatePorosity()
 	mapCenters();
 	this->internalFieldUpdate();
 	t.end();
-	output<<"mapping execution time " << t.lastTime()<<endl;
+	//output<<"mapping execution time " << t.lastTime()<<endl;
 	
 	this->correctBoundaryConditions();
 	

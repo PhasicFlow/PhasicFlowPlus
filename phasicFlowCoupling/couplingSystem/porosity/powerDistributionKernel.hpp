@@ -18,77 +18,64 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-#ifndef __diffusion_hpp__ 
-#define __diffusion_hpp__
+#ifndef __powerDistributionKernel_hpp__ 
+#define __powerDistributionKernel_hpp__
 
-#include "virtualConstructor.hpp"
 
 // from phasicFlow-coupling
-#include "PIC.hpp"
+#include "statistical.hpp"
 
 
 namespace pFlow::coupling
 {
 
 /**
- * Particle In Cell (diffusion) model for porosity calculation
+ * powerDistributionKernel model for porosity calculation
  * 
- * This model only considers the particle center and if the particle center 
- * resides inside a cell, it is assumed that the whole volume of the particle
- * is located in that cell.
+ * This model distributes particle volume to the target cell and neighboring 
+ * cell based on the a Gaussian distribution and the distance between 
+ * particle center and cell center. 
  * 
  */
-class diffusion
+class powerDistributionKernel
 : 
-	public PIC
+	public statistical
 {
-private:
+protected:
 
-	Foam::label 			  nSteps_;
+	Foam::Switch 				filterEmpty_;
 
-	Foam::scalar 			  boundLength_;
-
-	Foam::scalar 			  intTime_;
-
-	Foam::dimensionedScalar   dt_;
-
-	Foam::dimensionedScalar   DT_;
-
-	Foam::dictionary          picSolDict_;
-
-
-
-	Foam::tmp<Foam::fvMatrix<Foam::scalar>> fvmDdt
-    (
-        const Foam::volScalarField& sField
-    );
+	Foam::scalar boundRatio()const override
+	{
+		return 1.0;
+	} 		
 
 public:
 
 	/// Type info
-	TypeInfo("diffusion");
+	TypeInfo("powerDistributionKernel");
 
 	/// Construc from dictionary 
-	diffusion(
+	powerDistributionKernel(
 		Foam::dictionary 		dict, 
 		couplingMesh& 			cMesh, 
 		MPI::centerMassField& 	centerMass, 
 		MPI::realProcCMField& 	parDiam);
 
 	/// Destructor
-	virtual ~diffusion() = default;
+	virtual ~powerDistributionKernel() = default;
 
 	/// Add this constructor to the list of virtual constructors
 	add_vCtor
 	(
 		porosity,
-		diffusion,
+		powerDistributionKernel,
 		dictionary
 	);
 
 	bool internalFieldUpdate() override;
 
-	
+
 }; 
 
 } // pFlow::coupling

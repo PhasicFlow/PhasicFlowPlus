@@ -30,11 +30,11 @@ namespace pFlow::coupling
 {
 
 /**
- * Particle In Cell (statistical) model for porosity calculation
+ * statistical model for porosity calculation
  * 
- * This model only considers the particle center and if the particle center 
- * resides inside a cell, it is assumed that the whole volume of the particle
- * is located in that cell.
+ * This model distributes particle volume to the target cell and neighboring 
+ * cell based on the a Gaussian distribution and the distance between 
+ * particle center and cell center. 
  * 
  */
 class statistical
@@ -43,14 +43,36 @@ class statistical
 {
 protected:
 
-	int32 numInMesh_ 		= 0;
+	// radius of circule for cell neighbor list 
+	Foam::scalar 				neighborLength_;
+
+	// list of nieghbor cells for each cell 
+	std::vector<std::vector<Foam::label>>  neighborList_;
+	
+	// boundary cells 
+	std::vector<std::pair<Foam::label, Foam::label>>   boundaryCell_;		
+
+	bool 						listConstructed_;
+
+	volScalarField 			boundaryPatchNum_;
+	
+	/// Members
+
+	//
+	bool performCellNeighborSearch()const
+	{
+		if(cMesh_.moving()) return true;
+		if(!listConstructed_)return true;
+		return false;
+	}
 
 
-	// search/
-	Foam::scalar 				b_;
+	virtual Foam::scalar boundRatio()const = 0;
 
-	std::vector<std::vector<Foam::label>>  neighborList_;		
+	/// construct neighbors of cells based on neighborLength 
+	bool cellNeighborsSearch();
 
+	 
 public:
 
 	/// Type info
@@ -64,19 +86,14 @@ public:
 		MPI::realProcCMField& 	parDiam);
 
 	/// Destructor
-	virtual ~statistical() = default;
+	~statistical() override = default ;
 
-	/// Add this constructor to the list of virtual constructors
-	add_vCtor
-	(
-		porosity,
-		statistical,
-		dictionary
-	);
-
-	bool internalFieldUpdate() override;
-
-
+	inline
+	Foam::scalar neighborLength()const
+	{
+		return neighborLength_;
+	}
+	
 }; 
 
 } // pFlow::coupling
