@@ -65,13 +65,15 @@ pFlow::coupling::diffusion::diffusion(
 :
 	PIC(dict, cMesh, centerMass, parDiam),
 	nSteps_(Foam::max(1,dict.lookup<Foam::label>("nSteps"))),
-	intTime_(dict.lookup<Foam::scalar>("intTime")),
+	boundLength_(dict.lookup<Foam::scalar>("boundLength")),
+	intTime_(0.75*0.75*boundLength_*boundLength_/4),
 	dt_("dt", Foam::dimTime, intTime_/nSteps_),
+	DT_("DT", Foam::dimDynamicViscosity/Foam::dimDensity, 1.0),
 	picSolDict_("picSolDict")
 {
 	
 	picSolDict_.add("relTol", 0);
-	picSolDict_.add("tolerance", 1.0e-8);
+	picSolDict_.add("tolerance", 1.0e-6);
 	picSolDict_.add("solver", "smoothSolver");
 	picSolDict_.add("smoother", "symGaussSeidel");
 }
@@ -124,7 +126,7 @@ bool pFlow::coupling::diffusion::internalFieldUpdate()
 		picAlpha.storeOldTime();
 		fvScalarMatrix alphaEq
 		(
-			fvmDdt(picAlpha) - fvm::laplacian(picAlpha)
+			fvmDdt(picAlpha) - fvm::laplacian(DT_,picAlpha)
 		);
 		alphaEq.solve(picSolDict_);
 	}

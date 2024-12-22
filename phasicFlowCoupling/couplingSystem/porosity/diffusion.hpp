@@ -46,11 +46,17 @@ private:
 
 	Foam::label 			  nSteps_;
 
+	Foam::scalar 			  boundLength_;
+
 	Foam::scalar 			  intTime_;
 
 	Foam::dimensionedScalar   dt_;
 
+	Foam::dimensionedScalar   DT_;
+
 	Foam::dictionary          picSolDict_;
+
+
 
 	Foam::tmp<Foam::fvMatrix<Foam::scalar>> fvmDdt
     (
