@@ -24,6 +24,106 @@ Licence:
 #include "statistical.hpp"
 #include "porosity.hpp"
 
+bool pFlow::coupling::statistical::cellNeighborsSearch()
+{
+	
+	if(!performCellNeighborSearch()) return true;
+
+
+	const vectorField& cellC = cMesh_.mesh().cellCentres();
+	const scalarField& cellV = cMesh_.mesh().cellVolumes();
+	const auto& bndris = cMesh_.mesh().boundary();
+
+	const size_t nCells = cMesh_.mesh().nCells();
+
+	const Foam::scalar b = neighborLength_ * boundRatio();
+	
+	// check for capacity and size 
+	if(nCells > neighborList_.capacity() )
+	{
+		neighborList_.clear();
+		neighborList_.reserve(nCells);
+		boundaryCell_.clear();
+		boundaryCell_.reserve(nCells);
+	}
+
+	// clear the elements of each list 
+	for(auto& nL: neighborList_)
+	{
+		nL.clear();
+	}
+	
+	// check for size 
+	if(nCells > neighborList_.size() )
+	{
+		neighborList_.resize(nCells);
+
+		boundaryCell_.resize(nCells);
+		/*std::fill(
+			boundaryCell_.begin(), 
+			boundaryCell_.end(),
+			std::pair<Foam::label, Foam::label>{-1,-1});*/
+	}
+
+	
+	
+	// loop over all cells
+	// TODO: later this should be recursive calls 
+	//#pragma omp parallel for
+	for(size_t i=0; i<nCells; i++)
+	{
+		const Foam::vector& ci = cellC[i];
+		const Foam::scalar  lCell = 0.5* Foam::pow(cellV[i], 0.33333);
+		
+		neighborList_[i].push_back(i);
+
+		for(size_t j=0; j< nCells; j++)
+		{
+			
+			if( i == j)continue;
+
+			auto dist = mag(cellC[j]-ci);
+			if(dist < b + lCell )
+			{
+				neighborList_[i].push_back(j);
+			}
+		}
+		
+		Foam::label nghbrB = -1;
+		Foam::label nghbrFaceIndex = -1;
+		Foam::scalar minDistance = 1.0e15;
+		for(Foam::label nB = 0; nB < bndris.size(); nB++)
+		{
+			//const labelUList& faceCells = bndris[nB].faceCells();
+			const auto& bndry = bndris[nB];
+
+			for(auto j =0; j<bndry.size(); j++)
+			{
+				auto cellFaceDist = Foam::mag(ci - bndry.Cf()[j]);
+				if( cellFaceDist < b + lCell)
+				{
+					if(cellFaceDist<minDistance)
+					{
+						nghbrB = nB;
+						nghbrFaceIndex = j;
+						minDistance = cellFaceDist;
+					}		
+				}
+			}
+		}
+		
+		boundaryCell_[i] = std::pair<Foam::label, Foam::label>{nghbrB, nghbrFaceIndex};		
+
+	}
+
+	for(auto i=0; i<nCells; i++)
+	{
+		boundaryPatchNum_[i] = boundaryCell_[i].first;
+	}
+
+	listConstructed_ = true;
+	return true;
+}
 
 
 
@@ -34,99 +134,25 @@ pFlow::coupling::statistical::statistical(
 	MPI::realProcCMField& 	parDiam)
 :
 	porosity(dict, cMesh, centerMass, parDiam),
-	b_(dict.lookup<Foam::scalar>("b")),
-	neighborList_(cMesh.mesh().nCells())
+	neighborLength_(dict.lookup<Foam::scalar>("neighborLength")),
+	neighborList_(cMesh.mesh().nCells()),
+	boundaryCell_(cMesh.mesh().nCells(), std::pair<Foam::label, Foam::label>{-1,-1}),
+	listConstructed_(false),
+	boundaryPatchNum_
+	(
+		Foam::IOobject
+	    (
+	        "boundaryPatchNum",
+	        cMesh.mesh().time().timeName(),
+	        cMesh.mesh(),
+	        Foam::IOobject::NO_READ,
+	        Foam::IOobject::AUTO_WRITE
+	    ),
+   		cMesh.mesh()
+	)
 {
-	
-	const vectorField& cellC = cMesh.mesh().cellCentres();
-
-	// loop over all cells
-	for(size_t i=0; i<neighborList_.size(); i++)
-	{
-		Foam::vector ci = cellC[i];
-		for(size_t j=0; j< neighborList_.size(); j++)
-		{
-			auto dist = mag(cellC[j]-ci);
-
-			if(dist < 3*b_)
-			{
-				neighborList_[i].push_back(j);
-			}
-		}
-	}
-
-	
 }
 
-
-bool pFlow::coupling::statistical::internalFieldUpdate()
-{
-	
-	auto solidVoldTmp = Foam::volScalarField::Internal::New(
-		"solidVol",
-		this->mesh(),
-		 Foam::dimensioned("solidVol", Foam::dimVol, Foam::scalar(0))
-		 	);
-	
-	auto& solidVol = solidVoldTmp.ref();
-	
-	size_t numPar = centerMass_.size();
-	const vectorField& allCellCntr = this->mesh().cellCentres();
-	
-	
-	//#pragma omp parallel for 
-	for(size_t i=0; i<numPar; i++)
-	{
-		real parVolume = static_cast<real>(3.14159265358979/6)*
-				pFlow::pow(particleDiameter_[i], static_cast<real>(3.0));
-
-		const Foam::label targetCellId = parCellIndex_[i];
-		
-		if( targetCellId < 0 )continue;
-		
-		const auto& nList=neighborList_[targetCellId];
-		realx3 cp = centerMass_[i];	
-
-		std::vector<Foam::scalar> ks; 
-		ks.reserve(nList.size());
-		
-		Foam::scalar pSubTotal = 0;
-		
-		for(auto j:nList)
-		{
-			auto c2 = allCellCntr[j];
-			Foam::vector dx{cp.x()-c2.x(), cp.y()-c2.y(), cp.z()-c2.z()};
-
-			Foam::scalar ksi2 = dot(dx,dx)/(b_*b_);
-			
-			Foam::scalar k = 0;
-			if (ksi2<1)
-			{
-				k = Foam::pow(1-ksi2,4);
-			}
-			else
-			{
-				k = 0 ;
-			}
-			ks.push_back(k);
-			pSubTotal += k;
-
-		}
-
-		size_t n = 0;
-		for(auto j:nList)
-		{
-			solidVol[j] += ks[n++] /pSubTotal * parVolume;
-		}
-
-	} 
-	
-	this->ref() = Foam::max(
-		1 - solidVol/this->mesh().V(), 
-		static_cast<Foam::scalar>(this->alphaMin()) );
-
-	return true;
-}
 
 
 

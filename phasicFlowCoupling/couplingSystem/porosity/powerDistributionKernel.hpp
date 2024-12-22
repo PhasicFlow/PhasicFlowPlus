@@ -18,82 +18,64 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-#ifndef __statistical_hpp__ 
-#define __statistical_hpp__
+#ifndef __powerDistributionKernel_hpp__ 
+#define __powerDistributionKernel_hpp__
 
-#include "virtualConstructor.hpp"
+
 // from phasicFlow-coupling
-#include "porosity.hpp"
+#include "statistical.hpp"
 
 
 namespace pFlow::coupling
 {
 
 /**
- * statistical model for porosity calculation
+ * powerDistributionKernel model for porosity calculation
  * 
  * This model distributes particle volume to the target cell and neighboring 
  * cell based on the a Gaussian distribution and the distance between 
  * particle center and cell center. 
  * 
  */
-class statistical
+class powerDistributionKernel
 : 
-	public porosity
+	public statistical
 {
 protected:
 
-	// radius of circule for cell neighbor list 
-	Foam::scalar 				neighborLength_;
+	Foam::Switch 				filterEmpty_;
 
-	// list of nieghbor cells for each cell 
-	std::vector<std::vector<Foam::label>>  neighborList_;
-	
-	// boundary cells 
-	std::vector<std::pair<Foam::label, Foam::label>>   boundaryCell_;		
-
-	bool 						listConstructed_;
-
-	volScalarField 			boundaryPatchNum_;
-	
-	/// Members
-
-	//
-	bool performCellNeighborSearch()const
+	Foam::scalar boundRatio()const override
 	{
-		if(cMesh_.moving()) return true;
-		if(!listConstructed_)return true;
-		return false;
-	}
+		return 1.0;
+	} 		
 
-
-	virtual Foam::scalar boundRatio()const = 0;
-
-	/// construct neighbors of cells based on neighborLength 
-	bool cellNeighborsSearch();
-
-	 
 public:
 
 	/// Type info
-	TypeInfo("statistical");
+	TypeInfo("powerDistributionKernel");
 
 	/// Construc from dictionary 
-	statistical(
+	powerDistributionKernel(
 		Foam::dictionary 		dict, 
 		couplingMesh& 			cMesh, 
 		MPI::centerMassField& 	centerMass, 
 		MPI::realProcCMField& 	parDiam);
 
 	/// Destructor
-	~statistical() override = default ;
+	virtual ~powerDistributionKernel() = default;
 
-	inline
-	Foam::scalar neighborLength()const
-	{
-		return neighborLength_;
-	}
-	
+	/// Add this constructor to the list of virtual constructors
+	add_vCtor
+	(
+		porosity,
+		powerDistributionKernel,
+		dictionary
+	);
+
+	bool internalFieldUpdate() override;
+
+
 }; 
 
 } // pFlow::coupling
