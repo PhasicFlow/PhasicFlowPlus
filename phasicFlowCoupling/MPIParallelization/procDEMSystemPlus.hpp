@@ -18,8 +18,8 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-#ifndef __procDEMSystem_hpp__ 
-#define __procDEMSystem_hpp__
+#ifndef __procDEMSystemPlus_hpp__ 
+#define __procDEMSystemPlus_hpp__
 
 
 // from phasicFlow
@@ -28,7 +28,7 @@ Licence:
 
 
 // from coupling-phasicFlow
-#include "procVector.hpp"
+#include "procVectorPlus.hpp"
 
 
 namespace pFlow
@@ -37,7 +37,7 @@ class Timers;
 class Timer;
 }
 
-namespace pFlow::MPI
+namespace pFlow::Plus
 {
 
 class procDEMSystem
@@ -109,7 +109,7 @@ public:
 	{
 		if(demSystem_)
 		{
-			return demSystem_->parPosition();
+			return demSystem_->position();
 		}else
 		{
 			return span<realx3>();
@@ -121,7 +121,7 @@ public:
 	{
 		if(demSystem_)
 		{
-			return demSystem_->parVelocity();
+			return demSystem_->velocity();
 		}else
 		{
 			return span<realx3>();
@@ -158,7 +158,7 @@ public:
 	{
 		if(demSystem_)
 		{
-			return demSystem_->parDiameter();
+			return demSystem_->diameter();
 		}else
 		{
 			return span<real>();
@@ -170,7 +170,7 @@ public:
 	{
 		if(demSystem_)
 		{
-			return demSystem_->numParInDomain();
+			return demSystem_->numParInDomains();
 		}
 		else
 		{
@@ -268,4 +268,4 @@ public:
 
 
 
-#endif //__procDEMSystem_hpp__
+#endif //__procDEMSystemPlus_hpp__

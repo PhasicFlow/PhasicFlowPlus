@@ -18,13 +18,13 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-#ifndef __mpiTypes_H__
-#define __mpiTypes_H__
+#ifndef __mpiTypesPlus_H__
+#define __mpiTypesPlus_H__
 
 
 #include <mpi.h>
 
-namespace pFlow::MPI
+namespace pFlow::Plus
 {
 	// types
 	using Comm 			= MPI_Comm;
@@ -73,13 +73,6 @@ namespace pFlow::MPI
 	
 }
 
-#else // ndef pFlow_MPI_Parallel
-
-namespace pFlow::MPI
-{
-	
-}
 
 
-
-#endif //__mpiTypes_H__
+#endif //__mpiTypesPlus_H__

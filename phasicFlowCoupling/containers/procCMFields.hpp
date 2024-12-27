@@ -22,13 +22,13 @@ Licence:
 #include "procCMField.hpp"
 #include "types.hpp"
 
-namespace pFlow::MPI
+namespace pFlow::Plus
 {
 
-using realProcCMField = pFlow::MPI::procCMField<pFlow::real>;
+using realProcCMField = pFlow::Plus::procCMField<pFlow::real>;
 
-using int32ProcCMField = pFlow::MPI::procCMField<pFlow::int32>;
+using int32ProcCMField = pFlow::Plus::procCMField<pFlow::int32>;
 
-using realx3ProcCMField = pFlow::MPI::procCMField<pFlow::realx3>;
+using realx3ProcCMField = pFlow::Plus::procCMField<pFlow::realx3>;
 
 }

@@ -70,7 +70,7 @@ bool pFlow::coupling::statistical::cellNeighborsSearch()
 	// loop over all cells
 	// TODO: later this should be recursive calls 
 	//#pragma omp parallel for
-	for(size_t i=0; i<nCells; i++)
+	for(size_t i=0; i<20; i++)
 	{
 		const Foam::vector& ci = cellC[i];
 		const Foam::scalar  lCell = 0.5* Foam::pow(cellV[i], 0.33333);
@@ -89,6 +89,13 @@ bool pFlow::coupling::statistical::cellNeighborsSearch()
 			}
 		}
 		
+		Foam::Info<<"Size of "<< neighborList_[i].size()<<Foam::endl;
+		Foam::Info<<cMesh_.findSphere(i, b)<<Foam::endl<<Foam::endl;
+		for(auto j = 0; j <neighborList_[i].size(); j++)
+		{
+			Foam::Info<<neighborList_[i][j]<<Foam::endl;
+		}
+
 		Foam::label nghbrB = -1;
 		Foam::label nghbrFaceIndex = -1;
 		Foam::scalar minDistance = 1.0e15;
@@ -130,8 +137,8 @@ bool pFlow::coupling::statistical::cellNeighborsSearch()
 pFlow::coupling::statistical::statistical(
 	Foam::dictionary 		dict, 
 	couplingMesh& 			cMesh, 
-	MPI::centerMassField& 	centerMass, 
-	MPI::realProcCMField& 	parDiam)
+	Plus::centerMassField& 	centerMass, 
+	Plus::realProcCMField& 	parDiam)
 :
 	porosity(dict, cMesh, centerMass, parDiam),
 	neighborLength_(dict.lookup<Foam::scalar>("neighborLength")),

@@ -3,7 +3,7 @@
 
 
 #include "couplingMesh.hpp"
-#include "processor.hpp"
+#include "processorPlus.hpp"
 #include "streams.hpp"
 
 void pFlow::coupling::couplingMesh::calculateBox()const
@@ -20,7 +20,7 @@ void pFlow::coupling::couplingMesh::calculateBox()const
          static_cast<real>(upper[1]), 
          static_cast<real>(upper[2])});
 
-    Foam::Info<< blueText("Bounding box has been updated.")<<Foam::endl;
+    Foam::Info<< Blue_Text("Bounding box has been updated.")<<Foam::endl;
 
 }
 
@@ -53,7 +53,7 @@ void pFlow::coupling::couplingMesh::resetTree()const
         )
     );
 
-    Foam::Info<< blueText("Search tree has been reset.")<<Foam::endl;
+    Foam::Info<< Blue_Text("Search tree has been reset.")<<Foam::endl;
 }
 
 
@@ -92,7 +92,7 @@ pFlow::coupling::couplingMesh::couplingMesh
         fatalErrorInFunction<<
         "Wrong deompositionMode"<< decompositionMode_ <<
         " in dictionary "<< dict.name() <<endl;
-        MPI::processor::abort(0);
+        Plus::processor::abort(0);
         return;
     }
 
@@ -428,6 +428,23 @@ pFlow::coupling::couplingMesh::findCellTree
 
     return mesh_.findCell(pt, Foam::polyMesh::CELL_TETS);*/
 
+}
+
+Foam::labelList pFlow::coupling::couplingMesh::findSphere
+(
+    Foam::label cellId, 
+    Foam::scalar radius
+)
+{
+    const auto& targetCellCentre = mesh_.cellCentres()[cellId];
+
+     Foam::treeBoundBox searchBox
+    (
+        targetCellCentre - Foam::vector(radius, radius, radius),
+        targetCellCentre + Foam::vector(radius, radius, radius)
+    );
+    
+    return  cellTreeSearch_().findBox(searchBox);
 }
 
 /*Foam::label 

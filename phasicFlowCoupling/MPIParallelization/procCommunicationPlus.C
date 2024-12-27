@@ -18,45 +18,9 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-#include "centerMassField.hpp"
+#include "procCommunicationPlus.hpp"
 
 
-pFlow::Plus::centerMassField::centerMassField(size_t size, size_t capacity)
-:
-	Plus::eventSubscriber(),
-	std::vector<realx3>()
+pFlow::Plus::procCommunication::procCommunication()
 {
-	this->reserve(capacity);
-	this->resize(size);
-}
-
-bool pFlow::Plus::centerMassField::checkForNewSize(size_t newSize)
-{	
-
-		if(newSize == this->size()) return true;
-		
-		eventMessage msg;
-		if(newSize <= this->capacity() )
-		{
-			// enough space is avaiable
-			// only resize the container
-			msg.add(eventMessage::SIZE_CHANGED);
-			this->resize(newSize);
-		}
-		else if(newSize > this->capacity())
-		{
-			// resize to new size and let std::vector
-			// decides about capacity 
-			msg.add(eventMessage::SIZE_CHANGED);
-			msg.add(eventMessage::CAP_CHANGED);
-			this->resize(newSize);
-		}
-
-		if( !msg.isNull() )
-		{
-			return this->notify(msg);
-		}
-
-		return true;
-
 }

@@ -23,19 +23,19 @@ Licence:
 
 // from PhasicFlow
 #include "error.hpp"
-#include "processor.hpp"
+#include "processorPlus.hpp"
 #include "streams.hpp"
-#include "mpiCommunication.hpp"
+#include "mpiCommunicationPlus.hpp"
 
 
 static int numVarsInitialized__ = 0;
 
-pFlow::MPI::DataType pFlow::MPI::realx3Type__;
+pFlow::Plus::DataType pFlow::Plus::realx3Type__;
 
-pFlow::MPI::DataType pFlow::MPI::int32x3Type__;
+pFlow::Plus::DataType pFlow::Plus::int32x3Type__;
 
 
-void pFlow::MPI::processor::initMPI(int argc, char *argv[])
+void pFlow::Plus::processor::initMPI(int argc, char *argv[])
 {
 	if(!processor::isInitialized())
 	{
@@ -44,7 +44,7 @@ void pFlow::MPI::processor::initMPI(int argc, char *argv[])
 	}
 }
 
-void pFlow::MPI::processor::finalizeMPI()
+void pFlow::Plus::processor::finalizeMPI()
 {
 	if(isSelfInitialized_ && !isFinalized())
 	{
@@ -52,7 +52,7 @@ void pFlow::MPI::processor::finalizeMPI()
 	}
 }
 
-pFlow::MPI::processor::processor()
+pFlow::Plus::processor::processor()
 {
 	if(isParallel() && !isInitialized())
 	{
@@ -74,7 +74,7 @@ pFlow::MPI::processor::processor()
 	
 }
 
-pFlow::MPI::processor::~processor()
+pFlow::Plus::processor::~processor()
 {
 	/*if(numVarsInitialized__==1)
 	{
@@ -85,66 +85,66 @@ pFlow::MPI::processor::~processor()
 	numVarsInitialized__ --;*/
 }
 
-int pFlow::MPI::processor::myProcessorNo()
+int pFlow::Plus::processor::myProcessorNo()
 {
 	return Foam::UPstream::myProcNo();
 }
 
-int pFlow::MPI::processor::nProcessors()
+int pFlow::Plus::processor::nProcessors()
 {
 	return Foam::UPstream::nProcs();
 }
 
-int pFlow::MPI::processor::masterNo()
+int pFlow::Plus::processor::masterNo()
 {
 	return 0;
 }
 
-bool pFlow::MPI::processor::isParallel()
+bool pFlow::Plus::processor::isParallel()
 {
 	return Foam::UPstream::parRun();
 }
 
-bool pFlow::MPI::processor::isInitialized()
+bool pFlow::Plus::processor::isInitialized()
 {
 	int res;
 	MPI_Initialized(&res);
 	return res;
 }
 
-bool pFlow::MPI::processor::isFinalized()
+bool pFlow::Plus::processor::isFinalized()
 {
 	int res;
 	MPI_Finalized(&res);
 	return res;
 }
 
-bool pFlow::MPI::processor::isMaster()
+bool pFlow::Plus::processor::isMaster()
 {
 	return Foam::UPstream::master();
 }
 
-pFlow::MPI::Comm pFlow::MPI::processor::worldCommunicator()
+pFlow::Plus::Comm pFlow::Plus::processor::worldCommunicator()
 {
 	return CommWorld;
 }
 
-int pFlow::MPI::processor::commSize()
+int pFlow::Plus::processor::commSize()
 {
 	return Foam::UPstream::nProcs();
 }
 
-int pFlow::MPI::processor::commRank()
+int pFlow::Plus::processor::commRank()
 {
 	return Foam::UPstream::myProcNo();
 }
 
-void pFlow::MPI::processor::abort(int error)
+void pFlow::Plus::processor::abort(int error)
 {
 	MPI_Abort(processor::worldCommunicator(), error);	
 }
 
-bool pFlow::MPI::checkMPI(const char* funcName, int error, bool forceAbort, const char* fileName, int lineNumebr)
+bool pFlow::Plus::checkMPI(const char* funcName, int error, bool forceAbort, const char* fileName, int lineNumebr)
 {
 	if(error == MPI_SUCCESS) return true;
 	output<< "Error occured in function "<< funcName <<
@@ -154,7 +154,7 @@ bool pFlow::MPI::checkMPI(const char* funcName, int error, bool forceAbort, cons
 	return false;
 }
 
-int  pFlow::MPI::parReportAndExit(int errorCode)
+int  pFlow::Plus::parReportAndExit(int errorCode)
 {
 	errReport<<"\n>>> dFlow is exiting . . ." << endl;
 	processor::abort(errorCode);

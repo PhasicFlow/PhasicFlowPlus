@@ -18,12 +18,12 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-#ifndef __processor_H__
-#define __processor_H__ 
+#ifndef __processorPlus_H__
+#define __processorPlus_H__ 
 
-#include "mpiTypes.hpp"
+#include "mpiTypesPlus.hpp"
 
-namespace pFlow::MPI
+namespace pFlow::Plus
 {
 	bool checkMPI(
 		const char* funcName,
@@ -36,12 +36,14 @@ namespace pFlow::MPI
 }
 
 #define ExitParCode(errorCode)\
-	pFlow::MPI::parReportAndExit((errorCode))
+	pFlow::Plus::parReportAndExit((errorCode))
 
+#ifndef CheckMPI
 #define CheckMPI(caller, fAbort)\
-   pFlow::MPI::checkMPI(#caller, (caller), fAbort, __FILE__, __LINE__);
-
-namespace pFlow::MPI
+   pFlow::Plus::checkMPI(#caller, (caller), fAbort, __FILE__, __LINE__);
+#endif
+   
+namespace pFlow::Plus
 {
 
 

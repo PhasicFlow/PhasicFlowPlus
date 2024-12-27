@@ -28,9 +28,9 @@ Licence:
 #include "box.hpp"
 
 // from phasicFlow-coupling
-#include "scatteredCommunication.hpp"
+#include "scatteredCommunicationPlus.hpp"
 #include "procCMFields.hpp"
-#include "procDEMSystem.hpp"
+#include "procDEMSystemPlus.hpp"
 #include "couplingMesh.hpp"
 #include "porosity.hpp"
 #include "drag.hpp"
@@ -43,7 +43,7 @@ namespace pFlow::coupling
 class couplingSystem
 :
 	public Foam::IOdictionary,
-	public MPI::procCommunication
+	public Plus::procCommunication
 {
 protected:
 	
@@ -53,13 +53,13 @@ protected:
 
 	uniquePtr<drag> 			drag_ = nullptr;
 	
-	MPI::procVector<box> 		meshBoxes_;
+	Plus::procVector<box> 		meshBoxes_;
 
-	MPI::scatteredCommunication<real> 	realScatteredComm_;
+	Plus::scatteredCommunication<real> 	realScatteredComm_;
 
-	MPI::scatteredCommunication<realx3> realx3ScatteredComm_;
+	Plus::scatteredCommunication<realx3> realx3ScatteredComm_;
 
-	MPI::procDEMSystem 			procDEMSystem_;
+	Plus::procDEMSystem 			procDEMSystem_;
 
 	Timers 						couplingTimers_;
 
@@ -73,15 +73,15 @@ protected:
 
 	Timer 						sendDataTimer_;
 
-	MPI::centerMassField 		centerMass_;
+	Plus::centerMassField 		centerMass_;
 
-	MPI::realProcCMField		particleDiameter_;
+	Plus::realProcCMField		particleDiameter_;
 
-	MPI::realx3ProcCMField 		particleVelocity_;
+	Plus::realx3ProcCMField 		particleVelocity_;
 
-	MPI::realx3ProcCMField 		fluidForce_;
+	Plus::realx3ProcCMField 		fluidForce_;
 
-	MPI::realx3ProcCMField   	fluidTorque_;
+	Plus::realx3ProcCMField   	fluidTorque_;
 
 
 public:
@@ -127,7 +127,7 @@ public:
 
 	bool iterate(real upToTime, bool writeTime, const word& timeName)
 	{
-		Foam::Info<<blueText("Iterating DEM upto time ") << yellowText(upToTime)<<Foam::endl;
+		Foam::Info<<Blue_Text("Iterating DEM upto time ") << Yellow_Text(upToTime)<<Foam::endl;
 		return procDEMSystem_.iterate(upToTime, writeTime, timeName);
 	}
 

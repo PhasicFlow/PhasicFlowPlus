@@ -52,7 +52,7 @@ pFlow::coupling::couplingSystem::couplingSystem(
             IOobject::NO_WRITE
         )
     ),
-    MPI::procCommunication(),
+    Plus::procCommunication(),
 	couplingMesh_(subDict("particleMapping"), mesh),
 	procDEMSystem_(demSystemName, argc, argv),
 	couplingTimers_("coupling", procDEMSystem_.getTimers()),
@@ -75,7 +75,7 @@ pFlow::coupling::couplingSystem::couplingSystem(
 	if(! collectAllToAll(domain, meshBoxes_))
 	{
 		fatalErrorInFunction<<"could not corrlect meshBox into the master"<<endl;
-		MPI::processor::abort(0);
+		Plus::processor::abort(0);
 	}
 
 	// 
@@ -100,21 +100,21 @@ bool pFlow::coupling::couplingSystem::getDataFromDEM(real t, real fluidDt)
 {
 	// this updates data on host side
 
-	Foam::Info<<blueText("Obtaining data from DEM to master processor")<<Foam::endl;
+	Foam::Info<<Blue_Text("Obtaining data from DEM to master processor")<<Foam::endl;
 	getDataTimer_.start();
 	procDEMSystem_.getDataFromDEM();
 
 	if( couplingMesh_.checkForDomainUpdate(t, fluidDt) )
 	{
-		Foam::Info<<blueText("Sub-domains have been updated at time ")<< 
-		yellowText(t) <<Foam::endl;
+		Foam::Info<<Blue_Text("Sub-domains have been updated at time ")<< 
+		Yellow_Text(t) <<Foam::endl;
 
 		if(!procDEMSystem_.updateParticleDistribution(
 			couplingMesh_.domainExpansionRatio(), 
 			meshBoxes_))
 		{
 			fatalErrorInFunction;
-			MPI::processor::abort(0);
+			Plus::processor::abort(0);
 			return false;
 		}
 
@@ -125,7 +125,7 @@ bool pFlow::coupling::couplingSystem::getDataFromDEM(real t, real fluidDt)
 		{
 			fatalErrorInFunction<<
 			"failed to distribute particle numbers among processors"<<endl;
-			MPI::processor::abort(0);
+			Plus::processor::abort(0);
 			return false;
 		}
 		else
@@ -135,7 +135,7 @@ bool pFlow::coupling::couplingSystem::getDataFromDEM(real t, real fluidDt)
 				fatalErrorInFunction<<
 				"cannot change the size of containers to new size "<< 
 				thisNoPars<<endl;
-				MPI::processor::abort(0);
+				Plus::processor::abort(0);
 				return false;
 			}
 			
@@ -148,7 +148,7 @@ bool pFlow::coupling::couplingSystem::getDataFromDEM(real t, real fluidDt)
 		{
 			fatalErrorInFunction<<
 			"error in creating index block for real type"<<endl;
-			MPI::processor::abort(0);
+			Plus::processor::abort(0);
 			return false;
 		}
 
@@ -156,7 +156,7 @@ bool pFlow::coupling::couplingSystem::getDataFromDEM(real t, real fluidDt)
 		{
 			fatalErrorInFunction<<
 			"error in creating index block for realx3 type"<<endl;
-			MPI::processor::abort(0);
+			Plus::processor::abort(0);
 			return false;
 		}
 	}
@@ -184,12 +184,12 @@ void pFlow::coupling::couplingSystem::sendFluidForceToDEM()
 {
 	collectFluidForce();
 	
-	Foam::Info<<blueText("Sending fluid force from master processor to DEM")<<Foam::endl;
+	Foam::Info<<Blue_Text("Sending fluid force from master processor to DEM")<<Foam::endl;
 
 	if(!procDEMSystem_.sendFluidForceToDEM())
 	{
 		fatalErrorInFunction<< "could not perform sendFluidForceToDEM"<<endl;
-		MPI::processor::abort(0);	
+		Plus::processor::abort(0);	
 	}
 }
 
@@ -197,12 +197,12 @@ void pFlow::coupling::couplingSystem::sendFluidTorqueToDEM()
 {
 	collectFluidTorque();
 	
-	Foam::Info<<blueText("Sending fluid torque from master processor to DEM")<<Foam::endl;
+	Foam::Info<<Blue_Text("Sending fluid torque from master processor to DEM")<<Foam::endl;
 
 	if(!procDEMSystem_.sendFluidTorqueToDEM())
 	{
 		fatalErrorInFunction<< "could not perform sendFluidTorqueToDEM"<<endl;
-		MPI::processor::abort(0);	
+		Plus::processor::abort(0);	
 	}	
 }
 
@@ -237,7 +237,7 @@ bool pFlow::coupling::couplingSystem::collectFluidForce()
 {
 	// realx3 scatteredComm is used 
 	auto allForce = procDEMSystem_.particlesFluidForceAllMaster();
-	for(size_t i=0; i<allForce.size(); i++)
+	for(uint32 i=0; i<allForce.size(); i++)
 		allForce[i] = zero3;
 
 	auto thisForce = makeSpan(fluidForce_);
@@ -246,7 +246,7 @@ bool pFlow::coupling::couplingSystem::collectFluidForce()
 	{
 		fatalErrorInFunction<<
 		"Faild to perform collective sum over processors for fluid force"<<endl;
-		MPI::processor::abort(0);
+		Plus::processor::abort(0);
 	}
 
 	return true;
@@ -256,14 +256,14 @@ bool pFlow::coupling::couplingSystem::collectFluidTorque()
 {
 	// realx3 scatteredComm is used 
 	auto allTorque = procDEMSystem_.particlesFluidTorqueAllMaster();
-	for(size_t i=0; i<allTorque.size(); i++)
+	for(uint32 i=0; i<allTorque.size(); i++)
 		allTorque[i] = zero3;
 	auto thisTorque = makeSpan(fluidTorque_);
 	if(!realx3ScatteredComm_.collectSum(thisTorque, allTorque))
 	{
 		fatalErrorInFunction<<
 		"Faild to perform collective sum over processors for fluid torque"<<endl;
-		MPI::processor::abort(0);
+		Plus::processor::abort(0);
 	}
 
 	return true;	
@@ -279,7 +279,7 @@ bool pFlow::coupling::couplingSystem::distributeParticles()
 	{
 		fatalErrorInFunction<<
 		"cannot distribute particle diameters to processors"<<endl;
-		MPI::processor::abort(0);
+		Plus::processor::abort(0);
 		return false;
 	}
 
@@ -289,7 +289,7 @@ bool pFlow::coupling::couplingSystem::distributeParticles()
 	{
 		fatalErrorInFunction<<
 		"cannot distribute particle positions to processors"<<endl;
-		MPI::processor::abort(0);
+		Plus::processor::abort(0);
 		return false;
 	}
 
@@ -305,7 +305,7 @@ bool pFlow::coupling::couplingSystem::distributeVelocity()
 	{
 		fatalErrorInFunction<<
 		"cannot distribute particle velocity among processors"<<endl;
-		MPI::processor::abort(0);
+		Plus::processor::abort(0);
 		return false;
 	}
 

@@ -19,8 +19,8 @@ Licence:
 -----------------------------------------------------------------------------*/
 
 #include "porosity.hpp"
-#include "procVector.hpp"
-#include "procCommunication.hpp"
+#include "procVectorPlus.hpp"
+#include "procCommunicationPlus.hpp"
 #include "streams.hpp"
 #include "Timer.hpp"
 
@@ -44,8 +44,8 @@ void pFlow::coupling::porosity::mapCenters()
 pFlow::coupling::porosity::porosity(
 	Foam::dictionary		dict, 
 	couplingMesh& 			cMesh, 
-	MPI::centerMassField& 	centerMass, 
-	MPI::realProcCMField& 	parDiam)
+	Plus::centerMassField& 	centerMass, 
+	Plus::realProcCMField& 	parDiam)
 :
 	Foam::volScalarField
 	(
@@ -89,16 +89,16 @@ void pFlow::coupling::porosity::calculatePorosity()
 
 void pFlow::coupling::porosity::reportNumInMesh()
 {
-	MPI::procCommunication comm;
+	Plus::procCommunication comm;
 	if( auto [numInMeshAll, success] = comm.collectAllToMaster(numInMesh()); success)
 	{
-		if(MPI::processor::isMaster())
+		if(Plus::processor::isMaster())
 		{
 			int32 s=0;
 			for(auto v:numInMeshAll) s += v;
 
-			output<<blueText("Particles located in processor meshes:") << yellowText(numInMeshAll)<<
-			" => "<< yellowText(s)<< endl;
+			output<<Blue_Text("Particles located in processor meshes:") << Yellow_Text(numInMeshAll)<<
+			" => "<< Yellow_Text(s)<< endl;
 		}
 	}
 }
@@ -108,8 +108,8 @@ pFlow::coupling::porosity::create
 (
 	Foam::dictionary		dict, 
 	couplingMesh& 			cMesh, 
-	MPI::centerMassField& 	centerMass, 
-	MPI::realProcCMField& 	parDiam
+	Plus::centerMassField& 	centerMass, 
+	Plus::realProcCMField& 	parDiam
 )
 {
 	auto method = dict.lookup<Foam::word>("method");
@@ -119,7 +119,7 @@ pFlow::coupling::porosity::create
 	}
 	else
 	{
-		if(MPI::processor::isMaster())
+		if(Plus::processor::isMaster())
 		{
 			printKeys
 			( 
@@ -130,7 +130,7 @@ pFlow::coupling::porosity::create
 				dictionaryvCtorSelector_
 			)<<endl;
 		}
-		MPI::processor::abort(0);
+		Plus::processor::abort(0);
 	}
 
 	return nullptr;

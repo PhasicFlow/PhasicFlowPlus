@@ -18,45 +18,39 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-#include "centerMassField.hpp"
+#include "eventObserverPlus.hpp"
+#include "eventSubscriberPlus.hpp" 
 
+pFlow::Plus::eventObserver::eventObserver():
+	subscriber_(nullptr),
+	subscribed_(false)
+{}
 
-pFlow::Plus::centerMassField::centerMassField(size_t size, size_t capacity)
+pFlow::Plus::eventObserver::eventObserver
+(
+	const eventSubscriber& subscriber,
+	bool subscribe
+)
 :
-	Plus::eventSubscriber(),
-	std::vector<realx3>()
+	subscriber_(&subscriber),
+	subscribed_(false)
 {
-	this->reserve(capacity);
-	this->resize(size);
+	if(subscribe && subscriber_)
+	{
+		subscribed_ = subscriber_->subscribe(this);
+	}
 }
 
-bool pFlow::Plus::centerMassField::checkForNewSize(size_t newSize)
-{	
-
-		if(newSize == this->size()) return true;
-		
-		eventMessage msg;
-		if(newSize <= this->capacity() )
-		{
-			// enough space is avaiable
-			// only resize the container
-			msg.add(eventMessage::SIZE_CHANGED);
-			this->resize(newSize);
-		}
-		else if(newSize > this->capacity())
-		{
-			// resize to new size and let std::vector
-			// decides about capacity 
-			msg.add(eventMessage::SIZE_CHANGED);
-			msg.add(eventMessage::CAP_CHANGED);
-			this->resize(newSize);
-		}
-
-		if( !msg.isNull() )
-		{
-			return this->notify(msg);
-		}
-
-		return true;
-
+pFlow::Plus::eventObserver::~eventObserver()
+{
+	if(subscribed_ && subscriber_)
+		subscriber_->unsubscribe(this);
 }
+
+bool pFlow::Plus::eventObserver::subscribe(const eventSubscriber& subscriber)
+{
+	subscriber_ = &subscriber;
+	subscribed_ = subscriber_->subscribe(this);
+	return subscribed_;
+}
+

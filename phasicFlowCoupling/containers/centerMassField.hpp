@@ -23,16 +23,16 @@ Licence:
 
 #include "phasicFlowOverloads.hpp"
 
-#include "eventSubscriber.hpp"
+#include "eventSubscriberPlus.hpp"
 #include "span.hpp"
 #include "types.hpp"
 
-namespace pFlow::MPI
+namespace pFlow::Plus
 {
 
 class centerMassField
 :
-	public eventSubscriber,
+	public Plus::eventSubscriber,
 	public std::vector<realx3>
 {
 protected:

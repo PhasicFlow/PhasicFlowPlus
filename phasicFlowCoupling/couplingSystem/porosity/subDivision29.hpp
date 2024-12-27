@@ -54,8 +54,8 @@ public:
 	subDivision29(
 		Foam::dictionary 		dict, 
 		couplingMesh& 			cMesh, 
-		MPI::centerMassField& 	centerMass, 
-		MPI::realProcCMField& 	parDiam);
+		Plus::centerMassField& 	centerMass, 
+		Plus::realProcCMField& 	parDiam);
 
 	/// Destructor
 	virtual ~subDivision29() = default;

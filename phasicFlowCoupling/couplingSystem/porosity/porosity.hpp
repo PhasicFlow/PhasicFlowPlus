@@ -54,13 +54,13 @@ protected:
 	couplingMesh& 					cMesh_;
 
 	/// Reference to center mass position of particles in this processor
-	MPI::centerMassField& 			centerMass_;
+	Plus::centerMassField& 			centerMass_;
 
 	/// Reference to diameter of particles in this processor 
-	MPI::realProcCMField&  			particleDiameter_;	
+	Plus::realProcCMField&  			particleDiameter_;	
 
 	/// cell indices of particles in this processor 
-	MPI::procCMField<Foam::label> 	parCellIndex_;
+	Plus::procCMField<Foam::label> 	parCellIndex_;
 
 	int32 										numInMesh_ = 0;
 
@@ -77,8 +77,8 @@ public:
 		porosity(
 			Foam::dictionary 		dict, 
 			couplingMesh& 			cMesh, 
-			MPI::centerMassField& 	centerMass, 
-			MPI::realProcCMField& 	parDiam);
+			Plus::centerMassField& 	centerMass, 
+			Plus::realProcCMField& 	parDiam);
 
 		/// No copy
 		porosity(const porosity&) = delete;
@@ -103,8 +103,8 @@ public:
 			(
 				Foam::dictionary		dict, 
 				couplingMesh& 			cMesh, 
-				MPI::centerMassField& 	centerMass, 
-				MPI::realProcCMField& 	parDiam
+				Plus::centerMassField& 	centerMass, 
+				Plus::realProcCMField& 	parDiam
 			),
 			(dict, cMesh, centerMass, parDiam)
 		);
@@ -170,8 +170,8 @@ public:
 	uniquePtr<porosity> create(
 		Foam::dictionary		dict, 
 		couplingMesh& 			cMesh, 
-		MPI::centerMassField& 	centerMass, 
-		MPI::realProcCMField& 	parDiam);
+		Plus::centerMassField& 	centerMass, 
+		Plus::realProcCMField& 	parDiam);
 	
 
 }; 

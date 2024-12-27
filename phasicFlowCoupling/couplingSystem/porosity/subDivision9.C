@@ -34,8 +34,8 @@ const pFlow::real cos_45[] = {0.7071067811865475, -0.7071067811865475, -0.707106
 pFlow::coupling::subDivision9::subDivision9(
 	Foam::dictionary 		dict, 
 	couplingMesh& 			cMesh, 
-	MPI::centerMassField& 	centerMass, 
-	MPI::realProcCMField& 	parDiam)
+	Plus::centerMassField& 	centerMass, 
+	Plus::realProcCMField& 	parDiam)
 :
 	porosity(dict, cMesh, centerMass, parDiam)
 {

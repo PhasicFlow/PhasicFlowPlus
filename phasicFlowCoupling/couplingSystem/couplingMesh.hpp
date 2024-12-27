@@ -258,6 +258,10 @@ public:
 			}
 		}
 
+
+		Foam::labelList findSphere(Foam::label cellId, Foam::scalar radius);
+		
+
 };
 
 }
