@@ -82,8 +82,8 @@ public:
 	statistical(
 		Foam::dictionary 		dict, 
 		couplingMesh& 			cMesh, 
-		MPI::centerMassField& 	centerMass, 
-		MPI::realProcCMField& 	parDiam);
+		Plus::centerMassField& 	centerMass, 
+		Plus::realProcCMField& 	parDiam);
 
 	/// Destructor
 	~statistical() override = default ;

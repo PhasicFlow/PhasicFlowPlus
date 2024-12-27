@@ -18,15 +18,15 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-#ifndef __mpiCommunication_H__
-#define __mpiCommunication_H__
+#ifndef __mpiCommunicationPlus_H__
+#define __mpiCommunicationPlus_H__
 
 
-#include "mpiTypes.hpp"
+#include "mpiTypesPlus.hpp"
 #include "span.hpp"
 
 
-namespace pFlow::MPI
+namespace pFlow::Plus
 {
 
 extern DataType realx3Type__;
@@ -408,4 +408,4 @@ inline auto fileIWriteAtAll(File& fh, Offset off, const span<T>& data, Request* 
 }
 
 
-#endif  //__mpiCommunication_H__
+#endif  //__mpiCommunicationPlus_H__

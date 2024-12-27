@@ -22,7 +22,7 @@ Licence:
 #include "fvc.H"
 
 #include "drag.hpp"
-#include "processor.hpp"
+#include "processorPlus.hpp"
 
 void pFlow::coupling::drag::setSuSpToZero()
 {
@@ -98,9 +98,9 @@ pFlow::coupling::drag::pressureGradient(const Foam::volScalarField& rho)const
 
 
 void pFlow::coupling::drag::calculateDragForce(
-	const MPI::realx3ProcCMField& velocity,
-	const MPI::realProcCMField& diameter,
-	MPI::realx3ProcCMField& particleForce)
+	const Plus::realx3ProcCMField& velocity,
+	const Plus::realProcCMField& diameter,
+	Plus::realx3ProcCMField& particleForce)
 {
 
 	setSuSpToZero();
@@ -175,7 +175,7 @@ pFlow::uniquePtr<pFlow::coupling::drag>
 	}
 	else
 	{
-		if(MPI::processor::isMaster())
+		if(Plus::processor::isMaster())
 		{
 			printKeys
 			( 
@@ -186,7 +186,7 @@ pFlow::uniquePtr<pFlow::coupling::drag>
 				dictionaryvCtorSelector_
 			)<<endl;
 		}
-		MPI::processor::abort(0);
+		Plus::processor::abort(0);
 	}
 
 	return nullptr;

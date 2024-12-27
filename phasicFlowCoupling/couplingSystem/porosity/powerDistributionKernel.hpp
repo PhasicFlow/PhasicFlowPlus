@@ -59,8 +59,8 @@ public:
 	powerDistributionKernel(
 		Foam::dictionary 		dict, 
 		couplingMesh& 			cMesh, 
-		MPI::centerMassField& 	centerMass, 
-		MPI::realProcCMField& 	parDiam);
+		Plus::centerMassField& 	centerMass, 
+		Plus::realProcCMField& 	parDiam);
 
 	/// Destructor
 	virtual ~powerDistributionKernel() = default;

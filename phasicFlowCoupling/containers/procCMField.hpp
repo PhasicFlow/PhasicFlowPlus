@@ -24,19 +24,19 @@ Licence:
 #include <vector>
 
 
-#include "eventObserver.hpp"
+#include "eventObserverPlus.hpp"
 #include "span.hpp"
 #include "centerMassField.hpp"
 #include "iOstream.hpp"
 
 
-namespace pFlow::MPI
+namespace pFlow::Plus
 {
 
 template<typename T>
 class procCMField
 :
-	public eventObserver,
+	public Plus::eventObserver,
 	public std::vector<T>
 {
 protected:
@@ -62,7 +62,7 @@ protected:
 public:
 
 
-	TypeInfoTemplate("procCMField",T);
+	TypeInfoTemplate11("procCMField",T);
 
 	
 	procCMField(const centerMassField& cm, bool subscribe = true)

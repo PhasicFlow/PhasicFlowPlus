@@ -60,8 +60,8 @@ Foam::tmp<Foam::fvMatrix<Foam::scalar>> pFlow::coupling::diffusion::fvmDdt
 pFlow::coupling::diffusion::diffusion(
 	Foam::dictionary 		dict, 
 	couplingMesh& 			cMesh, 
-	MPI::centerMassField& 	centerMass, 
-	MPI::realProcCMField& 	parDiam)
+	Plus::centerMassField& 	centerMass, 
+	Plus::realProcCMField& 	parDiam)
 :
 	PIC(dict, cMesh, centerMass, parDiam),
 	nSteps_(Foam::max(1,dict.lookup<Foam::label>("nSteps"))),

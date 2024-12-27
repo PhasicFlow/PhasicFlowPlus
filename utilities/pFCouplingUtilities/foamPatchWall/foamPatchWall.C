@@ -106,7 +106,7 @@ pFlow::coupling::foamPatchWall::foamPatchWall(
 		addFaceTriangles(lfaces[fi], lPoints, triangles_);
 	}
 
-	REPORT(1)<<"Number of triagnles in patch "<< greenText(patch.name())<<
-	" is " << yellowText(triangles_.size())<<endl;
+	REPORT(1)<<"Number of triagnles in patch "<< Green_Text(patch.name())<<
+	" is " << Yellow_Text(triangles_.size())<<endl;
 	
 }

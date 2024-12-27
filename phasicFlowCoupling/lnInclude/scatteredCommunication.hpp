@@ -1,1 +1,0 @@
-../MPIParallelization/scatteredCommunication.hpp

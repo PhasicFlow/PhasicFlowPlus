@@ -27,8 +27,8 @@ Licence:
 pFlow::coupling::GaussianDistributionKernel::GaussianDistributionKernel(
 	Foam::dictionary 		dict, 
 	couplingMesh& 			cMesh, 
-	MPI::centerMassField& 	centerMass, 
-	MPI::realProcCMField& 	parDiam)
+	Plus::centerMassField& 	centerMass, 
+	Plus::realProcCMField& 	parDiam)
 :
 	statistical(dict, cMesh, centerMass, parDiam),
 	filterEmpty_(dict.lookupOrDefault<Foam::Switch>("filterEmpty", false))
@@ -104,9 +104,6 @@ bool pFlow::coupling::GaussianDistributionKernel::internalFieldUpdate()
 				
 				//Foam::Info<< targetCellId <<" "<< j<<Foam::endl;
 			}
-
-
-			
 		}
 		else
 		{

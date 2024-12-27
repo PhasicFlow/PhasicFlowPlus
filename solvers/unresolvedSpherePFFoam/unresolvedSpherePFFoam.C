@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
     #include "initContinuityErrs.H"
     #include "createDyMControls.H"
 
-    pFlow::MPI::processor::initMPI(argc, argv);
+    pFlow::Plus::processor::initMPI(argc, argv);
 
     #include "createFields.H"
 
@@ -167,7 +167,7 @@ int main(int argc, char *argv[])
 
     Info<< "End\n" << endl;
 
-    pFlow::MPI::processor::finalizeMPI();
+    pFlow::Plus::processor::finalizeMPI();
 
     return 0;
 }

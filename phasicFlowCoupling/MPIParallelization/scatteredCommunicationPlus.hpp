@@ -18,17 +18,17 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-#ifndef __scatteredCommunication_hpp__ 
-#define __scatteredCommunication_hpp__
+#ifndef __scatteredCommunicationPlus_hpp__ 
+#define __scatteredCommunicationPlus_hpp__
 
 #include "span.hpp"
-#include "procCommunication.hpp"
-#include "mpiCommunication.hpp"
-#include "procVector.hpp"
+#include "procCommunicationPlus.hpp"
+#include "mpiCommunicationPlus.hpp"
+#include "procVectorPlus.hpp"
 #include "streams.hpp"
 #include "stdAlgorithms.hpp"
 
-namespace pFlow::MPI
+namespace pFlow::Plus
 {
 
 template<typename T>
@@ -268,13 +268,13 @@ public:
 template<typename T>
 void performSum(span<T>& dest, T* src, span<const int32>& map)
 {
-	for(size_t i=0; i<map.size(); i++)
+	for(uint32 i=0; i<map.size(); i++)
 	{
 		dest[map[i]] += src[i]; 
 	}
 }
 
 
-} //pFlow::MPI
+} //pFlow::Plus
 
 #endif //__scatteredCommunication_hpp__

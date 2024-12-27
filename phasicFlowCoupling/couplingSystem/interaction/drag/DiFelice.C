@@ -23,7 +23,6 @@ Licence:
 
 #include "DiFelice.hpp"
 #include "streams.hpp"
-#include "processor.hpp"
 
 
 pFlow::coupling::DiFelice::DiFelice(

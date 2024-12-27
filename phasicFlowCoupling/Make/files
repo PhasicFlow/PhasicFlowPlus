@@ -1,9 +1,12 @@
+containers/eventSubscriber/eventSubscriberPlus.C
+containers/eventSubscriber/eventObserverPlus.C
 containers/centerMassField.C
 containers/procCMFields.C
 
-MPIParallelization/processor.C
-MPIParallelization/procCommunication.C
-MPIParallelization/procDEMSystem.C
+
+MPIParallelization/processorPlus.C
+MPIParallelization/procCommunicationPlus.C
+MPIParallelization/procDEMSystemPlus.C
 
 couplingSystem/couplingSystem.C
 couplingSystem/couplingMesh.C

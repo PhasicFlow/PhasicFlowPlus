@@ -111,9 +111,9 @@ public:
 
 	
 	void calculateDragForce(
-		const MPI::realx3ProcCMField& velocity,
-		const MPI::realProcCMField& diameter,
-		MPI::realx3ProcCMField& particleForce);
+		const Plus::realx3ProcCMField& velocity,
+		const Plus::realProcCMField& diameter,
+		Plus::realx3ProcCMField& particleForce);
 
 
 

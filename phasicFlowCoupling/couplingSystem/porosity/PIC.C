@@ -28,8 +28,8 @@ Licence:
 pFlow::coupling::PIC::PIC(
 	Foam::dictionary 		dict, 
 	couplingMesh& 			cMesh, 
-	MPI::centerMassField& 	centerMass, 
-	MPI::realProcCMField& 	parDiam)
+	Plus::centerMassField& 	centerMass, 
+	Plus::realProcCMField& 	parDiam)
 :
 	porosity(dict, cMesh, centerMass, parDiam)
 {

@@ -1,5 +1,5 @@
-#ifndef __procVector_hpp__ 
-#define __procVector_hpp__
+#ifndef __procVectorPlus_hpp__ 
+#define __procVectorPlus_hpp__
 
 // from std
 
@@ -8,12 +8,12 @@
 #include "phasicFlowOverloads.hpp"
 #include "iIstream.hpp"
 #include "iOstream.hpp"
-#include "processor.hpp"
+#include "processorPlus.hpp"
 #include "span.hpp"
 
 
 
-namespace pFlow::MPI
+namespace pFlow::Plus
 {
 
 template<typename T>
@@ -47,22 +47,22 @@ public:
 	procVector(bool onlyMaster = false)
 	:
 	VectorType(),
-	rank_(pFlow::MPI::processor::myProcessorNo())
+	rank_(pFlow::Plus::processor::myProcessorNo())
 	{
-		if( onlyMaster && !pFlow::MPI::processor::isMaster() ) return;
+		if( onlyMaster && !pFlow::Plus::processor::isMaster() ) return;
 
-		this->reserve(pFlow::MPI::processor::nProcessors());
-		this->resize(pFlow::MPI::processor::nProcessors());
+		this->reserve(pFlow::Plus::processor::nProcessors());
+		this->resize(pFlow::Plus::processor::nProcessors());
 	}
 
 	procVector(const T& val, bool onlyMaster=false)
 	:
-	rank_(pFlow::MPI::processor::myProcessorNo())
+	rank_(pFlow::Plus::processor::myProcessorNo())
 	{
-		if( onlyMaster && !pFlow::MPI::processor::isMaster() ) return;
+		if( onlyMaster && !pFlow::Plus::processor::isMaster() ) return;
 
-		this->reserve(pFlow::MPI::processor::nProcessors());
-		this->assign(pFlow::MPI::processor::nProcessors(),val);
+		this->reserve(pFlow::Plus::processor::nProcessors());
+		this->assign(pFlow::Plus::processor::nProcessors(),val);
 	}
 
 	procVector(const procVector&) = default;
@@ -76,9 +76,9 @@ public:
 	procVector(const VectorType& src)
 	:
 		VectorType(src),
-		rank_(pFlow::MPI::processor::myProcessorNo())
+		rank_(pFlow::Plus::processor::myProcessorNo())
 	{
-		if(src.size()!= pFlow::MPI::processor::nProcessors())
+		if(src.size()!= pFlow::Plus::processor::nProcessors())
 		{
 			fatalErrorInFunction<<
 			"Size of std::vector and procVector does not match in copy"<<endl;
@@ -116,10 +116,10 @@ public:
 	procVector(VectorType&& src)
 	:
 		VectorType(std::move(src)),
-		rank_(pFlow::MPI::processor::myProcessorNo())
+		rank_(pFlow::Plus::processor::myProcessorNo())
 	{
 		if(this->size()!= 
-			static_cast<size_t>(pFlow::MPI::processor::nProcessors()))
+			static_cast<size_t>(pFlow::Plus::processor::nProcessors()))
 		{
 			fatalErrorInFunction<<
 			"Size of std::vector and procVector does not match in move"<<endl;
@@ -151,12 +151,12 @@ public:
 
 	auto worldCommunicator()const
 	{
-		return pFlow::MPI::processor::worldCommunicator();
+		return pFlow::Plus::processor::worldCommunicator();
 	}
 
 	auto worldCommunicator()
 	{
-		return pFlow::MPI::processor::worldCommunicator();
+		return pFlow::Plus::processor::worldCommunicator();
 	}
 
 	bool write(iOstream& os)const

@@ -17,14 +17,14 @@ Licence:
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 -----------------------------------------------------------------------------*/
-#ifndef __procCommunication_hpp__
-#define __procCommunication_hpp__
+#ifndef __procCommunicationPlus_hpp__
+#define __procCommunicationPlus_hpp__
 
-#include "processor.hpp"
-#include "procVector.hpp"
-#include "mpiCommunication.hpp"
+#include "processorPlus.hpp"
+#include "procVectorPlus.hpp"
+#include "mpiCommunicationPlus.hpp"
 
-namespace pFlow::MPI
+namespace pFlow::Plus
 {
 
 
@@ -132,6 +132,6 @@ public:
 
 }; //procCommunication
 
-} // pFlow::MPI
+} // pFlow::Plus
 
-#endif //__procCommunication_hpp__
+#endif //__procCommunicationPlus_hpp__

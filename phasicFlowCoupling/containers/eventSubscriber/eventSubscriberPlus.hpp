@@ -18,46 +18,51 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-#include "procDEMSystem.hpp"
-#include "procVector.hpp"
-#include "procCommunication.hpp"
 
-pFlow::MPI::procDEMSystem::procDEMSystem
-(
-	word demSystemName,
-	int argc, 
-	char* argv[]
-)
+#ifndef __eventSubscriberPlus_hpp__
+#define __eventSubscriberPlus_hpp__
+
+#include "List.hpp"
+#include "eventObserverPlus.hpp"
+#include "eventMessagePlus.hpp"
+
+namespace pFlow
 {
-	if(MPI::processor::isMaster())
-	{	
-		demSystem_ = DEMSystem::create(
-			demSystemName, 
-			procVector<box>(
-				box
-				(
-					realx3(0), 
-					realx3(1)
-				)), 
-			argc, 
-			argv);	
-	}
 
-	procCommunication proc;
-	
-	real startT;
-	if(demSystem_)
-	{
-		startT = demSystem_->Control().time().startTime();
-	}
-	else
-	{
-		startT = 0;
-	}
+namespace Plus
+{
 
-	if(!proc.distributeMasterToAll(startT, startTime_))
-	{
-		fatalErrorInFunction<< "could not get start time"<<endl;
-		proc.abort(0);
-	}
-}
+
+class eventSubscriber
+{
+protected:
+
+	// - list of subsribed objectd that recieve updage messages 
+	mutable List<eventObserver*> observerList_;
+
+public:
+
+	eventSubscriber()
+	{}
+
+	virtual ~eventSubscriber();
+
+	virtual bool subscribe(eventObserver* observer)const;
+
+	virtual bool unsubscribe(eventObserver* observer)const;
+
+	bool notify(const eventMessage& msg);
+
+	bool notify(const eventMessage& msg, const List<eventObserver*>& exclutionList );
+
+
+
+};
+
+} // plus
+
+} // pFlow
+
+
+
+#endif // __eventSubscriber_hpp__

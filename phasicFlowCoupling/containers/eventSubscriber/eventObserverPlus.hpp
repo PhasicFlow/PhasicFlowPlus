@@ -18,9 +18,48 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-#include "procCommunication.hpp"
 
+#ifndef __eventObserverPlus_hpp__
+#define __eventObserverPlus_hpp__
 
-pFlow::MPI::procCommunication::procCommunication()
+#include "eventMessagePlus.hpp"
+
+namespace pFlow::Plus
 {
-}
+
+class eventSubscriber;
+
+
+class eventObserver
+{
+protected:
+	
+	const eventSubscriber* subscriber_ = nullptr;
+	
+	// if this object is linked to subscriber 
+	bool subscribed_ = false;
+
+public:
+
+	eventObserver();
+
+	eventObserver(const eventSubscriber& subscriber, bool subscribe = true );
+
+	virtual ~eventObserver();
+
+	inline bool subscribed()const {return subscribed_;}
+
+	bool subscribe(const eventSubscriber& subscriber);
+	
+	inline void invalidateSubscriber()
+	{
+		subscribed_ = false;
+	}
+
+	virtual bool update(const eventMessage& msg)=0;
+};
+
+} // pFlow
+
+
+#endif // __eventObserver_hpp__

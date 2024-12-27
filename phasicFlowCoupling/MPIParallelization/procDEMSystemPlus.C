@@ -18,45 +18,46 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-#include "centerMassField.hpp"
+#include "procDEMSystemPlus.hpp"
+#include "procVectorPlus.hpp"
+#include "procCommunicationPlus.hpp"
 
-
-pFlow::Plus::centerMassField::centerMassField(size_t size, size_t capacity)
-:
-	Plus::eventSubscriber(),
-	std::vector<realx3>()
+pFlow::Plus::procDEMSystem::procDEMSystem
+(
+	word demSystemName,
+	int argc, 
+	char* argv[]
+)
 {
-	this->reserve(capacity);
-	this->resize(size);
-}
+	if(Plus::processor::isMaster())
+	{	
+		demSystem_ = DEMSystem::create(
+			demSystemName, 
+			procVector<box>(
+				box
+				(
+					realx3(0), 
+					realx3(1)
+				)), 
+			argc, 
+			argv);	
+	}
 
-bool pFlow::Plus::centerMassField::checkForNewSize(size_t newSize)
-{	
+	procCommunication proc;
+	
+	real startT;
+	if(demSystem_)
+	{
+		startT = demSystem_->Control().time().startTime();
+	}
+	else
+	{
+		startT = 0;
+	}
 
-		if(newSize == this->size()) return true;
-		
-		eventMessage msg;
-		if(newSize <= this->capacity() )
-		{
-			// enough space is avaiable
-			// only resize the container
-			msg.add(eventMessage::SIZE_CHANGED);
-			this->resize(newSize);
-		}
-		else if(newSize > this->capacity())
-		{
-			// resize to new size and let std::vector
-			// decides about capacity 
-			msg.add(eventMessage::SIZE_CHANGED);
-			msg.add(eventMessage::CAP_CHANGED);
-			this->resize(newSize);
-		}
-
-		if( !msg.isNull() )
-		{
-			return this->notify(msg);
-		}
-
-		return true;
-
+	if(!proc.distributeMasterToAll(startT, startTime_))
+	{
+		fatalErrorInFunction<< "could not get start time"<<endl;
+		proc.abort(0);
+	}
 }

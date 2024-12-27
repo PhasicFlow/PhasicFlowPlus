@@ -22,8 +22,8 @@ Licence:
 #include "types.hpp"
 
 
-template class pFlow::MPI::procCMField<pFlow::int32>;
+template class pFlow::Plus::procCMField<pFlow::int32>;
 
-template class pFlow::MPI::procCMField<pFlow::real>;
+template class pFlow::Plus::procCMField<pFlow::real>;
 
-template class pFlow::MPI::procCMField<pFlow::realx3>;
+template class pFlow::Plus::procCMField<pFlow::realx3>;

@@ -23,7 +23,6 @@ Licence:
 
 #include "Rong.hpp"
 #include "streams.hpp"
-#include "processor.hpp"
 
 
 pFlow::coupling::Rong::Rong(
