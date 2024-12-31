@@ -23,17 +23,17 @@ setFields
 // positions particles 
 positionParticles
 {
-	method positionRandom; // positionRandom; 
-
-	positionRandomInfo
+	method random; // positionRandom; 
+	
+	randomInfo
 	{
-		numPoints   105000;
-		diameter 0.0016;
+		numPoints   2000;
+		diameter 0.005;
 		maxIterations 50;
 		axisOrder (z x y);
 	}
-
-	box
+	regionType box;
+	boxInfo
 	{
 		min (0.001 0.001 0.001);
 		max (0.14 0.35  0.039);
