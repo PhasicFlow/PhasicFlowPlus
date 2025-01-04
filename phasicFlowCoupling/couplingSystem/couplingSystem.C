@@ -219,7 +219,7 @@ void pFlow::coupling::couplingSystem::calculateFluidInteraction()
 	}
 	interactionTimer_.end();
 
-	output<<">>> Inteeraction time  "<<interactionTimer_.lastTime()<<endl;
+	Foam::Info<<Blue_Text("Interaction time: ")<<interactionTimer_.lastTime()<<" s\n";
 	
 }
 
@@ -237,6 +237,7 @@ bool pFlow::coupling::couplingSystem::collectFluidForce()
 {
 	// realx3 scatteredComm is used 
 	auto allForce = procDEMSystem_.particlesFluidForceAllMaster();
+	
 	for(uint32 i=0; i<allForce.size(); i++)
 		allForce[i] = zero3;
 
