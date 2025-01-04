@@ -9,8 +9,12 @@ fileFormat 	ASCII;
 /* ------------------------------------------------------------------------- */
 
 // motion model: all surfaces are fixed
-motionModel fixedWall;
+motionModel stationary;
  
+stationaryInfo
+	{
+	}
+
 
 surfaces
 {
@@ -23,7 +27,8 @@ surfaces
 		material wallMat;   // material name of this wall
 		motion 	 none;	// motion component name 
 	}
-
+	
+	
 	
 		
 }
