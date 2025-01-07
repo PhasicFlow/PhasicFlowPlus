@@ -21,85 +21,24 @@ Licence:
 #include "volFields.H"
 #include "fvc.H"
 
-#include "drag.hpp"
+#include "grainDrag.hpp"
 #include "processorPlus.hpp"
 
-void pFlow::coupling::drag::setSuSpToZero()
-{
-	// initialize all terms to zero
-	Su_ = Foam::dimensionedVector(
-    	Su_.name(),
-    	Su_.dimensions(),
-    	Foam::vector(0,0,0));
 
-	Sp_ = Foam::dimensionedScalar(
-		Sp_.name(), 
-		Sp_.dimensions(), 
-		0.0);
-}
-
-pFlow::coupling::drag::drag(
+pFlow::coupling::grainDrag::grainDrag(
 	Foam::dictionary 		dict, 
 	porosity& 				prsty)
 :
-	residualRe_(dict.lookup<real>("residualRe")),
-	porosity_(prsty),
-	p_(
-		porosity_.mesh().lookupObject<Foam::volScalarField>("p")
-	),
-	U_(
-		porosity_.mesh().lookupObject<Foam::volVectorField>("U")
-		),
-	Su_(
-	    Foam::IOobject
-	    (
-	        "Su",
-	        porosity_.mesh().time().timeName(),
-	        porosity_.mesh(),
-	        Foam::IOobject::READ_IF_PRESENT,
-	        Foam::IOobject::AUTO_WRITE
-	    ),
-    	porosity_.mesh(),
-    	Foam::dimensionedVector(
-	    	"Su",
-	    	Foam::dimensionSet(1,-2,-2,0,0),
-	    	Foam::vector(0,0,0))
-		),
-    Sp_(
-    	Foam::IOobject
-	    (
-	        "Sp",
-	        porosity_.mesh().time().timeName(),
-	        porosity_.mesh(),
-	        Foam::IOobject::READ_IF_PRESENT,
-	        Foam::IOobject::AUTO_WRITE
-	    ),
-    	porosity_.mesh(),
-    	Foam::dimensionedScalar(
-    		"Sp", 
-    		Foam::dimensionSet(1,-3,-1,0,0), 
-    		0.0)
-    	),
-    isCompressible_(
-    	p_.dimensions() == Foam::dimPressure
-    	)
+	drag(dict, prsty)
 {
 
 }
 
-Foam::tmp<Foam::volVectorField> 
-pFlow::coupling::drag::pressureGradient(const Foam::volScalarField& rho)const
-{
-	if(isCompressible_)
-		return Foam::fvc::grad(p_);
-	else
-		return Foam::fvc::grad(p_)*rho;
-}
 
-
-void pFlow::coupling::drag::calculateDragForce(
+void pFlow::coupling::grainDrag::calculateGrainDragForce(
 	const Plus::realx3ProcCMField& velocity,
 	const Plus::realProcCMField& diameter,
+	const Plus::realProcCMField& courseGrainFactor,
 	Plus::realx3ProcCMField& particleForce)
 {
 
@@ -131,6 +70,7 @@ void pFlow::coupling::drag::calculateDragForce(
 			auto Uf = U_[cell];
 			auto ef = porosity_[cell];
 			auto dp = diameter[i];
+			auto cgf = courseGrainFactor[i];
 
 			Foam::vector up = {velocity[i].x(), velocity[i].y(),velocity[i].z()};
 
@@ -139,7 +79,7 @@ void pFlow::coupling::drag::calculateDragForce(
 			Foam::vector ur = Uf-up;
 			Foam::scalar Re = Foam::max(ef * rhoi * Foam::mag(ur) * dp /mui, residualRe_);
 
-			Foam::scalar sp = 3 * Foam::constant::mathematical::pi * mui * ef * dp * dimlessDrag(Re, ef);
+			Foam::scalar sp = 3 * Foam::constant::mathematical::pi * mui * ef * dp * dimlessGrainDrag(Re, ef, cgf);
 			
 			Foam::vector pf = static_cast<real>(sp)*ur - vp*pGradRef[cell];
 			
@@ -163,8 +103,8 @@ void pFlow::coupling::drag::calculateDragForce(
 
 }
 
-pFlow::uniquePtr<pFlow::coupling::drag> 
-pFlow::coupling::drag::create(
+pFlow::uniquePtr<pFlow::coupling::grainDrag> 
+pFlow::coupling::grainDrag::create(
 	Foam::dictionary 		dict, 
 	porosity& 				prsty)
 {
@@ -180,7 +120,7 @@ pFlow::coupling::drag::create(
 			printKeys
 			( 
 				fatalErrorInFunction << "Ctor Selector "<< type << " dose not exist"
-				" for drag method in "<< dict.name()
+				" for grain drag method in "<< dict.name()
 				<<"\nAvaiable ones are: \n"
 				,
 				dictionaryvCtorSelector_

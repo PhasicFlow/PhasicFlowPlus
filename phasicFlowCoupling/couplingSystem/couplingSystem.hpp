@@ -32,8 +32,6 @@ Licence:
 #include "procCMFields.hpp"
 #include "procDEMSystemPlus.hpp"
 #include "couplingMesh.hpp"
-#include "porosity.hpp"
-#include "drag.hpp"
 #include "Timers.hpp"
 
 namespace pFlow::coupling
@@ -45,21 +43,17 @@ class couplingSystem
 	public Foam::IOdictionary,
 	public Plus::procCommunication
 {
-protected:
+private:
 	
 	couplingMesh 				couplingMesh_;
 
-	uniquePtr<porosity>			porosity_ = nullptr;
-
-	uniquePtr<drag> 			drag_ = nullptr;
-	
 	Plus::procVector<box> 		meshBoxes_;
 
-	Plus::scatteredCommunication<real> 	realScatteredComm_;
+	Plus::scatteredCommunication<real> 		realScatteredComm_;
 
-	Plus::scatteredCommunication<realx3> realx3ScatteredComm_;
+	Plus::scatteredCommunication<realx3> 	realx3ScatteredComm_;
 
-	Plus::procDEMSystem 			procDEMSystem_;
+	Plus::procDEMSystem 		procDEMSystem_;
 
 	Timers 						couplingTimers_;
 
@@ -67,22 +61,74 @@ protected:
 
 	Timer 						getDataTimer_;
 
-	Timer 						porosityTimer_;
-
-	Timer 						interactionTimer_;
-
 	Timer 						sendDataTimer_;
 
 	Plus::centerMassField 		centerMass_;
 
 	Plus::realProcCMField		particleDiameter_;
 
-	Plus::realx3ProcCMField 		particleVelocity_;
+	Plus::realx3ProcCMField 	particleVelocity_;
 
-	Plus::realx3ProcCMField 		fluidForce_;
+	Plus::realx3ProcCMField 	particleRVelocity_;
+
+	Plus::realx3ProcCMField 	fluidForce_;
 
 	Plus::realx3ProcCMField   	fluidTorque_;
 
+	bool collectFluidForce();
+
+	bool collectFluidTorque();
+
+	bool distributeParticles();
+
+	
+
+protected:
+
+	virtual
+	bool distributeParticleFields();
+
+	inline
+	auto& realx3MappedComm() 
+	{
+		return realx3ScatteredComm_;
+	}
+
+	inline 
+	auto& realMappedComm()
+	{
+		return realScatteredComm_;
+	}
+
+	inline
+	Plus::procDEMSystem& pDEMSystem()
+	{
+		return procDEMSystem_;
+	}
+
+	inline
+	Timer& getDataTimer()
+	{
+		return getDataTimer_;
+	}
+
+	inline 
+	Timer& sendDataTimer()
+	{
+		return sendDataTimer_;
+	}
+
+	inline 
+	Plus::realx3ProcCMField& fluidTorque()
+	{
+		return fluidTorque_;
+	}
+
+	inline
+	Plus::realx3ProcCMField& fluidForce()
+	{
+		return fluidForce_;
+	}
 
 public:
 
@@ -101,59 +147,46 @@ public:
 
 	couplingSystem& operator=(couplingSystem&&) = delete;
 
-	virtual ~couplingSystem() =default;
+	virtual 
+	~couplingSystem() = default;
 
 	bool updateMeshBoxes();
 
+	virtual
 	bool getDataFromDEM(real t, real dt);
 
-	bool sendDataToDEM();
+	virtual
+	bool sendDataToDEM(real t, real dt);
 
-	void calculatePorosity();
+	virtual
+	void calculateFluidInteraction() = 0;
 
-	void calculateFluidInteraction();
+	virtual
+	void calculatePorosity() = 0;
 
 	void sendFluidForceToDEM();
 
 	void sendFluidTorqueToDEM();
 
-	bool collectFluidForce();
+	
 
-	bool collectFluidTorque();
-
-	bool distributeParticles();
-
-	bool distributeVelocity();
-
-	bool iterate(real upToTime, bool writeTime, const word& timeName)
-	{
-		Foam::Info<<Blue_Text("Iterating DEM upto time ") << Yellow_Text(upToTime)<<Foam::endl;
-		return procDEMSystem_.iterate(upToTime, writeTime, timeName);
-	}
-
+	bool iterate(real upToTime, bool writeTime, const word& timeName);
+	
 	inline
 	auto& cMesh()
 	{
 		return couplingMesh_;
 	}
 
-	inline 
-	const Foam::volScalarField& alpha()const
-	{
-		return porosity_->alpha();
-	}
+	virtual 
+	const Foam::volScalarField& alpha()const = 0;
 
-	inline
-	const Foam::volScalarField& Sp ()const
-	{
-		return drag_->Sp();
-	}
-
-	inline
-	const Foam::volVectorField& Su ()const
-	{
-		return drag_->Su();
-	}
+	virtual
+	const Foam::volScalarField& Sp()const = 0;
+	
+	virtual
+	const Foam::volVectorField& Su()const = 0;
+	
 
 	inline 
 	auto numParticles()const
@@ -168,42 +201,40 @@ public:
 	}
 
 	inline
-	auto& centerMass()
+	Plus::centerMassField& centerMass()
 	{
 		return centerMass_;
 	}
 
 	inline
-	auto& particleVelocity()
+	Plus::realx3ProcCMField& particleVelocity()
+	{
+		return particleVelocity_;
+	}
+
+	inline
+	Plus::realx3ProcCMField& particleRVelocity()
 	{
 		return particleVelocity_;
 	}
 
 	inline 
-	auto& fluidTorque()
-	{
-		return fluidTorque_;
-	}
-
-	inline
-	auto& fluidForce()
-	{
-		return fluidForce_;
-	}
-
-	inline 
-	const auto& meshBoxes()const
+	const Plus::procVector<box>& meshBoxes()const
 	{
 		return meshBoxes_;
 	}
 
 	inline 
-	auto& cfdTimers()
+	Timers& cfdTimers()
 	{
 		return cfdTimers_;
 	}
 
-
+	inline
+	Timers& couplingTimers()
+	{
+		return couplingTimers_;
+	}
 
 }; 
 

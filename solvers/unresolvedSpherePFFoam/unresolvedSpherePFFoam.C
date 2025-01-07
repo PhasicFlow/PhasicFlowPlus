@@ -59,7 +59,7 @@ Description
 #include "fvcSmooth.H"
 
 // phasicFlow
-#include "couplingSystem.hpp" 
+#include "sphereCouplingSystem.hpp" 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -111,17 +111,19 @@ int main(int argc, char *argv[])
 
                 if(pimple.firstPimpleIter())
                 {
+                    auto t = runTime.time().value();
+                    auto dt = runTime.deltaT().value();
                     // DEM and coupling calculations should be done only once
                     // This is an explicit coupling, 
                     // fluid data from previous time step
                     // DEM data from previous time step 
-                    coupling.cMesh().update(runTime.time().value(), runTime.deltaT().value());
+                    coupling.cMesh().update(t, dt);
                     coupling.updateMeshBoxes();
-                    coupling.getDataFromDEM(runTime.time().value(), runTime.deltaT().value());
+                    coupling.getDataFromDEM(t, dt);
                     coupling.calculatePorosity();
                     coupling.calculateFluidInteraction();
-                    coupling.sendDataToDEM();
-                    coupling.iterate(runTime.time().value(), runTime.writeTime(), runTime.timeName());    
+                    coupling.sendDataToDEM(t, dt);
+                    coupling.iterate(t, runTime.writeTime(), runTime.timeName());    
                 }
                 
 

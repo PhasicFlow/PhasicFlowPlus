@@ -154,11 +154,23 @@ public:
 	}
 
 	inline
-	span<real> particledDiameterAllMaster()
+	span<real> particlesDiameterAllMaster()
 	{
 		if(demSystem_)
 		{
 			return demSystem_->diameter();
+		}else
+		{
+			return span<real>();
+		}		
+	}
+
+	inline
+	span<real> particlesCourseGrainFactorMasterAllMaster()
+	{
+		if(demSystem_)
+		{
+			return demSystem_->courseGrainFactor();
 		}else
 		{
 			return span<real>();
@@ -177,6 +189,7 @@ public:
 			return procVector<int32>(true);
 		}
 	}
+
 
 	inline
 	procVector<span<const int32>> parIndexInDomainsMaster()const

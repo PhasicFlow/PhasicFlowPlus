@@ -8,8 +8,10 @@ MPIParallelization/processorPlus.C
 MPIParallelization/procCommunicationPlus.C
 MPIParallelization/procDEMSystemPlus.C
 
-couplingSystem/couplingSystem.C
 couplingSystem/couplingMesh.C
+couplingSystem/couplingSystem.C
+couplingSystem/sphereCouplingSystem.C
+couplingSystem/grainCouplingSystem.C
 couplingSystem/porosity/porosity.C
 couplingSystem/porosity/PIC.C
 couplingSystem/porosity/subDivision9.C
@@ -19,10 +21,13 @@ couplingSystem/porosity/diffusion.C
 couplingSystem/porosity/statistical.C
 couplingSystem/porosity/powerDistributionKernel.C
 couplingSystem/porosity/GaussianDistributionKernel.C
+
 couplingSystem/interaction/drag/drag.C
 couplingSystem/interaction/drag/ErgunWenYu.C
 couplingSystem/interaction/drag/DiFelice.C
 couplingSystem/interaction/drag/Rong.C
 
+couplingSystem/interaction/grainDrag/grainDrag.C
+couplingSystem/interaction/grainDrag/DiFeliceGrain.C
 
 LIB = $(FOAM_USER_LIBBIN)/libphasicFlowCoupling

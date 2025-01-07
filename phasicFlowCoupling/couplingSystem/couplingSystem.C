@@ -58,19 +58,16 @@ pFlow::coupling::couplingSystem::couplingSystem(
 	couplingTimers_("coupling", procDEMSystem_.getTimers()),
 	cfdTimers_("CFD", procDEMSystem_.getTimers()),
 	getDataTimer_("get data from DEM", &couplingTimers_),
-	porosityTimer_("porosity", &couplingTimers_),
-	interactionTimer_("interaction", &couplingTimers_),
 	sendDataTimer_("send data to DEM", &couplingTimers_),
 	centerMass_(),
 	particleDiameter_("diameter",centerMass_),
 	particleVelocity_("velocity", centerMass_),
+	particleRVelocity_("rVelocity", centerMass_),
 	fluidForce_("fluidForce",centerMass_),
 	fluidTorque_("fluidTorque",centerMass_)
 {
 	
 	auto domain = couplingMesh_.meshBox();
-
-	output<< " domain " << domain <<endl;
 
 	if(! collectAllToAll(domain, meshBoxes_))
 	{
@@ -78,21 +75,7 @@ pFlow::coupling::couplingSystem::couplingSystem(
 		Plus::processor::abort(0);
 	}
 
-	// 
-	Foam::Info<<"\nCreating porosity model ...\n"<<Foam::endl;
-
-	porosity_ = porosity::create(
-		subDict("porosity"), 
-		couplingMesh_,
-		centerMass_,
-		particleDiameter_);
-
-	Foam::Info<<"\nCreating drag model ...\n"<<Foam::endl;
-
-	drag_ = drag::create(
-		subDict("drag"),
-		porosity_()
-		);
+	pFlow::mOutput<<"meshBoxes:\n"<<meshBoxes_<<pFlow::endl;
 
 }
 
@@ -165,13 +148,13 @@ bool pFlow::coupling::couplingSystem::getDataFromDEM(real t, real fluidDt)
 	distributeParticles();
 
 	// update velocity in each processor
-	distributeVelocity();
+	distributeParticleFields();
 
 	getDataTimer_.end();
 	return true;
 }
 
-bool pFlow::coupling::couplingSystem::sendDataToDEM()
+bool pFlow::coupling::couplingSystem::sendDataToDEM(real, real)
 {
 	sendDataTimer_.start();
 		sendFluidForceToDEM();
@@ -204,31 +187,6 @@ void pFlow::coupling::couplingSystem::sendFluidTorqueToDEM()
 		fatalErrorInFunction<< "could not perform sendFluidTorqueToDEM"<<endl;
 		Plus::processor::abort(0);	
 	}	
-}
-
-void pFlow::coupling::couplingSystem::calculateFluidInteraction()
-{
-
-	interactionTimer_.start();
-	if(drag_)
-	{
-		drag_->calculateDragForce(
-			particleVelocity_,
-			particleDiameter_,
-			fluidForce_);
-	}
-	interactionTimer_.end();
-
-	Foam::Info<<Blue_Text("Interaction time: ")<<interactionTimer_.lastTime()<<" s\n";
-	
-}
-
-void pFlow::coupling::couplingSystem::calculatePorosity()
-{
-	porosityTimer_.start();
-	porosity_->calculatePorosity();
-	porosity_->reportNumInMesh();
-	porosityTimer_.end();
 }
 
 
@@ -273,7 +231,7 @@ bool pFlow::coupling::couplingSystem::collectFluidTorque()
 bool pFlow::coupling::couplingSystem::distributeParticles()
 {
 
-	auto allDiam = procDEMSystem_.particledDiameterAllMaster();
+	auto allDiam = procDEMSystem_.particlesDiameterAllMaster();
 	auto thisDiam = makeSpan(particleDiameter_);
 
 	if(!realScatteredComm_.distribute(allDiam, thisDiam))
@@ -298,7 +256,7 @@ bool pFlow::coupling::couplingSystem::distributeParticles()
 
 }
 
-bool pFlow::coupling::couplingSystem::distributeVelocity()
+bool pFlow::coupling::couplingSystem::distributeParticleFields()
 {
 	auto allVel = procDEMSystem_.particlesVelocityAllMaster();
 	auto thisVel = makeSpan(particleVelocity_);
@@ -311,4 +269,10 @@ bool pFlow::coupling::couplingSystem::distributeVelocity()
 	}
 
 	return true;
+}
+
+bool pFlow::coupling::couplingSystem::iterate(real upToTime, bool writeTime, const word& timeName)
+{
+	Foam::Info<<Blue_Text("Iterating DEM upto time ") << Yellow_Text(upToTime)<<Foam::endl;
+	return procDEMSystem_.iterate(upToTime, writeTime, timeName);
 }

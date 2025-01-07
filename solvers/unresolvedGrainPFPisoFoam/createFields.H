@@ -29,7 +29,7 @@ volVectorField U
 
 // by default this is created on the master processor 
 Info<< "Creating sphere coupling system for unresolved solver \n" << endl;
-pFlow::coupling::couplingSystem coupling("grainDEMSystem", mesh, argc, argv);
+pFlow::coupling::grainCouplingSystem coupling("grainDEMSystem", mesh, argc, argv);
 
 Info<< "Reading/calculating face flux field phi\n" << endl;
 
