@@ -56,7 +56,7 @@ Description
 #include "fvConstraints.H"
 
 // phasicFlow
-#include "couplingSystem.hpp"
+#include "sphereCouplingSystem.hpp"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -82,17 +82,20 @@ int main(int argc, char *argv[])
 
     while (runTime.loop())
     {
+        auto t = runTime.time().value();
+        auto dt = runTime.deltaT().value();
+
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        coupling.cMesh().update(runTime.time().value(), runTime.deltaT().value());
+        coupling.cMesh().update(t, dt);
         
-        coupling.getDataFromDEM(runTime.time().value(), runTime.deltaT().value());
+        coupling.getDataFromDEM(t, dt);
         coupling.calculatePorosity();
         coupling.calculateFluidInteraction();
-        coupling.sendDataToDEM();
+        coupling.sendDataToDEM(t, dt);
 
         Info<<"Iterating DEM up to time "<< runTime.time().value()<<endl;
-        coupling.iterate(runTime.time().value(), runTime.writeTime(), runTime.timeName());
+        coupling.iterate(t, runTime.writeTime(), runTime.timeName());
 
         coupling.cfdTimers().start();
         #include "CourantNo.H"
