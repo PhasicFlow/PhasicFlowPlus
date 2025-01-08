@@ -69,17 +69,18 @@ void pFlow::coupling::grainDrag::calculateGrainDragForce(
 			auto mui = nu[cell]* rhoi;
 			auto Uf = U_[cell];
 			auto ef = porosity_[cell];
-			auto dp = diameter[i];
 			auto cgf = courseGrainFactor[i];
+			auto dp = diameter[i];
+			auto dps = dp/cgf; // dps = orginal particles diameter
 
 			Foam::vector up = {velocity[i].x(), velocity[i].y(),velocity[i].z()};
 
 			auto vp = Foam::constant::mathematical::pi/6 * Foam::pow(dp,3.0);
 			
 			Foam::vector ur = Uf-up;
-			Foam::scalar Re = Foam::max(ef * rhoi * Foam::mag(ur) * dp /mui, residualRe_);
+			Foam::scalar Res = Foam::max(ef * rhoi * Foam::mag(ur) * dps /mui, residualRe_) ;
 
-			Foam::scalar sp = 3 * Foam::constant::mathematical::pi * mui * ef * dp * dimlessGrainDrag(Re, ef, cgf);
+			Foam::scalar sp = 3*Foam::pow(cgf,3)*Foam::constant::mathematical::pi * mui * ef * dps * dimlessGrainDrag(Res, ef, cgf);
 			
 			Foam::vector pf = static_cast<real>(sp)*ur - vp*pGradRef[cell];
 			
