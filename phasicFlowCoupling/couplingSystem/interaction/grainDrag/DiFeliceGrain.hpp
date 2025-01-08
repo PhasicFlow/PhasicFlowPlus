@@ -31,17 +31,17 @@ class DiFeliceGrain
 {
 protected:
 
-	Foam::scalar dimlessGrainDrag(Foam::scalar Re, Foam::scalar ep, Foam::scalar cgf)override
+	Foam::scalar dimlessGrainDrag(Foam::scalar Res, Foam::scalar ep, Foam::scalar cgf)override
 	{
 
-		auto Rec = Foam::max(Re,residualRe_);
+		auto Rec = Foam::max(Res,residualRe_);
 		Foam::scalar xi = 3.7 - 0.65*Foam::exp(-0.5*Foam::pow(1.5-Foam::log10(Rec),2));
 		Foam::scalar Cd = Foam::pow(0.63+4.8/Foam::sqrt(Rec),2);
 
 		Foam::scalar n = 0.014 + 0.955261 * Foam::exp( -4.10239227 * Foam::pow(ep, 0.002469095687*Rec)/Foam::pow(Rec, 0.41379176));
 		n = Foam::max(Foam::min(n,1.0),0.0);
 
-		return Cd/24 * Re * Foam::pow(ep, -xi)*Foam::pow(cgf,2-n); 
+		return Cd/24 * Res * Foam::pow(ep, -xi); 
 		
 	}
 
