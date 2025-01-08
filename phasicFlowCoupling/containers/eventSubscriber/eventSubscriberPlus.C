@@ -20,7 +20,7 @@ Licence:
 
 
 #include "eventSubscriberPlus.hpp"
-#include "Set.hpp"
+#include <algorithm>
 
 pFlow::Plus::eventSubscriber::~eventSubscriber()
 {
@@ -53,7 +53,7 @@ bool pFlow::Plus::eventSubscriber::unsubscribe
 {
 	if(observer)
 	{
-		observerList_.remove(observer);
+		std::remove(observerList_.begin(), observerList_.end(), observer);
 	}
 	return true;
 }
@@ -72,13 +72,13 @@ bool pFlow::Plus::eventSubscriber::notify
 	return true;
 }
 
-bool pFlow::Plus::eventSubscriber::notify
+/*bool pFlow::Plus::eventSubscriber::notify
 (
 	const eventMessage& msg,
 	const List<eventObserver*>& exclutionList
 )
 {
-	Set<eventObserver*> sortedExcList(exclutionList.begin(),exclutionList.end());
+	std::set<eventObserver*> sortedExcList(exclutionList.begin(),exclutionList.end());
 
 	for(auto& observer:observerList_)
 	{
@@ -89,4 +89,4 @@ bool pFlow::Plus::eventSubscriber::notify
 	}
 
 	return true;
-}
+}*/

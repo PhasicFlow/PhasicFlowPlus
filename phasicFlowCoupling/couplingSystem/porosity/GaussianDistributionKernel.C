@@ -22,7 +22,7 @@ Licence:
 #include "fvCFD.H"
 
 #include "GaussianDistributionKernel.hpp"
-
+#include "streams.hpp"
 
 pFlow::coupling::GaussianDistributionKernel::GaussianDistributionKernel(
 	Foam::dictionary 		dict, 
@@ -71,9 +71,9 @@ bool pFlow::coupling::GaussianDistributionKernel::internalFieldUpdate()
 	{
 		real parVolume = static_cast<real>(3.14159265358979/6)*
 				pFlow::pow(particleDiameter_[i], static_cast<real>(3.0));
-
-		const Foam::label targetCellId = parCellIndex_[i];
 		
+		const Foam::label targetCellId = parCellIndex_[i];
+
 		if( targetCellId < 0 )continue;
 		
 		// get all the neighbors of cell 
@@ -101,8 +101,6 @@ bool pFlow::coupling::GaussianDistributionKernel::internalFieldUpdate()
 				Foam::scalar k = distFunc(CP - allCellCntr[j]);
 				ks.push_back(k);
 				pSubTotal += k;
-				
-				//Foam::Info<< targetCellId <<" "<< j<<Foam::endl;
 			}
 		}
 		else

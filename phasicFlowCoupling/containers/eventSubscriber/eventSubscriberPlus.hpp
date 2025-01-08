@@ -22,7 +22,7 @@ Licence:
 #ifndef __eventSubscriberPlus_hpp__
 #define __eventSubscriberPlus_hpp__
 
-#include "List.hpp"
+#include <vector>
 #include "eventObserverPlus.hpp"
 #include "eventMessagePlus.hpp"
 
@@ -38,7 +38,7 @@ class eventSubscriber
 protected:
 
 	// - list of subsribed objectd that recieve updage messages 
-	mutable List<eventObserver*> observerList_;
+	mutable std::vector<eventObserver*> observerList_;
 
 public:
 
@@ -53,7 +53,7 @@ public:
 
 	bool notify(const eventMessage& msg);
 
-	bool notify(const eventMessage& msg, const List<eventObserver*>& exclutionList );
+	//bool notify(const eventMessage& msg, const std::vector<eventObserver*>& exclutionList );
 
 
 

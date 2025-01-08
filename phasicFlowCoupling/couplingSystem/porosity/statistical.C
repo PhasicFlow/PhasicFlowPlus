@@ -59,18 +59,13 @@ bool pFlow::coupling::statistical::cellNeighborsSearch()
 		neighborList_.resize(nCells);
 
 		boundaryCell_.resize(nCells);
-		/*std::fill(
-			boundaryCell_.begin(), 
-			boundaryCell_.end(),
-			std::pair<Foam::label, Foam::label>{-1,-1});*/
+		
 	}
 
-	
-	
 	// loop over all cells
 	// TODO: later this should be recursive calls 
 	//#pragma omp parallel for
-	for(size_t i=0; i<20; i++)
+	for(size_t i=0; i<neighborList_.size(); i++)
 	{
 		const Foam::vector& ci = cellC[i];
 		const Foam::scalar  lCell = 0.5* Foam::pow(cellV[i], 0.33333);
@@ -87,13 +82,6 @@ bool pFlow::coupling::statistical::cellNeighborsSearch()
 			{
 				neighborList_[i].push_back(j);
 			}
-		}
-		
-		Foam::Info<<"Size of "<< neighborList_[i].size()<<Foam::endl;
-		Foam::Info<<cMesh_.findSphere(i, b)<<Foam::endl<<Foam::endl;
-		for(auto j = 0; j <neighborList_[i].size(); j++)
-		{
-			Foam::Info<<neighborList_[i][j]<<Foam::endl;
 		}
 
 		Foam::label nghbrB = -1;
@@ -123,7 +111,7 @@ bool pFlow::coupling::statistical::cellNeighborsSearch()
 
 	}
 
-	for(auto i=0; i<nCells; i++)
+	for(size_t i=0; i<nCells; i++)
 	{
 		boundaryPatchNum_[i] = boundaryCell_[i].first;
 	}
