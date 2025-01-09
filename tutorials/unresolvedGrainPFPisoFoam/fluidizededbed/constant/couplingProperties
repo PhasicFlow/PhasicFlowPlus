@@ -1,0 +1,45 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  9
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      couplingProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
+
+
+
+particleMapping
+{
+    // based on the maximum particle diameter in the simulation.
+    domainExpansionRatio    1;
+
+    domainUpdateInterval    0.01;
+
+    decompositionMode       facePlanes;
+}
+
+
+porosity
+{
+    method    GaussianDistributionKernel  ;
+    neighborLength  0.0075; 
+    alphaMin    0.2;
+}
+
+drag
+{
+    type            DiFeliceGrain;
+    residualRe      10e-4;
+}
+
+// ************************************************************************* //
