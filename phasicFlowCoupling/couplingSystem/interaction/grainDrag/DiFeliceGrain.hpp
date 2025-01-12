@@ -38,9 +38,6 @@ protected:
 		Foam::scalar xi = 3.7 - 0.65*Foam::exp(-0.5*Foam::pow(1.5-Foam::log10(Rec),2));
 		Foam::scalar Cd = Foam::pow(0.63+4.8/Foam::sqrt(Rec),2);
 
-		Foam::scalar n = 0.014 + 0.955261 * Foam::exp( -4.10239227 * Foam::pow(ep, 0.002469095687*Rec)/Foam::pow(Rec, 0.41379176));
-		n = Foam::max(Foam::min(n,1.0),0.0);
-
 		return Cd/24 * Res * Foam::pow(ep, -xi); 
 		
 	}

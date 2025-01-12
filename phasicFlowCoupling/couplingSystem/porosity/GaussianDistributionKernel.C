@@ -66,7 +66,7 @@ bool pFlow::coupling::GaussianDistributionKernel::internalFieldUpdate()
 	};
 	
 	
-	//#pragma omp parallel for 
+	#pragma omp parallel for 
 	for(size_t i=0; i<numPar; i++)
 	{
 		real parVolume = static_cast<real>(3.14159265358979/6)*
@@ -130,7 +130,8 @@ bool pFlow::coupling::GaussianDistributionKernel::internalFieldUpdate()
 		pSubTotal = Foam::max(pSubTotal, Foam::vSmall);
 		for(auto j:nList)
 		{
-			solidVol[j] += ks[n++] /pSubTotal * parVolume;
+			#pragma omp atomic
+			solidVol[j] += (ks[n++] /pSubTotal * parVolume);
 		}
 
 	}

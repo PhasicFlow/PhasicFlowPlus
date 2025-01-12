@@ -64,7 +64,7 @@ bool pFlow::coupling::statistical::cellNeighborsSearch()
 
 	// loop over all cells
 	// TODO: later this should be recursive calls 
-	//#pragma omp parallel for
+	#pragma omp parallel for
 	for(size_t i=0; i<neighborList_.size(); i++)
 	{
 		const Foam::vector& ci = cellC[i];
