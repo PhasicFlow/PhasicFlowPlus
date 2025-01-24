@@ -56,7 +56,7 @@ Description
 #include "fvConstraints.H"
 
 // phasicFlow
-#include "grainCouplingSystem.hpp"
+#include "unresolvedCouplingSystem.hpp"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

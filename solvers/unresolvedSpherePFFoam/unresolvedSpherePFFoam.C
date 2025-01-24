@@ -59,7 +59,7 @@ Description
 #include "fvcSmooth.H"
 
 // phasicFlow
-#include "sphereCouplingSystem.hpp" 
+#include "unresolvedCouplingSystem.hpp" 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
