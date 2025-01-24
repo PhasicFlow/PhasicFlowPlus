@@ -45,9 +45,9 @@ class couplingSystem
 {
 private:
 	
-	couplingMesh 				couplingMesh_;
+	couplingMesh 							couplingMesh_;
 
-	Plus::procVector<box> 		meshBoxes_;
+	Plus::procVector<box> 					meshBoxes_;
 
 	Plus::scatteredCommunication<real> 		realScatteredComm_;
 
@@ -80,8 +80,6 @@ private:
 	bool collectFluidTorque();
 
 	bool distributeParticles();
-
-	
 
 protected:
 
@@ -130,11 +128,18 @@ protected:
 		return fluidForce_;
 	}
 
+	inline
+	const Foam::dictionary& dict()const
+	{
+		return static_cast<const dictionary&>(*this);
+	}
+
 public:
 
+	TypeInfo("couplingSystem");
 
 	couplingSystem(
-		word demSystemName, 
+		word shapeTypeName, 
 		Foam::fvMesh& mesh,
 		int argc, 
 		char* argv[]);
@@ -158,35 +163,20 @@ public:
 	virtual
 	bool sendDataToDEM(real t, real dt);
 
-	virtual
-	void calculateFluidInteraction() = 0;
-
-	virtual
-	void calculatePorosity() = 0;
+	/*virtual
+	void calculateFluidInteraction() =0;*/
 
 	void sendFluidForceToDEM();
 
 	void sendFluidTorqueToDEM();
-
 	
-
 	bool iterate(real upToTime, bool writeTime, const word& timeName);
 	
 	inline
 	auto& cMesh()
 	{
 		return couplingMesh_;
-	}
-
-	virtual 
-	const Foam::volScalarField& alpha()const = 0;
-
-	virtual
-	const Foam::volScalarField& Sp()const = 0;
-	
-	virtual
-	const Foam::volVectorField& Su()const = 0;
-	
+	}	
 
 	inline 
 	auto numParticles()const

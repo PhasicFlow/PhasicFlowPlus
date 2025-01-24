@@ -8,26 +8,30 @@ MPIParallelization/processorPlus.C
 MPIParallelization/procCommunicationPlus.C
 MPIParallelization/procDEMSystemPlus.C
 
-couplingSystem/couplingMesh.C
+couplingSystem/unresolved/distributions/Gaussian.C
+couplingSystem/unresolved/distributions/self.C
+
+couplingSystem/unresolved/porosity/porosity/porosity.C
+couplingSystem/unresolved/porosity/PIC/PIC.C
+couplingSystem/unresolved/porosity/subDivision9/subDivision9.C
+couplingSystem/unresolved/porosity/subDivision29/subDivision29.C
+couplingSystem/unresolved/porosity/subDivision29/subDivision29Mod.C
+couplingSystem/unresolved/porosity/porosityCellDistribution/porosityCellDistributions.C
+couplingSystem/unresolved/porosity/diffusion/diffusion.C
+
+couplingSystem/unresolved/interaction/dragClosures/DiFelice.C
+couplingSystem/unresolved/interaction/dragClosures/ErgunWenYu.C
+couplingSystem/unresolved/interaction/dragClosures/Rong.C
+couplingSystem/unresolved/interaction/drag/drags.C
+couplingSystem/unresolved/interaction/sphereDrag/sphereDrags.C
+couplingSystem/unresolved/interaction/grainDrag/grainDrags.C
+
+
 couplingSystem/couplingSystem.C
-couplingSystem/sphereCouplingSystem.C
-couplingSystem/grainCouplingSystem.C
-couplingSystem/porosity/porosity.C
-couplingSystem/porosity/PIC.C
-couplingSystem/porosity/subDivision9.C
-couplingSystem/porosity/subDivision29.C
-couplingSystem/porosity/subDivision29Mod.C
-couplingSystem/porosity/diffusion.C
-couplingSystem/porosity/statistical.C
-couplingSystem/porosity/powerDistributionKernel.C
-couplingSystem/porosity/GaussianDistributionKernel.C
+couplingSystem/couplingMesh/couplingMesh.C
+couplingSystem/unresolved/unresolvedCouplingSystem/unresolvedCouplingSystem.C
+couplingSystem/unresolved/sphereUnresolvedCouplingSystem/sphereUnresolvedCouplingSystems.C
+couplingSystem/unresolved/grainUnresolvedCouplingSystem/grainUnresolvedCouplingSystems.C
 
-couplingSystem/interaction/drag/drag.C
-couplingSystem/interaction/drag/ErgunWenYu.C
-couplingSystem/interaction/drag/DiFelice.C
-couplingSystem/interaction/drag/Rong.C
-
-couplingSystem/interaction/grainDrag/grainDrag.C
-couplingSystem/interaction/grainDrag/DiFeliceGrain.C
 
 LIB = $(FOAM_USER_LIBBIN)/libphasicFlowCoupling
