@@ -40,7 +40,7 @@ Make/linux*/**
 Make/linux*/**/*
 Make/linux*/*
 lnInclude/**
-**/lnInclude/
+**/lnInclude/*
 **/Make/linux*/
 test/
 doc/code-documentation/

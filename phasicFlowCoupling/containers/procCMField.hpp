@@ -68,7 +68,7 @@ public:
 	procCMField(const centerMassField& cm, bool subscribe = true)
 	:
 		eventObserver(cm, subscribe),
-		std::vector<T>(cm.size(), cm.capacity()),
+		std::vector<T>(cm.size()),
 		centerMass_(cm)
 	{}
 
@@ -142,6 +142,11 @@ public:
 		}
 
 		return true;
+	}
+
+	const centerMassField& centerMass()const 
+	{
+		return centerMass_;
 	}
 	
 };

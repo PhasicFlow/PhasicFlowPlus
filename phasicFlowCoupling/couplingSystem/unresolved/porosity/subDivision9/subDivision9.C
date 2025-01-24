@@ -1,0 +1,113 @@
+/*------------------------------- phasicFlow ---------------------------------
+      O        C enter of
+     O O       E ngineering and
+    O   O      M ultiscale modeling of
+   OOOOOOO     F luid flow       
+------------------------------------------------------------------------------
+  Copyright (C): www.cemf.ir
+  email: hamid.r.norouzi AT gmail.com
+------------------------------------------------------------------------------  
+Licence:
+  This file is part of phasicFlow code. It is a free software for simulating 
+  granular and multiphase flows. You can redistribute it and/or modify it under
+  the terms of GNU General Public License v3 or any other later versions. 
+ 
+  phasicFlow is distributed to help others in their research in the field of 
+  granular and multiphase flows, but WITHOUT ANY WARRANTY; without even the
+  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+-----------------------------------------------------------------------------*/
+
+// from OpenFOAM
+#include "fvCFD.H"
+
+
+#include "subDivision9.hpp"
+
+const pFlow::real sin_45[] = {0.7071067811865475,  0.7071067811865475, -0.7071067811865475, -0.7071067811865475};
+const pFlow::real cos_45[] = {0.7071067811865475, -0.7071067811865475, -0.7071067811865475,  0.7071067811865475};
+
+
+pFlow::coupling::subDivision9::subDivision9(
+	const unresolvedCouplingSystem& CS,
+	const couplingMesh& 			cMesh,
+	const Plus::realProcCMField& 	parDiam)
+:
+	porosity(CS, cMesh, parDiam)
+{
+
+}
+
+
+bool pFlow::coupling::subDivision9::internalFieldUpdate()
+{
+	
+	auto solidVoldTmp = Foam::volScalarField::Internal::New(
+		"solidVol",
+		this->mesh(),
+		 Foam::dimensioned("solidVol", Foam::dimVol, Foam::scalar(0))
+		 	);
+	
+	auto& solidVol = solidVoldTmp.ref();
+	const auto& cntrMass = centerMass();
+	size_t numPar = cntrMass.size();
+
+	#pragma omp parallel for 
+	for(size_t i=0; i<numPar; i++)
+	{
+
+		const Foam::label cntrCellId = parCellIndex_[i];
+		if( cntrCellId < 0 )continue;
+
+		Foam::FixedList<realx3, 8> points;
+		Foam::FixedList<Foam::label, 8> cellIds;
+
+		const realx3 pPos = cntrMass[i];
+		const real pRad = particleDiameter_[i]/2;
+		
+		// 4*Pi/3 = 4.1887902047864
+		const real pSubVol = static_cast<real>(4.1887902047864/9.0) *
+					pFlow::pow(pRad, static_cast<real>(3.0));
+
+		realx3 offset(0,0,0);
+
+		Foam::label n = 0;
+		real r = static_cast<real>(0.5*1.48075) * pRad;
+		
+		// 8 subdivisions of particle
+		for(int32 i_alp =0; i_alp<4; i_alp++)
+		{
+			for(int32 i_bet=0; i_bet<2;i_bet++)
+			{
+				offset = {  
+					r*sin_45[i_alp]*cos_45[i_bet],
+					r*sin_45[i_alp]*sin_45[i_bet],
+					r*cos_45[i_alp] };
+
+				points[n++] = pPos + offset;
+			}
+		}
+
+		Foam::label nCellIds = 0;
+		cMesh_.findPointsInCells(points, cntrCellId, nCellIds, cellIds );
+		
+		for(auto ci=0; ci<nCellIds; ci++ )
+		{
+			#pragma omp atomic
+			solidVol[cellIds[ci]] += pSubVol;	
+		}
+
+		#pragma omp atomic
+		solidVol[cntrCellId] += (9-nCellIds)*pSubVol;
+
+	} // omp parallel for
+
+	this->ref() = Foam::max(
+		1 - solidVol/this->mesh().V(), 
+		static_cast<Foam::scalar>(this->alphaMin()) );
+
+	return true;
+}
+
+
+	

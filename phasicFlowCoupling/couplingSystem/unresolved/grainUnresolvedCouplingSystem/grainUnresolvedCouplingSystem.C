@@ -1,0 +1,102 @@
+/*------------------------------- phasicFlow ---------------------------------
+      O        C enter of
+     O O       E ngineering and
+    O   O      M ultiscale modeling of
+   OOOOOOO     F luid flow       
+------------------------------------------------------------------------------
+  Copyright (C): www.cemf.ir
+  email: hamid.r.norouzi AT gmail.com
+------------------------------------------------------------------------------  
+Licence:
+  This file is part of phasicFlow code. It is a free software for simulating 
+  granular and multiphase flows. You can redistribute it and/or modify it under
+  the terms of GNU General Public License v3 or any other later versions. 
+ 
+  phasicFlow is distributed to help others in their research in the field of 
+  granular and multiphase flows, but WITHOUT ANY WARRANTY; without even the
+  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+-----------------------------------------------------------------------------*/
+
+template<typename DistributorType>
+bool pFlow::coupling::grainUnresolvedCouplingSystem<DistributorType>::
+	distributeParticleFields()
+{
+	
+	auto allCG = this->pDEMSystem().particlesCourseGrainFactorMasterAllMaster();
+	auto thisCG = makeSpan(courseGrainFactor_);
+	if(!this->realMappedComm().distribute(allCG, thisCG))
+	{
+		fatalErrorInFunction<<
+		"cannot distribute particle course grain factor among processors"<<endl;
+		Plus::processor::abort(0);
+		return false;
+	}
+
+	return couplingSystem::distributeParticleFields();
+}
+
+
+template<typename DistributorType>
+pFlow::coupling::grainUnresolvedCouplingSystem<DistributorType>::
+grainUnresolvedCouplingSystem(
+		word demSystemName, 
+		Foam::fvMesh& mesh,
+		int argc, 
+		char* argv[])
+:
+	UnresolvedCouplingSystem<DistributorType>(demSystemName, mesh, argc, argv),
+	courseGrainFactor_("courseGrainFactor", this->centerMass()),
+	porosityTimer_("porosity", &this->couplingTimers()),
+	interactionTimer_("interaction", &this->couplingTimers())
+{
+
+	Foam::Info<<"\n  Creating porosity model ..."<<Foam::endl;
+	porosity_ = porosity::create(
+		*this, 
+		this->cMesh(),
+		this->particleDiameter());
+
+	Foam::Info<<"\n  Creating drag model ..."<<Foam::endl;
+	drag_ = drag<DistributorType>::create(
+		*this,
+		porosity_()
+		);
+
+	requiresDistribution_ = 
+		porosity_().requireCellDistribution()|| drag_().requireCellDistribution();
+}
+
+template<typename DistributorType>
+void pFlow::coupling::grainUnresolvedCouplingSystem<DistributorType>::calculatePorosity()
+{
+	porosityTimer_.start();
+	if(requiresDistribution_)
+	{
+		porosity_().mapCentersBeforeCalcPorosity();
+		this->cellDistribution().updateWeights(porosity_->particleCellIndex());
+	}
+	porosity_->calculatePorosity();
+	porosity_->reportNumInMesh();
+	porosityTimer_.end();
+
+	Foam::Info<<Blue_Text("Porosity time: ")<<porosityTimer_.lastTime()<<" s\n";
+}
+
+template<typename DistributorType>
+void pFlow::coupling::grainUnresolvedCouplingSystem<DistributorType>::calculateFluidInteraction()
+{
+	const auto& U = this->cMesh().mesh().template lookupObject<Foam::volVectorField>("U");
+	interactionTimer_.start();
+	if(drag_)
+	{
+		drag_->calculateDragForce(
+			U,
+			this->particleVelocity(),
+			this->particleDiameter(),
+			this->fluidForce());
+	}
+	interactionTimer_.end();
+
+	Foam::Info<<Blue_Text("Interaction time: ")<<interactionTimer_.lastTime()<<" s\n";
+}

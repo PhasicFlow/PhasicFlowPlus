@@ -36,7 +36,7 @@ bool pFlow::coupling::couplingSystem::updateMeshBoxes()
 }
 
 pFlow::coupling::couplingSystem::couplingSystem(
-		word demSystemName, 
+		word shapeTypeName, 
 		Foam::fvMesh& mesh,
 		int argc, 
 		char* argv[])
@@ -54,7 +54,7 @@ pFlow::coupling::couplingSystem::couplingSystem(
     ),
     Plus::procCommunication(),
 	couplingMesh_(subDict("particleMapping"), mesh),
-	procDEMSystem_(demSystemName, argc, argv),
+	procDEMSystem_(shapeTypeName+"DEMSystem", argc, argv),
 	couplingTimers_("coupling", procDEMSystem_.getTimers()),
 	cfdTimers_("CFD", procDEMSystem_.getTimers()),
 	getDataTimer_("get data from DEM", &couplingTimers_),
