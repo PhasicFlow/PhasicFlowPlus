@@ -89,8 +89,11 @@ void pFlow::coupling::sphereDrag<DistributorType, DragClosureType, useCellDistri
 		}
 	}
 
-	Su.ref() /= Vcells;
-	Sp.ref() /= Vcells;
+	forAll(Vcells, i)
+	{
+		Su[i] /= Vcells[i];
+		Sp[i] /= Vcells[i];	
+	}
 }
 
 

@@ -93,9 +93,11 @@ void pFlow::coupling::grainDrag<DistributorType, DragClosureType, useCellDistrib
 		}
 	}
 
-	Su.ref() /= Vcells;
-	Sp.ref() /= Vcells;
-
+	forAll(Vcells, i)
+	{
+		Su[i] /= Vcells[i];
+		Sp[i] /= Vcells[i];	
+	}
 }
 
 
