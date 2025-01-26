@@ -112,7 +112,7 @@ public:
 
 	word shapeTypeName() const override
 	{
-		return "sphere";
+		return "grain";
 	}
 	
 	

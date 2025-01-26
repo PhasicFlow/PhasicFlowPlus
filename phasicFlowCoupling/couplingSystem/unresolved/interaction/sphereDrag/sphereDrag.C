@@ -60,7 +60,6 @@ void pFlow::coupling::sphereDrag<DistributorType, DragClosureType, useCellDistri
 			auto mui = nu[cellIndx]* rhoi;
 			auto ef = alpha[cellIndx];
 			auto dp = diameter[parIndx];
-			auto vCell = Vcells[cellIndx];
 			auto vp = Foam::constant::mathematical::pi/6 * Foam::pow(dp,3.0);
 
 			Foam::vector up = {
@@ -78,18 +77,20 @@ void pFlow::coupling::sphereDrag<DistributorType, DragClosureType, useCellDistri
 			
 			if constexpr (useCellDistribution)
 			{
-				cellDist.distributeValue_OMP(parIndx, cellIndx, Su, -(sp*up)/vCell);
-				cellDist.distributeValue_OMP(parIndx, cellIndx, Sp,   sp/vCell);
+				cellDist.distributeValue_OMP(parIndx, cellIndx, Su, -(sp*up));
+				cellDist.distributeValue_OMP(parIndx, cellIndx, Sp,   sp);
 			}
 			else
 			{
-				selfDictribution.distributeValue_OMP(parIndx, cellIndx, Su, -(sp*up)/vCell);
-				selfDictribution.distributeValue_OMP(parIndx, cellIndx, Sp,   sp/vCell);
+				selfDictribution.distributeValue_OMP(parIndx, cellIndx, Su, -(sp*up));
+				selfDictribution.distributeValue_OMP(parIndx, cellIndx, Sp,   sp);
 			}
 			
 		}
 	}
 
+	Su.ref() /= Vcells;
+	Sp.ref() /= Vcells;
 }
 
 
