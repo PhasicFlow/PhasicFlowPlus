@@ -53,3 +53,31 @@ template class pFlow::coupling::grainDrag
 		pFlow::coupling::DiFelice,
 		false
 	>; 
+	
+template class pFlow::coupling::grainDrag
+		<
+		pFlow::coupling::self,
+		pFlow::coupling::ErgunWenYu,
+		true
+	>; 
+
+template class pFlow::coupling::grainDrag
+	<
+		pFlow::coupling::self,
+		pFlow::coupling::ErgunWenYu,
+		false
+	>; 
+
+template class pFlow::coupling::grainDrag
+	<
+		pFlow::coupling::Gaussian,
+		pFlow::coupling::ErgunWenYu,
+		true
+	>; 
+
+template class pFlow::coupling::grainDrag
+	<
+		pFlow::coupling::Gaussian,
+		pFlow::coupling::ErgunWenYu,
+		false
+	>;
