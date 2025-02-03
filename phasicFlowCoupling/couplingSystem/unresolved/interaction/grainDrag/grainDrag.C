@@ -74,7 +74,7 @@ void pFlow::coupling::grainDrag<DistributorType, DragClosureType, useCellDistrib
 			Foam::scalar Res = ef * rhoi * Foam::mag(ur) * dps /mui ;
 
 			Foam::scalar sp = 3 * Foam::pow(cgf,3) * Foam::constant::mathematical::pi * 
-					mui * ef * dp * dragClosure.dimlessDrag(Res, ef);
+					mui * ef * dps * dragClosure.dimlessDrag(Res, ef);
 			
 			Foam::vector pf = static_cast<real>(sp)*ur - vp*pGrad[cellIndx];
 			particleForce[parIndx] = realx3(pf.x(), pf.y(), pf.z());
