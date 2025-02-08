@@ -21,35 +21,52 @@ Licence:
 #include "sphereDrag.hpp"
 #include "self.hpp"
 #include "Gaussian.hpp"
+#include "GaussianIntegral.hpp"
 
 #include "DiFelice.hpp"
 #include "Rong.hpp"
 #include "ErgunWenYu.hpp"
 
-template class pFlow::coupling::sphereDrag
-	<
-		pFlow::coupling::self,
-		pFlow::coupling::DiFelice,
-		true
-	>; 
+#define makeSphereDrag(closure)                     \
+													\
+template class pFlow::coupling::sphereDrag 			\
+	< 												\
+		pFlow::coupling::self, 						\
+		closure, 									\
+		true 										\
+	>;  											\
+template class pFlow::coupling::sphereDrag  		\
+	<												\
+		pFlow::coupling::self, 						\
+		closure, 									\
+		false 										\
+	>;  											\
+													\
+template class pFlow::coupling::sphereDrag 			\
+	<												\
+		pFlow::coupling::Gaussian,					\
+		closure,									\
+		true 										\
+	>; 												\
+template class pFlow::coupling::sphereDrag 			\
+	< 												\
+		pFlow::coupling::Gaussian, 					\
+		closure,									\
+		false										\
+	>; 												\
+template class pFlow::coupling::sphereDrag 			\
+	<												\
+		pFlow::coupling::GaussianIntegral,			\
+		closure,									\
+		true										\
+	>; 												\
+template class pFlow::coupling::sphereDrag 			\
+	<												\
+		pFlow::coupling::GaussianIntegral,			\
+		closure,									\
+		false										\
+	>; 												
 
-template class pFlow::coupling::sphereDrag
-	<
-		pFlow::coupling::self,
-		pFlow::coupling::DiFelice,
-		false
-	>; 
-
-template class pFlow::coupling::sphereDrag
-	<
-		pFlow::coupling::Gaussian,
-		pFlow::coupling::DiFelice,
-		true
-	>; 
-
-template class pFlow::coupling::sphereDrag
-	<
-		pFlow::coupling::Gaussian,
-		pFlow::coupling::DiFelice,
-		false
-	>; 
+makeSphereDrag(pFlow::coupling::DiFelice);
+makeSphereDrag(pFlow::coupling::ErgunWenYu);
+makeSphereDrag(pFlow::coupling::Rong);

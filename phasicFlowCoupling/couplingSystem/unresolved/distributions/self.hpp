@@ -56,7 +56,9 @@ public:
 	~self() = default;
 
 	
-	void updateWeights(const Plus::procCMField<Foam::label> & parCellIndex);
+	void updateWeights(
+		const Plus::procCMField<Foam::label> & parCellIndex,
+		const Plus::procCMField<real> & parDiameter);
 
 	inline
 	void distributeValue_OMP(

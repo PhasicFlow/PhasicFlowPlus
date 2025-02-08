@@ -31,7 +31,8 @@ pFlow::coupling::self::self
 
 void pFlow::coupling::self::updateWeights
 (
-	const Plus::procCMField<Foam::label> & parCellIndex
+	const Plus::procCMField<Foam::label> & ,
+  const Plus::procCMField<real> & 
 )
 {
 	return;

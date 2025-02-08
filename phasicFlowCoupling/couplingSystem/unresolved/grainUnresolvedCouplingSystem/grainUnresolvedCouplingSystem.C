@@ -74,7 +74,9 @@ void pFlow::coupling::grainUnresolvedCouplingSystem<DistributorType>::calculateP
 	if(requiresDistribution_)
 	{
 		porosity_().mapCentersBeforeCalcPorosity();
-		this->cellDistribution().updateWeights(porosity_->particleCellIndex());
+		this->cellDistribution().updateWeights(
+			porosity_->particleCellIndex(),
+			this->particleDiameter());
 	}
 	porosity_->calculatePorosity();
 	porosity_->reportNumInMesh();

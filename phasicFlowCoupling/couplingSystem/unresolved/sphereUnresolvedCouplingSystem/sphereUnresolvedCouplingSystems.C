@@ -22,6 +22,8 @@ Licence:
 #include "sphereUnresolvedCouplingSystem.hpp"
 #include "self.hpp"
 #include "Gaussian.hpp"
+#include "GaussianIntegral.hpp"
 
 template class pFlow::coupling::sphereUnresolvedCouplingSystem<pFlow::coupling::self>;
 template class pFlow::coupling::sphereUnresolvedCouplingSystem<pFlow::coupling::Gaussian>;
+template class pFlow::coupling::sphereUnresolvedCouplingSystem<pFlow::coupling::GaussianIntegral>;

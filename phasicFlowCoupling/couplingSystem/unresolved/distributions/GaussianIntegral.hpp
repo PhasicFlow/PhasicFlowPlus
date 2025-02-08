@@ -17,8 +17,8 @@ Licence:
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 -----------------------------------------------------------------------------*/
-#ifndef __Gaussian_hpp__ 
-#define __Gaussian_hpp__
+#ifndef __GaussianIntegral_hpp__ 
+#define __GaussianIntegral_hpp__
 
 
 // from OpenFOAM
@@ -36,7 +36,7 @@ namespace pFlow::coupling
 
 class couplingMesh;
 
-class Gaussian
+class GaussianIntegral
 {
 private:
 	
@@ -50,9 +50,6 @@ private:
 	// list of nieghbor cells for each cell 
 	Foam::labelListList  		neighborList_;
 	
-	// boundary cells 
-	Foam::List<std::pair<Foam::label, Foam::label>> 	boundaryCell_;
-
 	const Foam::fvMesh&			mesh_;
 
 protected:
@@ -70,22 +67,24 @@ protected:
 public:
 
 	/// Type info
-	TypeInfoNV("Gaussian");
+	TypeInfoNV("GaussianIntegral");
 
 	/// Construc from dictionary 
-	Gaussian(
+	GaussianIntegral(
 		Foam::dictionary 		dict, 
 		const couplingMesh& 	cMesh,
 		const Plus::centerMassField& centerMass);
 
 	/// Destructor
-	~Gaussian() = default;
+	~GaussianIntegral() = default;
 
 	inline
 	auto neighborLength()const
 	{
 		return neighborLength_;
 	}
+
+	void updateWeights(const Plus::procCMField<Foam::label> & parCellIndex){}
 
 	void updateWeights(
 		const Plus::procCMField<Foam::label> & parCellIndex,
@@ -100,11 +99,12 @@ public:
 	{
 		const auto& weightsI = weights_[parIndx];
 		const Foam::labelList& neighbors = neighborList_[parCellIndx];
-		forAll(neighbors, j)
+
+		for(size_t j=0; j<weightsI.size(); j++)
 		{
 			#pragma omp atomic
-			internalField[neighbors[j]] += val*weightsI[j];
-		}
+			internalField[neighbors[j]] += weightsI[j]* val;
+		}	
 	}
 
 	inline
@@ -116,10 +116,12 @@ public:
 	{
 		const auto& weightsI = weights_[parIndx];
 		const Foam::labelList& neighbors = neighborList_[parCellIndx];
-		forAll(neighbors, j)
+
+		for(size_t j=0; j<weightsI.size(); j++)
 		{
 			const auto v = weightsI[j]* val;
 			auto& tv = internalField[neighbors[j]]; 
+
 			#pragma omp atomic
 			tv.x() += v.x();
 			
@@ -140,9 +142,10 @@ public:
 	{
 		const auto& weightsI = weights_[parIndx];
 		const Foam::labelList& neighbors = neighborList_[parCellIndx];
-		forAll(neighbors, j)
+
+		for(size_t j=0; j<weightsI.size(); j++)
 		{
-			internalField[neighbors[j]] += val*weightsI[j];
+			internalField[neighbors[j]] += weightsI[j]* val;
 		}
 	}
 
@@ -155,10 +158,12 @@ public:
 	{
 		const auto& weightsI = weights_[parIndx];
 		const Foam::labelList& neighbors = neighborList_[parCellIndx];
-		forAll(neighbors, j)
+
+		for(size_t j=0; j<weightsI.size(); j++)
 		{
 			internalField[neighbors[j]] += weightsI[j]* val;
-		}
+		}		
+		
 	}
 
 }; 
