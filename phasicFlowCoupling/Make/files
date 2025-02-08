@@ -8,6 +8,7 @@ MPIParallelization/processorPlus.C
 MPIParallelization/procCommunicationPlus.C
 MPIParallelization/procDEMSystemPlus.C
 
+couplingSystem/unresolved/distributions/GaussianIntegral.C
 couplingSystem/unresolved/distributions/Gaussian.C
 couplingSystem/unresolved/distributions/self.C
 

@@ -22,6 +22,8 @@ Licence:
 #include "grainUnresolvedCouplingSystem.hpp"
 #include "self.hpp"
 #include "Gaussian.hpp"
+#include "GaussianIntegral.hpp"
 
 template class pFlow::coupling::grainUnresolvedCouplingSystem<pFlow::coupling::self>;
 template class pFlow::coupling::grainUnresolvedCouplingSystem<pFlow::coupling::Gaussian>;
+template class pFlow::coupling::grainUnresolvedCouplingSystem<pFlow::coupling::GaussianIntegral>;

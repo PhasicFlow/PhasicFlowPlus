@@ -21,63 +21,52 @@ Licence:
 #include "grainDrag.hpp"
 #include "self.hpp"
 #include "Gaussian.hpp"
+#include "GaussianIntegral.hpp"
 
 #include "DiFelice.hpp"
 #include "Rong.hpp"
 #include "ErgunWenYu.hpp"
 
-template class pFlow::coupling::grainDrag
-	<
-		pFlow::coupling::self,
-		pFlow::coupling::DiFelice,
-		true
-	>; 
+#define makeGrainDrag(closure)                     \
+													\
+template class pFlow::coupling::grainDrag 			\
+	< 												\
+		pFlow::coupling::self, 						\
+		closure, 									\
+		true 										\
+	>;  											\
+template class pFlow::coupling::grainDrag  	 		\
+	<												\
+		pFlow::coupling::self, 						\
+		closure, 									\
+		false 										\
+	>;  											\
+													\
+template class pFlow::coupling::grainDrag 			\
+	<												\
+		pFlow::coupling::Gaussian,					\
+		closure,									\
+		true 										\
+	>; 												\
+template class pFlow::coupling::grainDrag 			\
+	< 												\
+		pFlow::coupling::Gaussian, 					\
+		closure,									\
+		false										\
+	>; 												\
+template class pFlow::coupling::grainDrag 			\
+	<												\
+		pFlow::coupling::GaussianIntegral,			\
+		closure,									\
+		true										\
+	>; 												\
+template class pFlow::coupling::grainDrag 			\
+	<												\
+		pFlow::coupling::GaussianIntegral,			\
+		closure,									\
+		false										\
+	>; 												
 
-template class pFlow::coupling::grainDrag
-	<
-		pFlow::coupling::self,
-		pFlow::coupling::DiFelice,
-		false
-	>; 
-
-template class pFlow::coupling::grainDrag
-	<
-		pFlow::coupling::Gaussian,
-		pFlow::coupling::DiFelice,
-		true
-	>; 
-
-template class pFlow::coupling::grainDrag
-	<
-		pFlow::coupling::Gaussian,
-		pFlow::coupling::DiFelice,
-		false
-	>; 
-	
-template class pFlow::coupling::grainDrag
-		<
-		pFlow::coupling::self,
-		pFlow::coupling::ErgunWenYu,
-		true
-	>; 
-
-template class pFlow::coupling::grainDrag
-	<
-		pFlow::coupling::self,
-		pFlow::coupling::ErgunWenYu,
-		false
-	>; 
-
-template class pFlow::coupling::grainDrag
-	<
-		pFlow::coupling::Gaussian,
-		pFlow::coupling::ErgunWenYu,
-		true
-	>; 
-
-template class pFlow::coupling::grainDrag
-	<
-		pFlow::coupling::Gaussian,
-		pFlow::coupling::ErgunWenYu,
-		false
-	>;
+makeGrainDrag(pFlow::coupling::DiFelice);
+makeGrainDrag(pFlow::coupling::ErgunWenYu);
+makeGrainDrag(pFlow::coupling::Rong);
