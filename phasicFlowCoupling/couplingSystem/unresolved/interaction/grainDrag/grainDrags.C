@@ -21,52 +21,64 @@ Licence:
 #include "grainDrag.hpp"
 #include "self.hpp"
 #include "Gaussian.hpp"
+#include "Gaussian2.hpp"
 #include "GaussianIntegral.hpp"
 
 #include "DiFelice.hpp"
 #include "Rong.hpp"
 #include "ErgunWenYu.hpp"
 
-#define makeGrainDrag(closure)                     \
-													\
-template class pFlow::coupling::grainDrag 			\
-	< 												\
-		pFlow::coupling::self, 						\
-		closure, 									\
-		true 										\
-	>;  											\
-template class pFlow::coupling::grainDrag  	 		\
-	<												\
-		pFlow::coupling::self, 						\
-		closure, 									\
-		false 										\
-	>;  											\
-													\
-template class pFlow::coupling::grainDrag 			\
-	<												\
-		pFlow::coupling::Gaussian,					\
-		closure,									\
-		true 										\
-	>; 												\
-template class pFlow::coupling::grainDrag 			\
-	< 												\
-		pFlow::coupling::Gaussian, 					\
-		closure,									\
-		false										\
-	>; 												\
-template class pFlow::coupling::grainDrag 			\
-	<												\
-		pFlow::coupling::GaussianIntegral,			\
-		closure,									\
-		true										\
-	>; 												\
-template class pFlow::coupling::grainDrag 			\
-	<												\
-		pFlow::coupling::GaussianIntegral,			\
-		closure,									\
-		false										\
+#define makegrainDrag(closure)                      \
+						    \
+template class pFlow::coupling::grainDrag 	    \
+	< 					    \
+		pFlow::coupling::self, 		    \
+		closure, 			    \
+		true 				    \
+	>;  					    \
+template class pFlow::coupling::grainDrag  	    \
+	<					    \
+		pFlow::coupling::self, 		    \
+		closure, 			    \
+		false 	                            \
+	>;                                          \
+template class pFlow::coupling::grainDrag 	    \
+	<                                           \
+		pFlow::coupling::Gaussian,          \
+		closure,                            \
+		true 	                            \
+	>;                                          \
+template class pFlow::coupling::grainDrag           \
+	<                                           \
+		pFlow::coupling::Gaussian,          \
+		closure,                            \
+		false                               \
+	>;                                          \
+template class pFlow::coupling::grainDrag           \
+	<                                           \
+		pFlow::coupling::Gaussian2,         \
+		closure,                            \
+		false                               \
+	>;                                          \
+template class pFlow::coupling::grainDrag           \
+	<                                           \
+		pFlow::coupling::Gaussian2,         \
+		closure,                            \
+		true                                \
+	>;                                          \
+template class pFlow::coupling::grainDrag           \
+	<                                           \
+		pFlow::coupling::GaussianIntegral,  \
+		closure,                            \
+		true                                \
+	>;                                          \
+template class pFlow::coupling::grainDrag           \
+	<                                           \
+		pFlow::coupling::GaussianIntegral,  \
+		closure,                            \
+		false                               \
 	>; 												
 
-makeGrainDrag(pFlow::coupling::DiFelice);
-makeGrainDrag(pFlow::coupling::ErgunWenYu);
-makeGrainDrag(pFlow::coupling::Rong);
+makegrainDrag(pFlow::coupling::DiFelice);
+makegrainDrag(pFlow::coupling::ErgunWenYu);
+makegrainDrag(pFlow::coupling::Rong);

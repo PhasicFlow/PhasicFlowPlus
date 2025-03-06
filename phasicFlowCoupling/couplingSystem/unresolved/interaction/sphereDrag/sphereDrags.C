@@ -21,6 +21,7 @@ Licence:
 #include "sphereDrag.hpp"
 #include "self.hpp"
 #include "Gaussian.hpp"
+#include "Gaussian2.hpp"
 #include "GaussianIntegral.hpp"
 
 #include "DiFelice.hpp"
@@ -28,43 +29,54 @@ Licence:
 #include "ErgunWenYu.hpp"
 
 #define makeSphereDrag(closure)                     \
-													\
-template class pFlow::coupling::sphereDrag 			\
-	< 												\
-		pFlow::coupling::self, 						\
-		closure, 									\
-		true 										\
-	>;  											\
-template class pFlow::coupling::sphereDrag  		\
-	<												\
-		pFlow::coupling::self, 						\
-		closure, 									\
-		false 										\
-	>;  											\
-													\
-template class pFlow::coupling::sphereDrag 			\
-	<												\
-		pFlow::coupling::Gaussian,					\
-		closure,									\
-		true 										\
-	>; 												\
-template class pFlow::coupling::sphereDrag 			\
-	< 												\
-		pFlow::coupling::Gaussian, 					\
-		closure,									\
-		false										\
-	>; 												\
-template class pFlow::coupling::sphereDrag 			\
-	<												\
-		pFlow::coupling::GaussianIntegral,			\
-		closure,									\
-		true										\
-	>; 												\
-template class pFlow::coupling::sphereDrag 			\
-	<												\
-		pFlow::coupling::GaussianIntegral,			\
-		closure,									\
-		false										\
+						    \
+template class pFlow::coupling::sphereDrag 	    \
+	< 					    \
+		pFlow::coupling::self, 		    \
+		closure, 			    \
+		true 				    \
+	>;  					    \
+template class pFlow::coupling::sphereDrag  	    \
+	<					    \
+		pFlow::coupling::self, 		    \
+		closure, 			    \
+		false 	                            \
+	>;                                          \
+template class pFlow::coupling::sphereDrag 	    \
+	<                                           \
+		pFlow::coupling::Gaussian,          \
+		closure,                            \
+		true 	                            \
+	>;                                          \
+template class pFlow::coupling::sphereDrag          \
+	<                                           \
+		pFlow::coupling::Gaussian,          \
+		closure,                            \
+		false                               \
+	>;                                          \
+template class pFlow::coupling::sphereDrag          \
+	<                                           \
+		pFlow::coupling::Gaussian2,         \
+		closure,                            \
+		false                               \
+	>;                                          \
+template class pFlow::coupling::sphereDrag          \
+	<                                           \
+		pFlow::coupling::Gaussian2,         \
+		closure,                            \
+		true                                \
+	>;                                          \
+template class pFlow::coupling::sphereDrag          \
+	<                                           \
+		pFlow::coupling::GaussianIntegral,  \
+		closure,                            \
+		true                                \
+	>;                                          \
+template class pFlow::coupling::sphereDrag          \
+	<                                           \
+		pFlow::coupling::GaussianIntegral,  \
+		closure,                            \
+		false                               \
 	>; 												
 
 makeSphereDrag(pFlow::coupling::DiFelice);
