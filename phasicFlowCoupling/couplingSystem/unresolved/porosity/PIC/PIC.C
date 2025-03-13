@@ -18,9 +18,6 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-// from OpenFOAM
-#include "fvCFD.H"
-
 
 #include "PIC.hpp"
 #include "self.hpp"
@@ -44,7 +41,7 @@ bool pFlow::coupling::PIC::internalFieldUpdate()
 	auto solidVolTmp = calculateSolidVol(selfCellDist);
 	//auto& solidVol = .ref();
 
-	this->ref() = Foam::max(
+	Foam::fieldRef(*this) = Foam::max(
 		1 - solidVolTmp/this->mesh().V(), 
 		static_cast<Foam::scalar>(this->alphaMin()) );
 

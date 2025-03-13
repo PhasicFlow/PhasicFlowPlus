@@ -6,6 +6,7 @@ pFlow_INCLUDE_DIR =$(pFlow_Project)/include
 CUDA_PATH =/usr/local/cuda
 
 -include $(GENERAL_RULES)/mplibType
+-include $(GENERAL_RULES)/mpi-rules
 
 EXE_INC = \
     -I$(pFlow_INCLUDE_DIR) \
@@ -15,7 +16,7 @@ EXE_INC = \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/Pstream/mpi/lnInclude \
-    -I$(LIB_SRC)/triSurface/lnInclude
+    -I../../phasicFlowCoupling/lnInclude
 
 LIB_LIBS = \
     -L$(pFlow_Project)/lib \
@@ -24,9 +25,9 @@ LIB_LIBS = \
     -lUtilities \
     -lOpenFOAM \
     -L$(FOAM_LIBBIN)/openmpi-system -lPstream \
+    -L$(FOAM_LIBBIN)/sys-openmpi -lPstream \
     -lfiniteVolume \
-    -lmeshTools \
-    -ltriSurface
+    -lmeshTools 
 
 EXE_INC  += $(PFLAGS) $(PINC)
 LIB_LIBS += $(PLIBS)

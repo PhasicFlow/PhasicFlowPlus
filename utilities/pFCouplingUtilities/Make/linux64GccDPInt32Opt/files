@@ -1,5 +1,0 @@
-SOURCE += foamPatchWall/foamPatchWall.C
-
-
-
-LIB = $(FOAM_USER_LIBBIN)/libpFCouplingUtilities

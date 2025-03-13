@@ -3,10 +3,33 @@ cd ${0%/*} || exit 1    # Run from this directory
 
 
 # Compile OpenFOAM libraries and applications
-echo "  -> building unresolvedSpherePFPisoFoam"
-wmake ./unresolvedSpherePFPisoFoam
-wmake ./unresolvedSpherePFFoam
-wmake ./unresolvedGrainPFPisoFoam
+# Check OpenFOAM version
+echo "  -> detected OpenFOAM version: $WM_PROJECT_VERSION"
+
+# Compile OpenFOAM libraries and applications based on version
+if [ "$WM_PROJECT_VERSION" = "9" ]; then
+    echo "  -> building solvers for OpenFOAM 9"
+    wmake ./unresolvedSpherePFPlus/v9
+    wmake ./unresolvedSpherePFPisoFoam/v9
+    wmake ./unresolvedGrainPFPisoFoam/v9
+elif [ "$WM_PROJECT_VERSION" = "12" ]; then
+    echo "  -> building solvers for OpenFOAM 12"
+    #wmake ./unresolvedSpherePFPisoFoam
+    #wmake ./unresolvedSpherePFFoam
+    #wmake ./unresolvedGrainPFPisoFoam
+elif [ "$WM_PROJECT_VERSION" = "v2406" ]; then
+    echo "  -> building solvers for OpenFOAM v2406"
+    wmake ./unresolvedSpherePFPlus/24
+    wmake ./unresolvedSpherePFPisoFoam/24
+elif [ "$WM_PROJECT_VERSION" = "v2412" ]; then
+    echo "  -> building solvers for OpenFOAM v2412"
+    wmake ./unresolvedSpherePFPlus/24
+    wmake ./unresolvedSpherePFPisoFoam/24
+else
+    echo "  -> Error: Unknown OpenFOAM version: $WM_PROJECT_VERSION"
+    echo "  -> Cannot proceed with build"
+    exit 1
+fi
 
 
 

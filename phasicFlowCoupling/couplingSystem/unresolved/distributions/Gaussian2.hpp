@@ -22,7 +22,7 @@ Licence:
 
 
 // from OpenFOAM
-#include "fvCFD.H"
+#include "OFCompatibleHeader.hpp"
 
 // from phasicFlow
 #include "typeInfo.hpp"

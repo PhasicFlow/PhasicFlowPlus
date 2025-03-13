@@ -22,7 +22,7 @@ Licence:
 #define __Rong_hpp__
 
 // from OpenFOAM
-#include "dictionary.H"
+#include "OFCompatibleHeader.hpp"
 
 #include "typeInfo.hpp"
 

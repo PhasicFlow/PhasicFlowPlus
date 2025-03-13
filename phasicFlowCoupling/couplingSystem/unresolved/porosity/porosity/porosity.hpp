@@ -21,8 +21,7 @@ Licence:
 #define __porosity_hpp__
 
 // from OpenFOAM
-#include "dictionary.H"
-#include "volFields.H"
+#include "OFCompatibleHeader.hpp"
 
 // from phasicFlow
 #include "virtualConstructor.hpp"

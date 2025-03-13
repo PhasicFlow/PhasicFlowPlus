@@ -24,7 +24,7 @@ Licence:
 
 pFlow::coupling::DiFelice::DiFelice(const Foam::dictionary&	dict)
 :
-	residualRe_(dict.lookup<Foam::scalar>("residualRe"))
+	residualRe_(lookupDict<Foam::scalar>(dict, "residualRe"))
 {
 
 }

@@ -53,7 +53,7 @@ pFlow::coupling::drag<DistributorType>::drag
 		Foam::IOobject
 		(
 			"Su",
-			porosity_.mesh().time().timeName(),
+			Foam::timeName(porosity_.mesh().time()),
 			porosity_.mesh(),
 			Foam::IOobject::READ_IF_PRESENT,
 			Foam::IOobject::AUTO_WRITE
@@ -71,7 +71,7 @@ pFlow::coupling::drag<DistributorType>::drag
     	Foam::IOobject
 	    (
 	        "Sp",
-	        porosity_.mesh().time().timeName(),
+	        Foam::timeName(porosity_.mesh().time()),
 	        porosity_.mesh(),
 	        Foam::IOobject::READ_IF_PRESENT,
 	        Foam::IOobject::AUTO_WRITE
@@ -112,9 +112,9 @@ pFlow::coupling::drag<DistributorType>::create
 	const auto& dragDict = uDict.subDict("drag");
 
 	auto shapeName = uCS.shapeTypeName();
-	auto useCellDist = dragDict.template lookup<Foam::Switch>("cellDistribution");
+	auto useCellDist = lookupDict<Foam::Switch>(dragDict, "cellDistribution");
 	auto distName = DistributorType::TYPENAME();
-	auto dType = dragDict.template lookup<Foam::word>("type");
+	auto dType = lookupDict<Foam::word>(dragDict, "type");
 	
 	Foam::word dragType;
 

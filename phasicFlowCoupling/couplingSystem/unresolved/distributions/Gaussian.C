@@ -149,8 +149,8 @@ pFlow::coupling::Gaussian::Gaussian
 	const Plus::centerMassField& centerMass
 )
 :
-	neighborLength_(dict.lookup<Foam::scalar>("neighborLength")),
-	lengthExtent_(dict.lookupOrDefault<Foam::scalar>("lengthExtent", 3.0)),
+	neighborLength_(lookupDict<Foam::scalar>(dict, "neighborLength")),
+	lengthExtent_(lookupOrDefaultDict<Foam::scalar>(dict, "lengthExtent", 3.0)),
 	weights_("weights",centerMass),
 	mesh_(cMesh.mesh())
 {
@@ -239,7 +239,7 @@ void pFlow::coupling::Gaussian::updateWeights
 			}
 
 		}
-		pSubTotal = Foam::max(pSubTotal, Foam::vSmall);
+		pSubTotal = Foam::max(pSubTotal, static_cast<Foam::scalar>(1.0e-15));
 		for(auto& w:weightsI) w /= pSubTotal;
 	}
 

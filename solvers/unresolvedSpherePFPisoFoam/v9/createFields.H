@@ -5,7 +5,7 @@ volScalarField p
     IOobject
     (
         "p",
-        runTime.timeName(),
+        Foam::timeName(runTime),
         mesh,
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
@@ -19,7 +19,7 @@ volVectorField U
     IOobject
     (
         "U",
-        runTime.timeName(),
+        Foam::timeName(runTime),
         mesh,
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
@@ -39,7 +39,7 @@ surfaceScalarField phi
     IOobject
     (
         "phi",
-        runTime.timeName(),
+        Foam::timeName(runTime),
         mesh,
         IOobject::READ_IF_PRESENT,
         IOobject::AUTO_WRITE
@@ -51,7 +51,6 @@ surfaceScalarField phi
 pressureReference pressureReference(p, piso.dict());
 
 mesh.setFluxRequired(p.name());
-
 
 singlePhaseTransportModel laminarTransport(U, phi);
 
@@ -66,7 +65,7 @@ volScalarField rho
     IOobject
     (
         "rho",
-        runTime.timeName(),
+        Foam::timeName(runTime),
         mesh
     ),
     mesh,

@@ -6,6 +6,7 @@ pFlow_INCLUDE_DIR =$(pFlow_Project)/include
 CUDA_PATH =/usr/local/cuda
 
 -include $(GENERAL_RULES)/mplibType
+-include $(GENERAL_RULES)/mpi-rules
 
 EXE_INC = \
     -I$(pFlow_INCLUDE_DIR) \
@@ -35,6 +36,7 @@ LIB_LIBS = \
     -lUtilities \
     -lOpenFOAM \
     -L$(FOAM_LIBBIN)/openmpi-system -lPstream \
+    -L$(FOAM_LIBBIN)/sys-openmpi -lPstream \
     -lfiniteVolume \
     -lmeshTools
 

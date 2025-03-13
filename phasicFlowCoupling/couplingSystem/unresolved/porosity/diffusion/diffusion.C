@@ -18,10 +18,6 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-// from OpenFOAM
-#include "fvCFD.H"
-
-
 #include "diffusion.hpp"
 #include "unresolvedCouplingSystem.hpp"
 
@@ -30,7 +26,7 @@ Foam::tmp<Foam::fvMatrix<Foam::scalar>> pFlow::coupling::diffusion::fvmDdt
     const Foam::volScalarField& sField
 )
 {
-	Foam::tmp<fvMatrix<Foam::scalar>> tfvm
+	Foam::tmp<Foam::fvMatrix<Foam::scalar>> tfvm
     (
         new Foam::fvMatrix<Foam::scalar>
         (
@@ -65,11 +61,11 @@ pFlow::coupling::diffusion::diffusion(
 	porosity(CS, cMesh, parDiam),
 	nSteps_
 	(
-		Foam::max(1, CS.unresolvedDict().subDict("porosity").lookup<Foam::label>("nSteps"))
+		Foam::max(1, lookupDict<Foam::label>(CS.unresolvedDict().subDict("porosity"), "nSteps"))
 	),
 	boundLength_
 	(
-		CS.unresolvedDict().subDict("porosity").lookup<Foam::scalar>("boundLength")
+		lookupDict<Foam::scalar>(CS.unresolvedDict().subDict("porosity"), "boundLength")
 	),
 	intTime_(boundLength_*boundLength_/4),
 	dt_("dt", Foam::dimTime, intTime_/nSteps_),
@@ -119,25 +115,24 @@ bool pFlow::coupling::diffusion::internalFieldUpdate()
 		"zeroGradient"
 	);
 
-	volScalarField& picAlpha = picAlphaTmp.ref();
+	Foam::volScalarField& picAlpha = picAlphaTmp.ref();
 	
-	
-	picAlpha.ref() = Foam::max( 1 - solidVol/this->mesh().V(), 0.0);
+	Foam::fieldRef(picAlpha) = Foam::max( 1 - solidVol/this->mesh().V(), 0.0);
 	picAlpha.correctBoundaryConditions();
 	
 	
 	// start of Time loop
 	for(Foam::label i=0; i<nSteps_; i++)
 	{
-		picAlpha.storeOldTime();
-		fvScalarMatrix alphaEq
+		picAlpha.storeOldTimes();
+		Foam::fvScalarMatrix alphaEq
 		(
-			fvmDdt(picAlpha) - fvm::laplacian(DT_,picAlpha)
+			fvmDdt(picAlpha) - Foam::fvm::laplacian(DT_,picAlpha)
 		);
 		alphaEq.solve(picSolDict_);
 	}
 
-	this->ref() = picAlpha.internalField();
+	Foam::fieldRef(*this) = picAlpha.internalField();
 
 	return true;
 }

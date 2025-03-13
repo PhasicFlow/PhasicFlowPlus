@@ -1,0 +1,65 @@
+#!/bin/bash
+
+# Check if WM_PROJECT_VERSION environment variable is set
+if [ -z "$WM_PROJECT_VERSION" ]; then
+  echo "Error: WM_PROJECT_VERSION environment variable is not set. Load environment variables of OpenFOAM first."
+  exit 1
+fi
+
+# Define the header file path
+HEADER_FILE="./phasicFlowCoupling/OFVersion.H"
+
+# Determine what to write based on WM_PROJECT_VERSION
+case "$WM_PROJECT_VERSION" in
+  9)
+    VERSION_VALUE="9"
+    VERSION_STRING="9"
+    ;;
+  12)
+    VERSION_VALUE="12"
+    VERSION_STRING="12"
+    ;;
+  v2406)
+    VERSION_VALUE="2406"
+    VERSION_STRING="v2406"
+    ;;
+  v2412)
+    VERSION_VALUE="2412"
+    VERSION_STRING="v2412"
+    ;;
+  *)
+    echo "Error: WM_PROJECT_VERSION has an unsupported value: $WM_PROJECT_VERSION"
+    echo "Supported values are: 9, 12, v2406, v2412"
+    exit 1
+    ;;
+esac
+
+# Check if file already exists and has the correct version
+if [ -f "$HEADER_FILE" ]; then
+  CURRENT_VERSION=$(grep -o "FOAM_VERSION_STRING $VERSION_STRING" "$HEADER_FILE")
+  if [ ! -z "$CURRENT_VERSION" ]; then
+    echo "File $HEADER_FILE already exists with correct version $VERSION_STRING. No update needed."
+    exit 0
+  fi
+fi
+
+
+
+# Write the version to the header file
+echo "/*--------------------------------*- C++ -*----------------------------------*\\" > "$HEADER_FILE"
+echo "| =========                 |                                                 |" >> "$HEADER_FILE"
+echo "| \\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |" >> "$HEADER_FILE"
+echo "|  \\\\    /   O peration     | Version:  $VERSION_STRING                         |" >> "$HEADER_FILE"
+echo "|   \\\\  /    A nd           | Web:      www.OpenFOAM.org                      |" >> "$HEADER_FILE"
+echo "|    \\\\/     M anipulation  |                                                 |" >> "$HEADER_FILE"
+echo "\\*---------------------------------------------------------------------------*/" >> "$HEADER_FILE"
+echo "" >> "$HEADER_FILE"
+echo "#ifndef OFVersion_H" >> "$HEADER_FILE"
+echo "#define OFVersion_H" >> "$HEADER_FILE"
+echo "" >> "$HEADER_FILE"
+echo "#define FOAM_VERSION $VERSION_VALUE" >> "$HEADER_FILE"
+echo "#define FOAM_VERSION_STRING $VERSION_STRING" >> "$HEADER_FILE"
+echo "" >> "$HEADER_FILE"
+echo "#endif // OFVersion_H" >> "$HEADER_FILE"
+
+echo "Successfully created $HEADER_FILE with OpenFOAM version $VERSION_VALUE"

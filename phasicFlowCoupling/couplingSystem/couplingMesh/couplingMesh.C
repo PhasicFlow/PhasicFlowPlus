@@ -26,6 +26,15 @@ void pFlow::coupling::couplingMesh::calculateBox()const
 
 void pFlow::coupling::couplingMesh::resetTree()const
 {
+    Foam::treeBoundBox bb(Foam::point(
+                    meshBox_.minPoint().x(),
+                    meshBox_.minPoint().y(),
+                    meshBox_.minPoint().z()),
+                Foam::point(
+                    meshBox_.maxPoint().x(),
+                    meshBox_.maxPoint().y(),
+                    meshBox_.maxPoint().z()));
+
     cellTreeSearch_.reset
     (
         new Foam::indexedOctree<Foam::treeDataCell>
@@ -36,17 +45,11 @@ void pFlow::coupling::couplingMesh::resetTree()const
                 mesh_,
                 cellDecompositionMode_   // use tet-decomposition for any inside test
             ),
-            Foam::treeBoundBox
+            treeBoundBoxExtend
             (
-                Foam::point(
-                    meshBox_.minPoint().x(),
-                    meshBox_.minPoint().y(),
-                    meshBox_.minPoint().z()),
-                Foam::point(
-                    meshBox_.maxPoint().x(),
-                    meshBox_.maxPoint().y(),
-                    meshBox_.maxPoint().z())
-            ).extend(1e-3),
+                bb,
+                1.0e-3
+            ),
             8,              // maxLevel
             10,             // leafsize
             6.0             // duplicity
@@ -67,15 +70,15 @@ pFlow::coupling::couplingMesh::couplingMesh
     meshStatic_(!mesh.dynamic()),
     domainExpansionRatio_
     (
-        Foam::max(dict.lookup<Foam::scalar>("domainExpansionRatio"), 0.5)
+        Foam::max(lookupDict<Foam::scalar>(dict, "domainExpansionRatio"), 0.5)
     ),
     domainUpdateInterval_
     (
-        dict.lookup<Foam::scalar>("domainUpdateInterval")
+        lookupDict<Foam::scalar>(dict, "domainUpdateInterval")
     ),
     decompositionMode_
     (
-        dict.lookup<Foam::word>("decompositionMode")
+        lookupDict<Foam::word>(dict, "decompositionMode")
     )
 {
 

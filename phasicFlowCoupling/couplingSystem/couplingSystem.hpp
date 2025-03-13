@@ -22,7 +22,7 @@ Licence:
 #define __couplingSystem_hpp__
 
 // from OpenFOAM
-#include "IOdictionary.H"
+#include "OFCompatibleHeader.hpp"
 
 // from phasicFlow
 #include "box.hpp"

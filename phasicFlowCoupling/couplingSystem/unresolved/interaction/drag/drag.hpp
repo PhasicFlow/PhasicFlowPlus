@@ -22,9 +22,7 @@ Licence:
 #define __drag_hpp__
 
 // from OpenFOAM
-#include "dictionary.H"
-#include "volFields.H"
-#include "fvc.H"
+#include "OFCompatibleHeader.hpp"
 
 // from phasicFlow
 #include "virtualConstructor.hpp"
