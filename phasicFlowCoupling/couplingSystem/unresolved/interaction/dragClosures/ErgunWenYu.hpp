@@ -21,7 +21,8 @@ Licence:
 #ifndef __ErgunWenYu_hpp__ 
 #define __ErgunWenYu_hpp__
 
-#include "dictionary.H"
+// from OpenFOAM
+#include "OFCompatibleHeader.hpp"
 
 #include "typeInfo.hpp"
 

@@ -19,9 +19,8 @@ Licence:
 -----------------------------------------------------------------------------*/
 
 // from OpenFOAM
-#include "Time.H"
+#include "OFCompatibleHeader.hpp"
 #include "polyMesh.H"
-#include "meshTriangulation.H"
 
 #include "foamPatchWall.hpp"
 #include "streams.hpp"
@@ -81,19 +80,20 @@ pFlow::coupling::foamPatchWall::foamPatchWall(
 	    Foam::IOobject
 	    (
 	        Foam::polyMesh::defaultRegion,
-	        runTime.timeName(),
+	        Foam::timeName(runTime),
 	        runTime,
 	        Foam::IOobject::MUST_READ
 	    )
 	);
 
-	auto& boundaries = mesh.boundaryMesh();
+	const auto& boundaries = mesh.boundaryMesh();
 
 	auto names = boundaries.names();
 
-	Foam::label pId = boundaries.findPatchID(patchName_);
+	Foam::label pId = Foam::findPatchID(boundaries, patchName_);
 	if( pId == -1 )
 	{
+		fatalErrorInFunction<<"Patch name does not exit:"<<patchName_<<endl;
 		fatalExit;
 	}
 

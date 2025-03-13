@@ -59,12 +59,13 @@ Description
 #include "unresolvedCouplingSystem.hpp"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+using namespace Foam;
 
 int main(int argc, char *argv[])
 {
     #include "postProcess.H"
-
     #include "setRootCaseLists.H"
+
     #include "createTime.H"
     #include "createMesh.H"
     #include "createControl.H"

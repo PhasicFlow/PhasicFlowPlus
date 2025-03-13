@@ -22,11 +22,15 @@ Licence:
 #define __couplingMesh_hpp__
 
 // from OpneFOAM
-#include "fvMesh.H"
+#include "OFCompatibleHeader.hpp"
 #include "indexedOctree.H"
 #include "treeDataCell.H"
 
-#include <map>
+//#include "fvMesh.H"
+//
+//
+
+//#include <map>
 
 // phasicFlow
 #include "box.hpp"

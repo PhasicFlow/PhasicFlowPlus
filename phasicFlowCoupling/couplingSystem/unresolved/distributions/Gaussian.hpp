@@ -20,9 +20,8 @@ Licence:
 #ifndef __Gaussian_hpp__ 
 #define __Gaussian_hpp__
 
-
 // from OpenFOAM
-#include "fvCFD.H"
+#include "OFCompatibleHeader.hpp"
 
 // from phasicFlow
 #include "typeInfo.hpp"

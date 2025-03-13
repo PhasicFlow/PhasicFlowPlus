@@ -53,14 +53,14 @@ pFlow::coupling::porosity::porosity
 		Foam::IOobject
 	    (
 	        "alpha",
-	        cMesh.mesh().time().timeName(),
+	        Foam::timeName(cMesh.mesh().time()),
 	        cMesh.mesh(),
 	        Foam::IOobject::MUST_READ,
 	        Foam::IOobject::AUTO_WRITE
 	    ),
     	cMesh.mesh()
 	),
-	alphaMin_(CS.unresolvedDict().subDict("porosity").lookup<Foam::scalar>("alphaMin")),
+	alphaMin_(lookupDict<Foam::scalar>(CS.unresolvedDict().subDict("porosity"), "alphaMin")),
 	cMesh_(cMesh),
 	particleDiameter_(parDiam),
 	parCellIndex_
@@ -110,12 +110,12 @@ pFlow::coupling::porosity::create
 )
 {
 
-	auto method = CS.unresolvedDict().subDict("porosity").lookup<Foam::word>("method");
+	auto method = lookupDict<Foam::word>(CS.unresolvedDict().subDict("porosity"), "method");
 	
 	if(method == "cellDistribution")
 	{
 		// 
-		auto cdType = CS.unresolvedDict().subDict("cellDistribution").lookup<Foam::word>("type");
+		auto cdType = lookupDict<Foam::word>(CS.unresolvedDict().subDict("cellDistribution"), "type");
 		method = pFlow::angleBracketsNames("porosityCellDistribution", cdType);
 	}
 

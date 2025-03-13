@@ -73,10 +73,7 @@ pFlow::uniquePtr<pFlow::coupling::unresolvedCouplingSystem>
     }
     else
     {
-    	cellDistMethod = couplingDict.
-    					subDict("unresolved").
-    					subDict("cellDistribution").
-    					lookup<Foam::word>("type");
+    	cellDistMethod = lookupDict<Foam::word>(couplingDict.subDict("unresolved").subDict("cellDistribution"), "type");
     }
 
     word couplingType = angleBracketsNames(

@@ -18,10 +18,6 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-// from OpenFOAM
-#include "fvCFD.H"
-
-
 #include "subDivision9.hpp"
 
 const pFlow::real sin_45[] = {0.7071067811865475,  0.7071067811865475, -0.7071067811865475, -0.7071067811865475};
@@ -102,7 +98,7 @@ bool pFlow::coupling::subDivision9::internalFieldUpdate()
 
 	} // omp parallel for
 
-	this->ref() = Foam::max(
+	Foam::fieldRef(*this) = Foam::max(
 		1 - solidVol/this->mesh().V(), 
 		static_cast<Foam::scalar>(this->alphaMin()) );
 

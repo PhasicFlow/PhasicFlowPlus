@@ -17,20 +17,14 @@ Licence:
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 -----------------------------------------------------------------------------*/
-// from OpenFOAM
-#include "mathematicalConstants.H"
-#include "volFields.H"
 
 #include "ErgunWenYu.hpp"
-#include "streams.hpp"
-
-
 
 pFlow::coupling::ErgunWenYu::ErgunWenYu
 (
 	const Foam::dictionary&	dict
 )
 :
-	residualRe_(dict.lookup<Foam::scalar>("residualRe"))
+	residualRe_(lookupDict<Foam::scalar>(dict, "residualRe"))
 {}
 

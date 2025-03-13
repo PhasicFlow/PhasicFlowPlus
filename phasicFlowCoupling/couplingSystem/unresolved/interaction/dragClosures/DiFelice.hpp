@@ -21,7 +21,9 @@ Licence:
 #ifndef __DiFelice_hpp__ 
 #define __DiFelice_hpp__
 
-#include "dictionary.H"
+// from OpenFOAM
+#include "OFCompatibleHeader.hpp"
+
 
 #include "typeInfo.hpp"
 
@@ -32,7 +34,6 @@ class DiFelice
 {
 
 	Foam::scalar 		residualRe_;
-	
 
 public:
 

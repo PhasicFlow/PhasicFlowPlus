@@ -41,7 +41,7 @@ bool pFlow::coupling::porosityCellDistribution<DistributorType>::internalFieldUp
     
     auto solidVolTmp = calculateSolidVol(cellDistributor_);
 
-    this->ref() = Foam::max(
+    Foam::fieldRef(*this) = Foam::max(
         1 - solidVolTmp/this->mesh().V(), 
         static_cast<Foam::scalar>(this->alphaMin()) );
 
