@@ -24,8 +24,12 @@ Licence:
 #include "Gaussian.hpp"
 #include "Gaussian2.hpp"
 #include "GaussianIntegral.hpp"
+//#include "adaptiveGaussian.hpp"
+//#include "Gaussian29.hpp"
 
 template class pFlow::coupling::drag<pFlow::coupling::self>;
 template class pFlow::coupling::drag<pFlow::coupling::Gaussian>;
 template class pFlow::coupling::drag<pFlow::coupling::Gaussian2>;
 template class pFlow::coupling::drag<pFlow::coupling::GaussianIntegral>;
+//template class pFlow::coupling::drag<pFlow::coupling::adaptiveGaussian>;
+//template class pFlow::coupling::drag<pFlow::coupling::Gaussian29>;

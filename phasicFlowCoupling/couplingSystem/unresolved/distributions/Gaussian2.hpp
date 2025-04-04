@@ -20,15 +20,8 @@ Licence:
 #ifndef __Gaussian2_hpp__ 
 #define __Gaussian2_hpp__
 
-
-// from OpenFOAM
-#include "OFCompatibleHeader.hpp"
-
-// from phasicFlow
-#include "typeInfo.hpp"
-
-// from phasicFlowPlus
-#include "procCMField.hpp"
+// from PhasicFlowPlus
+#include "distribution.hpp"
 
 
 namespace pFlow::coupling
@@ -37,35 +30,15 @@ namespace pFlow::coupling
 class couplingMesh;
 
 class Gaussian2
-{
+:
+	public distribution
+{	
 private:
 	
 	// radius of circle for cell neighbor list 
-	Foam::scalar 				neighborLength_;
+	Foam::scalar 				standardDeviation_;
 
-	Foam::scalar 				lengthExtent_;
-
-	Plus::procCMField< std::vector<Foam::scalar> > 		weights_;
-
-	// list of neighbor cells for each cell 
-	Foam::labelListList  		neighborList_;
-	
-	// boundary cells 
-	Foam::List<std::pair<Foam::label, Foam::label>> 	boundaryCell_;
-
-	const Foam::fvMesh&			mesh_;
-
-protected:
-	
-	void constructLists(const Foam::scalar searchLen);
-
-	void parseNeighbors(
-		const Foam::label 		targetCelli,
-		const Foam::vector& 	targetCellCentre, 
-		const Foam::scalar 		searchLen,
-		const Foam::scalar 		celli,
-		std::set<Foam::label>& 	finalList,
-		const Foam::label 		layerNumber);
+	Foam::scalar 				distLengthExtent_;
 
 public:
 
@@ -82,84 +55,16 @@ public:
 	~Gaussian2() = default;
 
 	inline
-	auto neighborLength()const
+	auto standardDeviation()const
 	{
-		return neighborLength_;
+		return standardDeviation_;
 	}
 
 	void updateWeights(
 		const Plus::procCMField<Foam::label> & parCellIndex,
 		const Plus::procCMField<real> & parDiameter);
 
-	inline
-	void distributeValue_OMP(
-		Foam::label parIndx, 
-		Foam::label parCellIndx,
-		Foam::volScalarField::Internal& internalField,
-		const Foam::scalar& val)const
-	{
-		const auto& weightsI = weights_[parIndx];
-		const Foam::labelList& neighbors = neighborList_[parCellIndx];
-		forAll(neighbors, j)
-		{
-			#pragma omp atomic
-			internalField[neighbors[j]] += val*weightsI[j];
-		}
-	}
-
-	inline
-	void distributeValue_OMP(
-		Foam::label parIndx, 
-		Foam::label parCellIndx,
-		Foam::volVectorField::Internal& internalField,
-		const Foam::vector& val )const
-	{
-		const auto& weightsI = weights_[parIndx];
-		const Foam::labelList& neighbors = neighborList_[parCellIndx];
-		forAll(neighbors, j)
-		{
-			const auto v = weightsI[j]* val;
-			auto& tv = internalField[neighbors[j]]; 
-			#pragma omp atomic
-			tv.x() += v.x();
-			
-			#pragma omp atomic
-			tv.y() += v.y();
-
-			#pragma omp atomic
-			tv.z() += v.z();
-		}
-	}
-
-	inline 
-	void distributeValue(
-		Foam::label parIndx, 
-		Foam::label parCellIndx,
-		Foam::volScalarField::Internal& internalField,
-		const Foam::scalar& val)const
-	{
-		const auto& weightsI = weights_[parIndx];
-		const Foam::labelList& neighbors = neighborList_[parCellIndx];
-		forAll(neighbors, j)
-		{
-			internalField[neighbors[j]] += val*weightsI[j];
-		}
-	}
-
-	inline
-	void distributeValue(
-		Foam::label parIndx, 
-		Foam::label parCellIndx,
-		Foam::volVectorField::Internal& internalField,
-		const Foam::vector& val)const
-	{
-		const auto& weightsI = weights_[parIndx];
-		const Foam::labelList& neighbors = neighborList_[parCellIndx];
-		forAll(neighbors, j)
-		{
-			internalField[neighbors[j]] += weightsI[j]* val;
-		}
-	}
+	
 
 }; 
 

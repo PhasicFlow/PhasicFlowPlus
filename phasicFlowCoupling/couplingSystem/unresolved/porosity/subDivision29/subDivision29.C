@@ -91,16 +91,16 @@ bool pFlow::coupling::subDivision29::internalFieldUpdate()
 
 			for( int j=-1; j<=1; j+=2 )
 			{
-	        	offset= {r*j, 0.0, 0.0};
-	          	
-	          	points[n++] = pPos + offset;
-	            
-	            offset = {0.0, r*j, 0.0};
-	            points[n++] = pPos + offset;
-	            
+				offset= {r*j, 0.0, 0.0};
+				
+				points[n++] = pPos + offset;
+				
+				offset = {0.0, r*j, 0.0};
+				points[n++] = pPos + offset;
+				
 
-	            offset = {0.0, 0.0, r*j};
-	            points[n++] = pPos + offset;
+				offset = {0.0, 0.0, r*j};
+				points[n++] = pPos + offset;
 			}
 		}
 

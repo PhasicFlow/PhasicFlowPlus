@@ -29,3 +29,4 @@ template class pFlow::coupling::sphereUnresolvedCouplingSystem<pFlow::coupling::
 template class pFlow::coupling::sphereUnresolvedCouplingSystem<pFlow::coupling::Gaussian>;
 template class pFlow::coupling::sphereUnresolvedCouplingSystem<pFlow::coupling::Gaussian2>;
 template class pFlow::coupling::sphereUnresolvedCouplingSystem<pFlow::coupling::GaussianIntegral>;
+

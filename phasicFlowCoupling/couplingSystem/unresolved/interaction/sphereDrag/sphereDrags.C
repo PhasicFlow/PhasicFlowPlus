@@ -23,6 +23,8 @@ Licence:
 #include "Gaussian.hpp"
 #include "Gaussian2.hpp"
 #include "GaussianIntegral.hpp"
+//#include "adaptiveGaussian.hpp"
+//#include "Gaussian29.hpp"
 
 #include "DiFelice.hpp"
 #include "Rong.hpp"
@@ -77,7 +79,7 @@ template class pFlow::coupling::sphereDrag          \
 		pFlow::coupling::GaussianIntegral,  \
 		closure,                            \
 		false                               \
-	>; 												
+	>; 														
 
 makeSphereDrag(pFlow::coupling::DiFelice);
 makeSphereDrag(pFlow::coupling::ErgunWenYu);

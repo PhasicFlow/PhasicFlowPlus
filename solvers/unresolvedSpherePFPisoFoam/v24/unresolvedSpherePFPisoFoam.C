@@ -49,23 +49,20 @@ Description
 // OpenFOAM
 #include "fvCFD.H"
 #include "singlePhaseTransportModel.H"
-#include "kinematicMomentumTransportModel.H"
+#include "turbulentTransportModel.H"
 #include "pisoControl.H"
-#include "pressureReference.H"
-#include "fvModels.H"
-#include "fvConstraints.H"
+#include "fvOptions.H"
 
 // phasicFlow
 #include "unresolvedCouplingSystem.hpp"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-using namespace Foam;
 
 int main(int argc, char *argv[])
 {
     #include "postProcess.H"
-    #include "setRootCaseLists.H"
 
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createMesh.H"
     #include "createControl.H"
@@ -94,7 +91,7 @@ int main(int argc, char *argv[])
         coupling.calculatePorosity();
         coupling.calculateFluidInteraction();
         coupling.sendDataToDEM(t, dt);
-        
+
         Info<<"Iterating DEM up to time "<< runTime.time().value()<<endl;
         coupling.iterate(t, runTime.writeTime(), runTime.timeName());
 
@@ -103,7 +100,6 @@ int main(int argc, char *argv[])
 
         // Pressure-velocity PISO corrector
         {
-            fvModels.correct();
 
             #include "UEqn.H"
 

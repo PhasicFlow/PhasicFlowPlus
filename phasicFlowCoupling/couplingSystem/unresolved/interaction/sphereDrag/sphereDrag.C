@@ -73,7 +73,7 @@ void pFlow::coupling::sphereDrag<DistributorType, DragClosureType, useCellDistri
 			Foam::scalar sp = 3 * Foam::constant::mathematical::pi * mui * ef * dp * dragClosure.dimlessDrag(Re, ef);
 			
 			Foam::vector pf = static_cast<real>(sp)*ur - vp*pGrad[cellIndx];
-			particleForce[parIndx] = realx3(0,0,0); //realx3(pf.x(), pf.y(), pf.z());
+			particleForce[parIndx] = realx3(pf.x(), pf.y(), pf.z());
 			
 			if constexpr (useCellDistribution)
 			{
@@ -91,10 +91,8 @@ void pFlow::coupling::sphereDrag<DistributorType, DragClosureType, useCellDistri
 
 	forAll(Vcells, i)
 	{
-		/*Su[i] /= Vcells[i];
-		Sp[i] /= Vcells[i];*/
-		Su[i] = Foam::vector(0,0,0);
-		Sp[i] = 0;
+		Su[i] /= Vcells[i];
+		Sp[i] /= Vcells[i];
 	}
 }
 
