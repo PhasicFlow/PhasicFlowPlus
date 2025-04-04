@@ -74,7 +74,7 @@ pFlow::coupling::diffusion::diffusion(
 {
 	
 	picSolDict_.add("relTol", 0);
-	picSolDict_.add("tolerance", 1.0e-6);
+	picSolDict_.add("tolerance", 1.0e-8);
 	picSolDict_.add("solver", "smoothSolver");
 	picSolDict_.add("smoother", "symGaussSeidel");
 }
@@ -117,22 +117,22 @@ bool pFlow::coupling::diffusion::internalFieldUpdate()
 
 	Foam::volScalarField& picAlpha = picAlphaTmp.ref();
 	
-	Foam::fieldRef(picAlpha) = Foam::max( 1 - solidVol/this->mesh().V(), 0.0);
+	Foam::fieldRef(picAlpha) = Foam::min(solidVol/this->mesh().V(), 1.0);
 	picAlpha.correctBoundaryConditions();
 	
 	
 	// start of Time loop
 	for(Foam::label i=0; i<nSteps_; i++)
 	{
-		picAlpha.storeOldTimes();
+		picAlpha.storeOldTime();
 		Foam::fvScalarMatrix alphaEq
 		(
 			fvmDdt(picAlpha) - Foam::fvm::laplacian(DT_,picAlpha)
 		);
 		alphaEq.solve(picSolDict_);
 	}
-
-	Foam::fieldRef(*this) = picAlpha.internalField();
+        Info<<"*********************************************************\n";
+	Foam::fieldRef(*this) = 1.0-picAlpha.internalField();
 
 	return true;
 }

@@ -77,7 +77,7 @@ template class pFlow::coupling::grainDrag           \
 		pFlow::coupling::GaussianIntegral,  \
 		closure,                            \
 		false                               \
-	>; 												
+	>;							
 
 makegrainDrag(pFlow::coupling::DiFelice);
 makegrainDrag(pFlow::coupling::ErgunWenYu);
