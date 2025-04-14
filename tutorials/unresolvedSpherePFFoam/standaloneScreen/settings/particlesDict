@@ -1,0 +1,46 @@
+/* -------------------------------*- C++ -*--------------------------------- *\ 
+|  phasicFlow File                                                            | 
+|  copyright: www.cemf.ir                                                     | 
+\* ------------------------------------------------------------------------- */  
+objectName 	geometryDict;
+objectType 	dictionary;
+fileFormat  ASCII;
+/*---------------------------------------------------------------------------*/
+
+setFields
+{
+	defaultValue 
+	{
+		// linear velocity (m/s)
+		velocity 	realx3 	(0 0 0);
+
+		// linear acceleration (m/s2)
+		acceleration 	realx3 	(0 0 0);
+
+		// rotational velocity (rad/s)
+		rVelocity 	realx3 	(0 0 0);
+
+		// name of the particle shape
+		shapeName 	word	sphere;
+	}
+
+	selectors
+	{}
+}
+
+positionParticles                                // positions particles 
+{
+	method                empty;                 // other options: ordered and random 
+           
+	regionType              box;                 // other options: cylinder and sphere  
+
+	boxInfo                                      // box region for positioning particles 
+	{
+		min (-0.1 -0.3 -0.1);                 // lower corner point of the box 
+
+		max ( 0.9  0.3 0.3);	             // upper corner point of the box 
+	} 
+
+
+}
+
