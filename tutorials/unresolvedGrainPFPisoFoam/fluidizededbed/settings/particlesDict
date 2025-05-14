@@ -28,10 +28,10 @@ positionParticles
 		orderedInfo
 	{
 		// minimum space between centers of particles
-		diameter 0.0035;
+		distance 0.0035;
 		
 		// number of particles in the simulation 	 	
-		numPoints 40000;
+		numPoints 50000;
 	
 		// axis order for filling the space with particles		 	
 		axisOrder (x y z);  
