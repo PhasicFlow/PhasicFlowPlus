@@ -28,7 +28,7 @@ positionParticles
 	randomInfo
 	{
 		numPoints   2000;
-		diameter 0.005;
+		distance   0.005;
 		maxIterations 50;
 		axisOrder (z x y);
 	}
