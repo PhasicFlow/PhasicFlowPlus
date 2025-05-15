@@ -21,7 +21,8 @@ EXE_INC = \
     -I$(pFlow_INCLUDE_DIR)/Utilities \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
-    -I$(LIB_SRC)/Pstream/mpi/lnInclude
+    -I$(LIB_SRC)/Pstream/mpi/lnInclude \
+    -I$(LIB_SRC)/surfMesh/lnInclude 
 
 LIB_LIBS = \
     -L$(pFlow_Project)/lib \
@@ -38,7 +39,8 @@ LIB_LIBS = \
     -L$(FOAM_LIBBIN)/openmpi-system -lPstream \
     -L$(FOAM_LIBBIN)/sys-openmpi -lPstream \
     -lfiniteVolume \
-    -lmeshTools
+    -lmeshTools \
+    -lsurfMesh 
 
 EXE_INC  += $(PFLAGS) $(PINC)
 LIB_LIBS += $(PLIBS)

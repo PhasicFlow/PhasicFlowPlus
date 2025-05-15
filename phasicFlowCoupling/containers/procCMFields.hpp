@@ -29,6 +29,8 @@ using realProcCMField = pFlow::Plus::procCMField<pFlow::real>;
 
 using int32ProcCMField = pFlow::Plus::procCMField<pFlow::int32>;
 
+using uint32ProcCMField = pFlow::Plus::procCMField<pFlow::uint32>;
+
 using realx3ProcCMField = pFlow::Plus::procCMField<pFlow::realx3>;
 
 }

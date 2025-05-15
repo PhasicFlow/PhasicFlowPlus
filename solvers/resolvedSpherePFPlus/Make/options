@@ -1,0 +1,53 @@
+ptFLAGS += -std=c++17 -Wno-old-style-cast
+
+pFlow_Project = $(pFlow_PROJECT_DIR)
+pFlow_INCLUDE_DIR =$(pFlow_Project)/include
+
+-include $(GENERAL_RULES)/mpi-rules
+
+EXE_INC = \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/sampling/lnInclude \
+    -I$(LIB_SRC)/TurbulenceModels/turbulenceModels/lnInclude \
+    -I$(LIB_SRC)/TurbulenceModels/incompressible/lnInclude \
+    -I$(LIB_SRC)/transportModels \
+    -I$(LIB_SRC)/transportModels/incompressible/singlePhaseTransportModel \
+    -I$(LIB_SRC)/dynamicMesh/lnInclude \
+    -I$(LIB_SRC)/dynamicFvMesh/lnInclude \
+    -I$(LIB_SRC)/regionFaModels/lnInclude \
+    -I$(LIB_SRC)/surfMesh/lnInclude \
+    -I$(LIB_SRC)/fileFormats/lnInclude \
+    -I../../phasicFlowCoupling/lnInclude \
+    -I../../utilities/pFCouplingUtilities/lnInclude \
+    -I$(pFlow_INCLUDE_DIR) \
+    -I$(pFlow_INCLUDE_DIR)/phasicFlow \
+    -I$(pFlow_INCLUDE_DIR)/DEMSystems \
+    -I$(pFlow_INCLUDE_DIR)/Utilities
+
+EXE_LIBS = \
+    -lfiniteVolume \
+    -lfvOptions \
+    -lmeshTools \
+    -lsampling \
+    -lturbulenceModels \
+    -lincompressibleTurbulenceModels \
+    -lincompressibleTransportModels \
+    -ldynamicMesh \
+    -ldynamicFvMesh \
+    -ltopoChangerFvMesh \
+    -latmosphericModels \
+    -lregionFaModels \
+    -lfiniteArea \
+    -lsurfMesh \
+    -lOpenFOAM \
+    -L$(FOAM_USER_LIBBIN)/ \
+    -lphasicFlowCoupling \
+    -lpFCouplingUtilities \
+    -L$(pFlow_Project)/lib \
+    -lphasicFlow \
+    -lDEMSystems \
+    -lUtilities
+
+EXE_INC  += $(PFLAGS) $(PINC)
+EXE_LIBS += $(PLIBS)
