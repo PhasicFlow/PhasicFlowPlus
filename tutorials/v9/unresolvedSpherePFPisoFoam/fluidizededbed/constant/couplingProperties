@@ -1,0 +1,68 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  9
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+	format      ascii;
+	class       dictionary;
+	location    "constant";
+	object      couplingProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+particleMapping
+{
+	// based on the maximum particle diameter in the simulation.
+	domainExpansionRatio    1;
+
+	domainUpdateInterval    0.01;
+
+	decompositionMode       facePlanes;
+}
+
+unresolved
+{
+
+	cellDistribution
+	{
+		// type of cell distribution method (if required) 
+		//   self: no distribution (cell itself)
+		//   Gaussian: distribute values on sorounding cells based on a neighbor length
+		//   Power: similar to Gaussian, but with power law distribution 
+		type                self; 
+	}
+
+	porosity
+	{
+		// Options are PIC, subDivision29, subDivision9, diffusion, cellDistribution
+		method      subDivision29Mod;
+
+		// minimum alpha allowed 
+		alphaMin    0.25;
+	}
+
+	drag
+	{
+		// Drag force closure, other options are ErgunWenYu, Rong
+		type                DiFelice; 
+
+		// type of fluid velocity used in the drag force calculations
+		//   cell: uses fluid velocity of the cell that contains the particle center 
+		//   interpolation: uses averaged fluid velocity based on cell velocities around particle
+		fluidVelocity       cell;  
+
+		// weather to distribute calculated drag force on cells
+		//   off: set the calculated drag force on cell itself
+		//   on: distributed the calculated drag force on cells (using cellDistribution method)
+		cellDistribution    off; 
+		
+		residualRe          10e-6;
+	}
+
+}
+
+// ************************************************************************* //

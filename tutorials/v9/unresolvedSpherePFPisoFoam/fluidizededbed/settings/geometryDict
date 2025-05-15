@@ -1,0 +1,35 @@
+/* -------------------------------*- C++ -*--------------------------------- *\ 
+|  phasicFlow File                                                            | 
+|  copyright: www.cemf.ir                                                     | 
+\* ------------------------------------------------------------------------- */  
+
+objectName 	geometryDict;
+objectType 	dictionary;
+fileFormat 	ASCII;
+/* ------------------------------------------------------------------------- */
+
+// motion model: all surfaces are fixed
+motionModel stationary;
+ 
+stationaryInfo
+	{
+	}
+
+
+surfaces
+{
+	allWall
+	{
+		type 	 cuboidWall;   // type of the wall
+		center 	 (0.075 0.35 0.02);
+		edgeLength 	 (0.15  0.70 0.040);
+		numDiv 	 (3 14 1);
+		material wallMat;   // material name of this wall
+		motion 	 none;	// motion component name 
+	}
+	
+	
+	
+		
+}
+
