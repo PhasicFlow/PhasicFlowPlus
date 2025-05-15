@@ -1,8 +1,8 @@
 /*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
-   \\    /   O peration     | Website:  https://openfoam.org
-    \\  /    A nd           | Copyright (C) 2011-2021 OpenFOAM Foundation
+   \\    /   O peration     |
+    \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
       O        C enter of
@@ -47,10 +47,10 @@ Application
 
 Description
     Transient incompressible solver for resolved simulation of spherical
-    fluid-particle systems.
+    fluid-particle systems - based on pimpleFoam.
 
 Author
-    Bahram Haddadi, fluidDynamics.at.  All rights reserved - based on pimpleFoam
+    Bahram Haddadi, fluidDynamics.at.  All rights reserved
 
 \*---------------------------------------------------------------------------*/
 

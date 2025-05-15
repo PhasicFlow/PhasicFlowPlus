@@ -4,9 +4,12 @@
     O   O      M ultiscale modeling of
    OOOOOOO     F luid flow       
 ------------------------------------------------------------------------------
-  Copyright (C): www.cemf.ir
-  email: hamid.r.norouzi AT gmail.com
-------------------------------------------------------------------------------  
+ _____ _____ ____
+|   __|   __|    \    Engineering    |
+|   __|   __|  |  |   Fluid          |
+|_____|__|  |____/    Dynamics       |  www.fluidDynamics.at
+
+-------------------------------------------------------------------------------
 Licence:
   This file is part of phasicFlow code. It is a free software for simulating 
   granular and multiphase flows. You can redistribute it and/or modify it under
