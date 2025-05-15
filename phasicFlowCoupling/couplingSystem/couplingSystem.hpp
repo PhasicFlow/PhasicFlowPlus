@@ -65,6 +65,8 @@ private:
 
 	Plus::centerMassField 		centerMass_;
 
+	Plus::uint32ProcCMField     particleID_;
+
 	Plus::realProcCMField		particleDiameter_;
 
 	Plus::realx3ProcCMField 	particleVelocity_;
@@ -196,6 +198,12 @@ public:
 		return centerMass_;
 	}
 
+	inline 
+	Plus::uint32ProcCMField& particleID()
+	{
+		return particleID_;
+	}
+
 	inline
 	Plus::realx3ProcCMField& particleVelocity()
 	{
@@ -205,7 +213,7 @@ public:
 	inline
 	Plus::realx3ProcCMField& particleRVelocity()
 	{
-		return particleVelocity_;
+		return particleRVelocity_;
 	}
 
 	inline 

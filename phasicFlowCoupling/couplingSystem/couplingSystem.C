@@ -60,6 +60,7 @@ pFlow::coupling::couplingSystem::couplingSystem(
 	getDataTimer_("get data from DEM", &couplingTimers_),
 	sendDataTimer_("send data to DEM", &couplingTimers_),
 	centerMass_(),
+	particleID_("particleID",centerMass_),
 	particleDiameter_("diameter",centerMass_),
 	particleVelocity_("velocity", centerMass_),
 	particleRVelocity_("rVelocity", centerMass_),
@@ -230,7 +231,6 @@ bool pFlow::coupling::couplingSystem::collectFluidTorque()
 
 bool pFlow::coupling::couplingSystem::distributeParticles()
 {
-
 	auto allDiam = procDEMSystem_.particlesDiameterAllMaster();
 	auto thisDiam = makeSpan(particleDiameter_);
 
@@ -252,6 +252,17 @@ bool pFlow::coupling::couplingSystem::distributeParticles()
 		return false;
 	}
 
+	/*auto allID = procDEMSystem_.particlesIDAllMaster();
+	auto thisID = makeSpan(particleID_);
+
+	if(!realScatteredComm_.distribute(allID, thisID))
+	{
+		fatalErrorInFunction<<
+		"cannot distribute particle IDs to processors"<<endl;
+		Plus::processor::abort(0);
+		return false;
+	}*/
+
 	return true;
 
 }
@@ -267,6 +278,16 @@ bool pFlow::coupling::couplingSystem::distributeParticleFields()
 		Plus::processor::abort(0);
 		return false;
 	}
+
+	/*auto allRVel = procDEMSystem_.particlesRVelocityAllMaster();
+	auto thisRVel = makeSpan(particleRVelocity_);
+	if(!realx3ScatteredComm_.distribute(allRVel, thisRVel))
+	{
+		fatalErrorInFunction<<
+		"cannot distribute particle rotational velocity among processors"<<endl;
+		Plus::processor::abort(0);
+		return false;
+	}*/
 
 	return true;
 }

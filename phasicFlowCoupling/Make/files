@@ -36,5 +36,6 @@ couplingSystem/unresolved/unresolvedCouplingSystem/unresolvedCouplingSystem.C
 couplingSystem/unresolved/sphereUnresolvedCouplingSystem/sphereUnresolvedCouplingSystems.C
 couplingSystem/unresolved/grainUnresolvedCouplingSystem/grainUnresolvedCouplingSystems.C
 
+couplingSystem/resolved/resolvedCouplingSystem.C
 
 LIB = $(FOAM_USER_LIBBIN)/libphasicFlowCoupling

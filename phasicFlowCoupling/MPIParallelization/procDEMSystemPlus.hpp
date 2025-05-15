@@ -128,6 +128,18 @@ public:
 		}
 	}
 
+	inline 
+	span<realx3> particlesRVelocityAllMaster()
+	{
+		if(demSystem_)
+		{
+			return demSystem_->rVelocity();
+		}else
+		{
+			return span<realx3>();
+		}
+	}
+
 
 	inline 
 	span<realx3> particlesFluidForceAllMaster()
