@@ -100,12 +100,7 @@ volScalarField rho
         mesh
     ),
     mesh,
-    dimensionedScalar
-    (
-        "rho", 
-        dimDensity, 
-        readScalar(laminarTransport.lookup("rho"))
-    )
+    dimensionedScalar("rho", dimDensity, laminarTransport)
 );
 
 #include "createFvOptions.H"

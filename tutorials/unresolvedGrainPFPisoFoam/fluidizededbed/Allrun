@@ -18,7 +18,7 @@ particlesPhasicFlow
 echo " 2.2) add Geometry "
 geometryPhasicFlow
 echo " 2.3) Running "
-GrainGranFlow
+grainGranFlow
 
 
 echo "\n<--------------------------------------------------------------------->"
