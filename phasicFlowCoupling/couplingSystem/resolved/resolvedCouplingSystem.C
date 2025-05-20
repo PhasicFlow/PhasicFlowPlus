@@ -31,7 +31,7 @@ pFlow::coupling::resolvedCouplingSystem::resolvedCouplingSystem
 	char* argv[]
 )
 :
-	couplingSystem(shapeTypeName, mesh, argc, argv),
+	couplingSystem(shapeTypeName, mesh, argc, argv, true),
 	alpha_
 	(
 		Foam::IOobject

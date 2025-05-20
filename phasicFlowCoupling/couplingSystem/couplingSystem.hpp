@@ -77,6 +77,8 @@ private:
 
 	Plus::realx3ProcCMField   	fluidTorque_;
 
+	bool requireRVel_;
+
 	bool collectFluidForce();
 
 	bool collectFluidTorque();
@@ -144,7 +146,8 @@ public:
 		word shapeTypeName, 
 		Foam::fvMesh& mesh,
 		int argc, 
-		char* argv[]);
+		char* argv[],
+		bool requireRVel = false);
 
 	couplingSystem(const couplingSystem&) = delete;
 	

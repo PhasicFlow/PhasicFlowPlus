@@ -54,7 +54,8 @@ public:
 	procDEMSystem(
 		word demSystemName,
 		int argc, 
-		char* argv[]);
+		char* argv[],
+		bool requireRVel = false);
 
 	inline 
 	real startTime()const
@@ -101,6 +102,18 @@ public:
 		}else
 		{
 			return span<const int32>();
+		}
+	}
+
+	inline
+	span<uint32> particleIdAllMaster()const
+	{
+		if(demSystem_)
+		{
+			return demSystem_->particleId();
+		}else
+		{
+			return span<uint32>();
 		}
 	}
 
