@@ -39,7 +39,8 @@ pFlow::coupling::couplingSystem::couplingSystem(
 		word shapeTypeName, 
 		Foam::fvMesh& mesh,
 		int argc, 
-		char* argv[])
+		char* argv[],
+		bool requireRVel)
 :
 	Foam::IOdictionary
     (
@@ -54,7 +55,7 @@ pFlow::coupling::couplingSystem::couplingSystem(
     ),
     Plus::procCommunication(),
 	couplingMesh_(subDict("particleMapping"), mesh),
-	procDEMSystem_(shapeTypeName+"DEMSystem", argc, argv),
+	procDEMSystem_(shapeTypeName+"DEMSystem", argc, argv, requireRVel),
 	couplingTimers_("coupling", procDEMSystem_.getTimers()),
 	cfdTimers_("CFD", procDEMSystem_.getTimers()),
 	getDataTimer_("get data from DEM", &couplingTimers_),
@@ -65,7 +66,8 @@ pFlow::coupling::couplingSystem::couplingSystem(
 	particleVelocity_("velocity", centerMass_),
 	particleRVelocity_("rVelocity", centerMass_),
 	fluidForce_("fluidForce",centerMass_),
-	fluidTorque_("fluidTorque",centerMass_)
+	fluidTorque_("fluidTorque",centerMass_),
+	requireRVel_(requireRVel)
 {
 	
 	auto domain = couplingMesh_.meshBox();
@@ -252,7 +254,7 @@ bool pFlow::coupling::couplingSystem::distributeParticles()
 		return false;
 	}
 
-	/*auto allID = procDEMSystem_.particlesIDAllMaster();
+	/*auto allID = procDEMSystem_.particleIdAllMaster();
 	auto thisID = makeSpan(particleID_);
 
 	if(!realScatteredComm_.distribute(allID, thisID))
@@ -279,15 +281,19 @@ bool pFlow::coupling::couplingSystem::distributeParticleFields()
 		return false;
 	}
 
-	/*auto allRVel = procDEMSystem_.particlesRVelocityAllMaster();
-	auto thisRVel = makeSpan(particleRVelocity_);
-	if(!realx3ScatteredComm_.distribute(allRVel, thisRVel))
+	if( requireRVel_)
 	{
-		fatalErrorInFunction<<
-		"cannot distribute particle rotational velocity among processors"<<endl;
-		Plus::processor::abort(0);
-		return false;
-	}*/
+		auto allRVel = procDEMSystem_.particlesRVelocityAllMaster();
+		auto thisRVel = makeSpan(particleRVelocity_);
+		if(!realx3ScatteredComm_.distribute(allRVel, thisRVel))
+		{
+			fatalErrorInFunction<<
+			"cannot distribute particle rotational velocity among processors"<<endl;
+			Plus::processor::abort(0);
+			return false;
+		}
+	}
+	
 
 	return true;
 }

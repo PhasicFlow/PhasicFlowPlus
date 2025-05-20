@@ -26,7 +26,8 @@ pFlow::Plus::procDEMSystem::procDEMSystem
 (
 	word demSystemName,
 	int argc, 
-	char* argv[]
+	char* argv[],
+	bool requireRVel
 )
 {
 	if(Plus::processor::isMaster())
@@ -40,7 +41,8 @@ pFlow::Plus::procDEMSystem::procDEMSystem
 					realx3(1)
 				)), 
 			argc, 
-			argv);	
+			argv,
+			requireRVel);	
 	}
 
 	procCommunication proc;
