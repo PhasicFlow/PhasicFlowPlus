@@ -25,6 +25,7 @@ elif [ "$WM_PROJECT_VERSION" = "v2412" ]; then
     echo "  -> building solvers for OpenFOAM v2412"
     #wmake ./unresolvedSpherePFPlus/24
     wmake ./unresolvedSpherePFPisoFoam/v24
+    wmake ./resolvedSpherePFPlus
 else
     echo "  -> Error: Unknown OpenFOAM version: $WM_PROJECT_VERSION"
     echo "  -> Cannot proceed with build"

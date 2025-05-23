@@ -1,6 +1,7 @@
 #include <sys/stat.h>
 
-triSurface generateSphere(const vector& center, const scalar& diameter, int resolution)
+inline
+triSurface generateSphere(const Foam::vector center, const Foam::scalar& diameter, int resolution)
 {
     scalar radius = diameter / 2.0;
     pointField points;
