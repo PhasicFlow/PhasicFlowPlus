@@ -47,96 +47,6 @@ pFlow::coupling::resolvedCouplingSystem::resolvedCouplingSystem
 {}
 
 
-Foam::PtrList<Foam::scalar> 
-pFlow::coupling::resolvedCouplingSystem::particleIDs()
-{
-	int nParticles = this->numParticles();
-	Foam::PtrList<Foam::scalar> pIDs(nParticles);
-
-	for(auto i=0; i<nParticles; ++i)
-	{
-		pIDs.set(i, new scalar(this->couplingSystem::particleID()[i]));
-	}
-
-	return pIDs;
-}
-
-Foam::PtrList<Foam::scalar> 
-pFlow::coupling::resolvedCouplingSystem::particleDiameters()
-{
-	int nParticles = this->numParticles();
-	Foam::PtrList<Foam::scalar> pDiameters(nParticles);
-
-	for(auto i=0; i<nParticles; ++i)
-	{
-		pDiameters.set(i, new scalar(this->couplingSystem::particleDiameter()[i]));
-	}
-
-	return pDiameters;
-}
-
-Foam::PtrList<Foam::point> 
-pFlow::coupling::resolvedCouplingSystem::particleCoMs()
-{
-	int nParticles = this->numParticles();
-	Foam::PtrList<Foam::point> pCentersOfMass(nParticles);
-
-	for(auto i=0; i<nParticles; ++i)
-	{
-		Foam::point centerOfMass;
-		{
-			Foam::vector& point(centerOfMass);
-			point[0] = this->couplingSystem::centerMass()[i].x();
-			point[1] = this->couplingSystem::centerMass()[i].y();
-			point[2] = this->couplingSystem::centerMass()[i].z();
-		}
-		pCentersOfMass.set(i, new point(centerOfMass));
-	}
-
-	return pCentersOfMass;
-}
-
-Foam::PtrList<Foam::point> 
-pFlow::coupling::resolvedCouplingSystem::particleLVelocities()
-{
-	int nParticles = this->numParticles();
-	Foam::PtrList<Foam::point> pLVelocities(nParticles);
-
-	for(auto i=0; i<nParticles; ++i)
-	{
-		Foam::point lVelocity;
-		{
-			Foam::vector& point(lVelocity);
-			point[0] = this->couplingSystem::particleVelocity()[i].x();
-			point[1] = this->couplingSystem::particleVelocity()[i].y();
-			point[2] = this->couplingSystem::particleVelocity()[i].z();
-		}
-		pLVelocities.set(i, new point(lVelocity));
-	}
-
-	return pLVelocities;
-}
-
-Foam::PtrList<Foam::point>
-pFlow::coupling::resolvedCouplingSystem::particleRVelocities()
-{
-	int nParticles = this->numParticles();
-	Foam::PtrList<Foam::point> pRVelocities(nParticles);
-
-	for(auto i=0; i<nParticles; ++i)
-	{
-		Foam::point rVelocity;
-		{
-			Foam::vector& point(rVelocity);
-			point[0] = this->couplingSystem::particleRVelocity()[i].x();
-			point[1] = this->couplingSystem::particleRVelocity()[i].y();
-			point[2] = this->couplingSystem::particleRVelocity()[i].z();
-		}
-		pRVelocities.set(i, new point(rVelocity));
-	}
-
-	return pRVelocities;
-}
 
 void pFlow::coupling::resolvedCouplingSystem::calculateSolidInteraction
 (
@@ -161,27 +71,30 @@ void pFlow::coupling::resolvedCouplingSystem::calculateSolidInteraction
 	for(auto i=0; i<nParticles; ++i)
 	{
 		// Converting PhasicFlow fields to OpenFOAM fields
-		Foam::PtrList<Foam::scalar> pIDs(this->particleIDs());
-		Foam::PtrList<Foam::point> pCentersOfMass(this->particleCoMs());
-		Foam::PtrList<Foam::point> pLVelocities(this->particleLVelocities());
-		Foam::PtrList<Foam::point> pRVelocities(this->particleRVelocities());
+
+		const auto& pIDs = this->particleID();
+		const auto& pCentersOfMass = this->centerMass();
+		const auto& pLVelocities = this->particleVelocity();
+		const auto& pRVelocities = this->particleRVelocity();
 
 		// Creating the surface pointer for searching the cells inside the STL
-		const triSurfaceSearch* querySurfPtr_(new triSurfaceSearch(particleSTLs[i]));
+		uniquePtr<Foam::triSurfaceSearch> querySurfPtr_ = makeUnique<triSurfaceSearch>(particleSTLs[i]);
 
-		Foam::boolList insideCells = querySurfPtr_->calcInside(mesh.C());
+		
+		const auto& cellCenters = mesh.C();
+		Foam::boolList insideCells = querySurfPtr_->calcInside(cellCenters);
 
-		forAll(mesh.C(), celli)
+		forAll(cellCenters, celli)
 		{
 			if(insideCells[celli])
 			{
 				//*** Alpha calculation needs to be updated to be between 0 and 1 ***//
 				alpha[celli] = 0.0;
 				particleID[celli] = pIDs[i];
-				Foam::vector centerOfMass = pCentersOfMass[i];
-				Foam::vector cellCenter = mesh.C()[celli];
-				Foam::vector linearVelocity = pLVelocities[i];
-				Foam::vector rotVelocity = pRVelocities[i];
+				const Foam::vector centerOfMass {pCentersOfMass[i].x(), pCentersOfMass[i].y(), pCentersOfMass[i].z()};
+				Foam::vector cellCenter {cellCenters[celli].x(), cellCenters[celli].y(), cellCenters[celli].z()};
+				Foam::vector linearVelocity{pLVelocities[i].x(), pLVelocities[i].y(), pLVelocities[i].z()};
+				Foam::vector rotVelocity{pRVelocities[i].x(), pRVelocities[i].y(), pRVelocities[i].z()};
 				Us[celli] = linearVelocity + (rotVelocity^(cellCenter-centerOfMass));
 			}
 		}
@@ -202,8 +115,9 @@ void pFlow::coupling::resolvedCouplingSystem::calculateFluidInteraction
 ) 
 {
 	int nParticles = this->numParticles();
-
-	Foam::PtrList<Foam::point> pCentersOfMass(this->particleCoMs());
+	
+	const auto& pCenterMass = this->centerMass();
+	//Foam::PtrList<Foam::point> pCentersOfMass(this->particleCoMs());
 
 	for(auto i=0; i<nParticles; ++i)
 	{
@@ -232,15 +146,18 @@ void pFlow::coupling::resolvedCouplingSystem::calculateFluidInteraction
 				celli = this->cMesh().findPointInCellTree(faceiCentroid, celli);
 
 				// position of center of triangle relative to center of mass
-				Foam::point centerToCoM = faceiCentroid - pCentersOfMass[i];
+				Foam::point centerToCoM = {
+					faceiCentroid.x() - pCenterMass[i].x(),
+					faceiCentroid.y() - pCenterMass[i].y(),
+					faceiCentroid.z() - pCenterMass[i].z()};
 
-				// If the triangle center is in the CFD doamin
+				// If the triangle center is in the CFD domain
 				if(celli != -1)
 				{
 					// Pressure force
 					Foam::vector pressureForce = -rho[celli] * faceiArea * p[celli]; //pf
 
-					// Viscos force
+					// Viscous force
 					Foam::vector viscousForce = -faceiArea & devRhoReff[celli]; // vf
 
 					// Pressure moment

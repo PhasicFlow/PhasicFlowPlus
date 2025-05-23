@@ -2,23 +2,28 @@
 
 volScalarField& alpha = coupling.alpha();
 
-PtrList<scalar> pDiameters(coupling.particleDiameters());
-PtrList<point> pCentersOfMass(coupling.particleCoMs());
+const auto& pDiameters = coupling.particleDiameter();
+const auto& pCentersOfMass = coupling.centerMass();
+Foam::scalar resolution = Foam::readScalar(coupling.lookup("sphereSTLResolution"));
 
 // Creating sphere STLs for each particle
 PtrList<triSurface> particleSTLs(coupling.numParticles());
 
-forAll(pDiameters, i)
+for(pFlow::uint32 i = 0; i < pDiameters.size(); i++)
 {
-	triSurface sphereSTL 
-  = 
-    generateSphere
-	(
-		pCentersOfMass[i],
-		pDiameters[i],
-		readScalar(coupling.lookup("sphereSTLResolution"))
+	Foam::vector cm{pCentersOfMass[i].x(), 
+		pCentersOfMass[i].y(), 
+		pCentersOfMass[i].z()};
+
+	particleSTLs.emplace_set(
+		i, 
+		generateSphere
+		(
+			cm,
+			pDiameters[i],
+			resolution
+		)
 	);
-	particleSTLs.set(i, new triSurface(sphereSTL));
 }
 
 // Calculating the solid to fluid interaction

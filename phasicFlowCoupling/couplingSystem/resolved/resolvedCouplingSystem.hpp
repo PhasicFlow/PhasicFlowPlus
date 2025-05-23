@@ -43,7 +43,6 @@ protected:
 
 	Foam::volScalarField alpha_;
 	
-
 public:
 
 	resolvedCouplingSystem(
@@ -94,21 +93,6 @@ public:
 	{
 		return couplingSystem::fluidForce();
 	}
-
-	/// Transfers the particle IDs to OpenFOAM
-	Foam::PtrList<Foam::scalar> particleIDs();
-
-	/// Transfers the particle diameters to OpenFOAM
-	Foam::PtrList<Foam::scalar> particleDiameters();
-
-	/// Transfers the particles' centers of mass to OpenFOAM
-	Foam::PtrList<Foam::point> particleCoMs();
-
-	/// Transfers the particles' linear velocity to OpenFOAM
-	Foam::PtrList<Foam::point> particleLVelocities();
-
-	/// Transfers the particles' rotational velocity to OpenFOAM
-	Foam::PtrList<Foam::point> particleRVelocities();
 
 	/// Calculating the solid-fluid interaction
 	void calculateSolidInteraction
