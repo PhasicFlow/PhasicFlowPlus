@@ -2,27 +2,21 @@
 cd ${0%/*} || exit 1    # Run from this directory
 
 
+# Compile OpenFOAM libraries and applications based on version
 if [ "$WM_PROJECT_VERSION" = "9" ]; then
-    echo "  -> building solvers for OpenFOAM 9"
-    wclean ./unresolvedSpherePFPlus/9
-    wclean ./unresolvedSpherePFPisoFoam/9
-    wclean ./unresolvedGrainPFPisoFoam/9
-elif [ "$WM_PROJECT_VERSION" = "12" ]; then
-    echo "  -> building solvers for OpenFOAM 12"
-    #wclean ./unresolvedSpherePFPisoFoam
-    #wclean ./unresolvedSpherePFFoam
-    #wclean ./unresolvedGrainPFPisoFoam
-elif [ "$WM_PROJECT_VERSION" = "v2406" ]; then
-    echo "  -> building solvers for OpenFOAM v2406"
-    wclean ./unresolvedSpherePFPlus/24
-    wclean ./unresolvedSpherePFPisoFoam/24
-elif [ "$WM_PROJECT_VERSION" = "v2412" ]; then
-    echo "  -> building solvers for OpenFOAM v2412"
-    wclean ./unresolvedSpherePFPlus/24
-    wclean ./unresolvedSpherePFPisoFoam/24
+    echo "  -> Cleaning solvers for OpenFOAM 9"
+    wclean ./unresolvedSpherePFPlus/v9
+    wclean ./unresolvedSpherePFPisoFoam/v9
+    wclean ./unresolvedGrainPFPisoFoam/v9
+elif [ "$WM_PROJECT_VERSION" = "v2406" ] || [ "$WM_PROJECT_VERSION" = "v2412" ]; then
+    echo "  -> Cleaning solvers for OpenFOAM $WM_PROJECT_VERSION"
+    wclean ./unresolvedSpherePFPlus/v24
+    wclean ./unresolvedSpherePFPisoFoam/v24
+    wclean ./unresolvedGrainPFPisoFoam/v24
+    wclean ./resolvedSpherePFPlus/v24
 else
     echo "  -> Error: Unknown OpenFOAM version: $WM_PROJECT_VERSION"
-    echo "  -> Cannot proceed with build"
+    echo "  -> Cannot proceed with wclean"
     exit 1
 fi
 
