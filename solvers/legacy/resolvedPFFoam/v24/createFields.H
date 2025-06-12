@@ -51,37 +51,30 @@ volScalarField IBVolFraction
         "IBVolFraction",
         runTime.timeName(),
         mesh,
+        IOobject::MUST_READ,
+        IOobject::AUTO_WRITE
+    ),
+    mesh
+);
+
+Info<< "Creating/Reading field particleID\n" << endl;
+volScalarField particleID
+(
+    IOobject
+    (
+        "particleID",
+        runTime.timeName(),
+        mesh,
         IOobject::READ_IF_PRESENT,
         IOobject::AUTO_WRITE
     ),
     mesh,
-    dimensionedScalar("IBVolFraction", dimensionSet(0,2,-1,0,0,0,0), 0.0)
+    dimensionedScalar("particleID", dimensionSet(0,0,0,0,0,0,0), 0.0)
 );
 
-Info<< "Creating/Reading field particleID\n" << endl;
-pFlow::uniquePtr<volScalarField> particleIDPtr = nullptr;
-
+// by default this is created on the master processor
 Info<< "Creating sphere coupling system for resolved solver \n" << endl;
 pFlow::coupling::resolvedCouplingSystem coupling("sphere", mesh, argc, argv);
-
-bool writeParticleID = readBool(coupling.subDict("resolved").lookup("writeParticleID"));
-
-if (writeParticleID)
-{
-    particleIDPtr = pFlow::makeUnique<volScalarField> 
-    (
-        IOobject
-        (
-            "particleID",
-            runTime.timeName(),
-            mesh,
-            IOobject::READ_IF_PRESENT,
-            IOobject::AUTO_WRITE
-        ),
-        mesh,
-        dimensionedScalar("particleID", dimensionSet(0,0,0,0,0,0,0), 0.0)
-    );
-}
 
 # include "createPhi.H"
 
@@ -111,7 +104,6 @@ volScalarField rho
     dimensionedScalar("rho", dimDensity, laminarTransport)
 );
 
-#include "createMRF.H"
 #include "createFvOptions.H"
 
 autoPtr<surfaceVectorField> Uf;

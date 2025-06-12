@@ -1,15 +1,11 @@
 volScalarField rAU(1.0/UEqn.A());
 volVectorField HbyA(constrainHbyA(rAU*UEqn.H(), U, p));
-surfaceScalarField phiHbyA("phiHbyA", fvc::flux(HbyA));
-
-volScalarField& alpha = coupling.alpha();
-
-if (pimple.ddtCorr())
-{
-    phiHbyA += MRF.zeroFilter(fvc::interpolate(rAU)*fvc::ddtCorr(U, phi, Uf));
-}
-
-MRF.makeRelative(phiHbyA);
+surfaceScalarField phiHbyA
+(
+    "phiHbyA",
+    fvc::flux(HbyA)
+  + fvc::interpolate(rAU)*fvc::ddtCorr(U, phi, Uf)
+);
 
 if (p.needReference())
 {
@@ -34,7 +30,7 @@ if (pimple.nCorrPISO() <= 1)
 }
 
 // Update the pressure BCs to ensure flux consistency
-constrainPressure(p, U, phiHbyA, rAtU(), MRF);
+constrainPressure(p, U, phiHbyA, rAtU());
 
 // Non-orthogonal pressure corrector loop
 while (pimple.correctNonOrthogonal())
@@ -50,7 +46,7 @@ while (pimple.correctNonOrthogonal())
 
     pEqn.setReference(pRefCell, pRefValue);
 
-    pEqn.solve(p.select(pimple.finalInnerIter()));
+    pEqn.solve();
 
     if (pimple.finalNonOrthogonalIter())
     {
@@ -76,10 +72,13 @@ fvScalarMatrix IBVolFractionEqn
     fvc::ddt(alpha)
   + fvc::div(U)
 );
-
+//--------------------------------------------------------pRefCell, pRefValue---------------------//
 if(IBVolFraction.needReference())
 {
-    setRefCell(IBVolFraction, pimple.dict(), pRefCell, pRefValue);
+     IBVolFractionEqn.setReference
+     (
+        pRefCell, pRefValue
+     );
 }
 
 IBVolFractionEqn.solve();
@@ -90,11 +89,9 @@ U.correctBoundaryConditions();
 p=p+IBVolFraction/U.mesh().time().deltaT();
 p.correctBoundaryConditions();
 
-fvOptions.correct(U);
 
 // Correct Uf if the mesh is moving
 fvc::correctUf(Uf, U, phi);
 
 // Make the fluxes relative to the mesh motion
 fvc::makeRelative(phi, U);
-

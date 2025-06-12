@@ -50,20 +50,23 @@ pFlow::coupling::resolvedCouplingSystem::resolvedCouplingSystem
 
 void pFlow::coupling::resolvedCouplingSystem::calculateSolidInteraction
 (
-	Foam::fvMesh& mesh,
-	Foam::PtrList<Foam::triSurface>& particleSTLs,
-	Foam::volScalarField& alpha,
-	Foam::volScalarField& particleID,
+	const Foam::PtrList<Foam::triSurface>& particleSTLs,
+	pFlow::uniquePtr<Foam::volScalarField>& particleIDPtr,
 	Foam::volVectorField& Us
 ) 
 {
+	const fvMesh& mesh = this->cMesh().mesh();
+
 	int nParticles = this->numParticles();
 
 	// Initializing alpha and particleID fields
-	forAll(alpha, celli)
+	forAll(alpha_, celli)
 	{
-		alpha[celli] = 1.0;
-		particleID[celli] = 0.0;
+		alpha_[celli] = 1.0;
+		if(particleIDPtr)
+		{
+			particleIDPtr()[celli] = 0.0;
+		}
 		Us[celli] = 0.0*Us[celli];
 	}
 
@@ -88,9 +91,12 @@ void pFlow::coupling::resolvedCouplingSystem::calculateSolidInteraction
 		{
 			if(insideCells[celli])
 			{
-				//*** Alpha calculation needs to be updated to be between 0 and 1 ***//
-				alpha[celli] = 0.0;
-				particleID[celli] = pIDs[i];
+				/*** Alpha calculation needs to be updated to be between 0 and 1 ***/
+				alpha_[celli] = 0.0;
+				if(particleIDPtr)
+				{
+					particleIDPtr()[celli] = pIDs[i];
+				}
 				const Foam::vector centerOfMass {pCentersOfMass[i].x(), pCentersOfMass[i].y(), pCentersOfMass[i].z()};
 				Foam::vector cellCenter {cellCenters[celli].x(), cellCenters[celli].y(), cellCenters[celli].z()};
 				Foam::vector linearVelocity{pLVelocities[i].x(), pLVelocities[i].y(), pLVelocities[i].z()};
@@ -101,23 +107,25 @@ void pFlow::coupling::resolvedCouplingSystem::calculateSolidInteraction
 	}
 
 	// Correcting and updating the boundary conditions
-	alpha.correctBoundaryConditions();
-	particleID.correctBoundaryConditions();
+	alpha_.correctBoundaryConditions();
+	if(particleIDPtr)
+	{
+		particleIDPtr().correctBoundaryConditions();
+	}
 	Us.correctBoundaryConditions();
 }
 
 void pFlow::coupling::resolvedCouplingSystem::calculateFluidInteraction
 (
-	Foam::volScalarField& p,
-	Foam::volScalarField& rho,
-	Foam::volSymmTensorField& devRhoReff,
-	Foam::PtrList<Foam::triSurface>& particleSTLs
+	const Foam::volScalarField& p,
+	const Foam::volScalarField& rho,
+	const Foam::volSymmTensorField& devRhoReff,
+	const Foam::PtrList<Foam::triSurface>& particleSTLs
 ) 
 {
 	int nParticles = this->numParticles();
 	
 	const auto& pCenterMass = this->centerMass();
-	//Foam::PtrList<Foam::point> pCentersOfMass(this->particleCoMs());
 
 	for(auto i=0; i<nParticles; ++i)
 	{

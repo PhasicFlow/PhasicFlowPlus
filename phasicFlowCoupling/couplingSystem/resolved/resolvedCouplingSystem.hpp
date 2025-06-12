@@ -97,20 +97,18 @@ public:
 	/// Calculating the solid-fluid interaction
 	void calculateSolidInteraction
 	(
-		Foam::fvMesh& mesh,
-		Foam::PtrList<Foam::triSurface>& particleSTLs,
-		Foam::volScalarField& alpha,
-		Foam::volScalarField& particleID,
+		const Foam::PtrList<Foam::triSurface>& particleSTLs,
+		pFlow::uniquePtr<Foam::volScalarField>& particleIDPtr,
 		Foam::volVectorField& Us
 	);
 
 	/// Calculating the fluid-solid interaction
 	void calculateFluidInteraction
 	(
-		Foam::volScalarField& p,	
-		Foam::volScalarField& rho,
-		Foam::volSymmTensorField& devRhoReff,
-		Foam::PtrList<Foam::triSurface>& particleSTLs
+		const Foam::volScalarField& p,	
+		const Foam::volScalarField& rho,
+		const Foam::volSymmTensorField& devRhoReff,
+		const Foam::PtrList<Foam::triSurface>& particleSTLs
 	);
 
 }; 

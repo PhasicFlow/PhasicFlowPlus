@@ -1,8 +1,8 @@
 /*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
-   \\    /   O peration     |
-    \\  /    A nd           | www.openfoam.com
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Copyright (C) 2011-2021 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
       O        C enter of
@@ -47,10 +47,10 @@ Application
 
 Description
     Transient incompressible solver for resolved simulation of spherical
-    fluid-particle systems - based on pimpleFoam.
+    fluid-particle systems.
 
 Author
-    Bahram Haddadi, fluidDynamics.at.  All rights reserved
+    Bahram Haddadi, fluidDynamics.at.  All rights reserved - based on pimpleFoam
 
 \*---------------------------------------------------------------------------*/
 
@@ -77,15 +77,8 @@ Author
 
 int main(int argc, char *argv[])
 {
-    argList::addNote
-    (
-        "Transient incompressible solver for resolved simulation" 
-        "of spherical fluid-particle systems."
-    );
-    
     #include "postProcess.H"
 
-    #include "addCheckCaseOptions.H"
     #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createDynamicFvMesh.H"
@@ -112,45 +105,34 @@ int main(int argc, char *argv[])
         #include "CourantNo.H"
         #include "setDeltaT.H"
 
-        ++runTime;
+        runTime++;
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        // Performing DEM calculation        
+        // Performing DEM calculation
+        coupling.cfdTimers().start();
         coupling.iterate(runTime.time().value(), runTime.writeTime(), runTime.timeName());
         coupling.getDataFromDEM(runTime.time().value(), runTime.deltaT().value());
 
-        // Starting CFD timers
-        coupling.cfdTimers().start();
-
         // Transfering data from DEM to CFD
-        #include "solidToFluid.H"
+        #include "DEMtoCFD.H"
 
         // --- Pressure-velocity PIMPLE corrector loop
         while (pimple.loop())
         {
             if (pimple.firstIter() || moveMeshOuterCorrectors)
             {
-                // Do any mesh changes
-                mesh.controlledUpdate();
+
+                mesh.update();
 
                 coupling.cMesh().update(runTime.time().value(), runTime.deltaT().value());
                 coupling.updateMeshBoxes();
 
                 if (mesh.changing())
                 {
-                    MRF.update();
-                    
                     if (correctPhi)
                     {
-                        // Calculate absolute flux
-                        // from the mapped surface velocity
-                        phi = mesh.Sf() & Uf();
-
                         #include "correctPhi.H"
-
-                        // Make the flux relative to the mesh motion
-                        fvc::makeRelative(phi, U);
                     }
 
                     if (checkMeshCourantNo)
@@ -163,11 +145,14 @@ int main(int argc, char *argv[])
 
             #include "UEqn.H"
 
+            
+
             // --- Pressure corrector loop
             while (pimple.correct())
             {
                 #include "pEqn.H"
-            }
+
+            } 
 
             if (pimple.turbCorr())
             {
@@ -177,12 +162,9 @@ int main(int argc, char *argv[])
         }
 
         // Transfering data from CFD to DEM
-        #include "fluidToSolid.H"
+        #include "CFDtoDEM.H"
 
-        // Writing the sphere STLs
-        bool writeSTL = readBool(coupling.subDict("resolved").lookup("writeSTL"));
-
-        if (runTime.write() && writeSTL)
+        if (runTime.write())
         {
           // Writing sphere STLs in a single STL file
             writeSTLs(particleSTLs, runTime.timeName());
@@ -190,7 +172,9 @@ int main(int argc, char *argv[])
 
         coupling.cfdTimers().end();
 
-        runTime.printExecutionTime(Info);
+        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
+            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
+            << nl << endl;
     }
 
     Info<< "End\n" << endl;
