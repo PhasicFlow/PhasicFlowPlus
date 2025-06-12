@@ -1,0 +1,41 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  9
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       volScalarField;
+    object      alpha;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 0 0 0 0 0 0];
+
+internalField   uniform 1;
+
+boundaryField
+{
+    rotor
+    {
+        type zeroGradient;
+    }
+    walls
+    {
+        type zeroGradient;//fixedValue;
+        value uniform 1;
+    }
+    body
+    {
+        type zeroGradient;
+    }
+    "AMIFace.*"
+    {
+        type            cyclicAMI;
+    }
+}
+
+// ************************************************************************* //

@@ -1,0 +1,45 @@
+/* -------------------------------*- C++ -*--------------------------------- *\
+|  phasicFlow File                                                            |
+|  copyright: www.cemf.ir                                                     |
+\* ------------------------------------------------------------------------- */
+
+objectName 	particlesDict;
+objectType 	dictionary;
+fileFormat 	ASCII;
+
+setFields
+{
+	defaultValue
+	{
+		velocity 		realx3 	(0 0 0); 	// linear velocity (m/s)
+		rVelocity 		realx3 	(10 0 0);  	// rotational velocity (rad/s)
+		shapeName 		word	sph1; 		// name of the particle shape
+	}
+
+	selectors
+	{}
+}
+
+// positions particles
+positionParticles
+{
+	method ordered; 
+
+	orderedInfo
+	{
+		numPoints  1;
+		distance   0.1;
+	}
+
+	regionType box;
+
+	boxInfo
+	{
+		min (0 0 0);
+		max (0.2 0.2  0.2);
+	}
+
+	maxNumberOfParticles 	1; // maximum number of particles in the simulation
+	mortonSorting 			No;//Yes;    // perform initial sorting based on morton code?
+
+}
