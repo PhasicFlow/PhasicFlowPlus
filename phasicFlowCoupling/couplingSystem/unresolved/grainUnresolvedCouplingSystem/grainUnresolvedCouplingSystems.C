@@ -24,9 +24,10 @@ Licence:
 #include "Gaussian.hpp"
 #include "Gaussian2.hpp"
 #include "GaussianIntegral.hpp"
+#include "adaptiveGaussian.hpp"
 
 template class pFlow::coupling::grainUnresolvedCouplingSystem<pFlow::coupling::self>;
 template class pFlow::coupling::grainUnresolvedCouplingSystem<pFlow::coupling::Gaussian>;
 template class pFlow::coupling::grainUnresolvedCouplingSystem<pFlow::coupling::Gaussian2>;
 template class pFlow::coupling::grainUnresolvedCouplingSystem<pFlow::coupling::GaussianIntegral>;
-
+template class pFlow::coupling::grainUnresolvedCouplingSystem<pFlow::coupling::adaptiveGaussian>;
