@@ -18,7 +18,7 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-#define distributed
+#define distributed1
 
 #include "adaptiveGaussian.hpp"
 
@@ -72,7 +72,7 @@ void pFlow::coupling::adaptiveGaussian::updateWeights
         parWeights.push_back({targetCellId,1.0});
         continue;      
     }
-#ifdef distributed
+#ifdef distributed1
     
     Foam::scalar pSubTotal = 0;
     for(auto cellId:neighbors)

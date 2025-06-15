@@ -48,7 +48,6 @@ OF90_LIBS = \
 OF24_LIBS = \
 	-L$(FOAM_LIBBIN)/sys-openmpi -lPstream 
 
-
 ifeq ($(WM_PROJECT_VERSION),v2406)
     LIB_LIBS = $(BASE_LIBS) $(OF24_LIBS)
 else ifeq ($(WM_PROJECT_VERSION),v2412)
@@ -56,7 +55,6 @@ else ifeq ($(WM_PROJECT_VERSION),v2412)
 else
     LIB_LIBS = $(BASE_LIBS) $(OF90_LIBS)
 endif
-     
 
 EXE_INC  += $(PFLAGS) $(PINC)
 LIB_LIBS += $(PLIBS)
