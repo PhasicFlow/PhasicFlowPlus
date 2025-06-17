@@ -1,0 +1,36 @@
+/* -------------------------------*- C++ -*--------------------------------- *\
+|  phasicFlow File                                                            |
+|  copyright: www.cemf.ir                                                     |
+\* ------------------------------------------------------------------------- */
+
+objectName 	geometryDict;
+objectType 	dictionary;
+fileFormat 	ASCII;
+/* ------------------------------------------------------------------------- */
+
+// motion model: all surfaces are fixed
+motionModel stationary;
+
+stationaryInfo
+	{
+		
+	}
+
+surfaces
+{
+	walls
+	{
+		type 	 foamPatchWall;   	// type of the wall
+		patch 	 walls;		// patch name in polyMesh
+		material wallMat;   		// material name of this wall
+		motion 	 none;				// motion component name 
+	}
+
+	atmosphere
+	{
+		type 	 foamPatchWall;   	// type of the wall
+		patch 	 atmosphere;		// patch name in polyMesh
+		material wallMat;   		// material name of this wall
+		motion 	 none;				// motion component name 
+	}
+}
