@@ -32,11 +32,29 @@ pFlow::coupling::resolvedCouplingSystem::resolvedCouplingSystem
 )
 :
 	couplingSystem(shapeTypeName, mesh, argc, argv, true),
-	alpha_
+	IBDiv_
+	(
+		Foam::IOobject
+		(
+			"IBDiv",
+			mesh.time().timeName(),
+			mesh,
+			IOobject::READ_IF_PRESENT,
+			IOobject::AUTO_WRITE
+		),
+		mesh,
+		Foam::dimensionedScalar
+		(
+			"IBDiv", 
+			Foam::dimensionSet(0,2,-1,0,0,0,0), 
+			0.0
+		)
+	),
+	voidFraction_
 	(
 		Foam::IOobject
 	    (
-	        "alpha",
+	        "voidFraction",
 	        mesh.time().timeName(),
 	        mesh,
 	        Foam::IOobject::MUST_READ,
@@ -59,10 +77,10 @@ void pFlow::coupling::resolvedCouplingSystem::calculateSolidInteraction
 
 	int nParticles = this->numParticles();
 
-	// Initializing alpha and particleID fields
-	forAll(alpha_, celli)
+	// Initializing voidFraction and particleID fields
+	forAll(voidFraction_, celli)
 	{
-		alpha_[celli] = 1.0;
+		voidFraction_[celli] = 1.0;
 		if(particleIDPtr)
 		{
 			particleIDPtr()[celli] = 0.0;
@@ -91,8 +109,8 @@ void pFlow::coupling::resolvedCouplingSystem::calculateSolidInteraction
 		{
 			if(insideCells[celli])
 			{
-				/*** Alpha calculation needs to be updated to be between 0 and 1 ***/
-				alpha_[celli] = 0.0;
+				/*** voidFraction calculation needs to be updated to be between 0 and 1 ***/
+				voidFraction_[celli] = 0.0;
 				if(particleIDPtr)
 				{
 					particleIDPtr()[celli] = pIDs[i];
@@ -107,7 +125,7 @@ void pFlow::coupling::resolvedCouplingSystem::calculateSolidInteraction
 	}
 
 	// Correcting and updating the boundary conditions
-	alpha_.correctBoundaryConditions();
+	voidFraction_.correctBoundaryConditions();
 	if(particleIDPtr)
 	{
 		particleIDPtr().correctBoundaryConditions();
@@ -118,7 +136,6 @@ void pFlow::coupling::resolvedCouplingSystem::calculateSolidInteraction
 void pFlow::coupling::resolvedCouplingSystem::calculateFluidInteraction
 (
 	const Foam::volScalarField& p,
-	const Foam::volScalarField& rho,
 	const Foam::volSymmTensorField& devRhoReff,
 	const Foam::PtrList<Foam::triSurface>& particleSTLs
 ) 
@@ -162,8 +179,8 @@ void pFlow::coupling::resolvedCouplingSystem::calculateFluidInteraction
 				// If the triangle center is in the CFD domain
 				if(celli != -1)
 				{
-					// Pressure force
-					Foam::vector pressureForce = -rho[celli] * faceiArea * p[celli]; //pf
+					// Pressure force  
+					Foam::vector pressureForce = -faceiArea * p[celli]; //pf
 
 					// Viscous force
 					Foam::vector viscousForce = -faceiArea & devRhoReff[celli]; // vf
@@ -193,3 +210,48 @@ void pFlow::coupling::resolvedCouplingSystem::calculateFluidInteraction
 	}
 }
 
+void pFlow::coupling::resolvedCouplingSystem::IBMCorrect
+(
+	Foam::volScalarField& p,
+	Foam::volVectorField& U,
+	const Foam::volScalarField rho,
+	const Foam::volVectorField Us,
+	const Foam::dictionary pDict
+) 
+{
+	U=(1.0-this->voidFraction())*Us+this->voidFraction()*U;
+
+	// divergence correction in IB 
+	Foam::fvScalarMatrix IBDivEqn
+	(
+		Foam::fvm::laplacian(IBDiv_)
+	==
+		Foam::fvc::ddt(voidFraction_)
+	  + Foam::fvc::div(U)
+	);
+
+	Foam::label refCell = 0;
+	Foam::scalar refValue = 0.0;
+
+	if(IBDiv_.needReference())
+	{
+		Foam::setRefCell(IBDiv_, pDict, refCell, refValue);
+	}
+
+	IBDivEqn.solve();
+
+	U=U-Foam::fvc::grad(IBDiv_);
+	U.correctBoundaryConditions();
+
+	// Accounting for reduced pressure in incompressible solvers
+	if(p.dimensions()==dimPressure)
+	{
+		p=p+IBDiv_*rho/p.mesh().time().deltaT();
+	}
+	else
+	{
+		p=p+IBDiv_/p.mesh().time().deltaT();
+	}
+
+	p.correctBoundaryConditions();
+}

@@ -2,8 +2,6 @@ volScalarField rAU(1.0/UEqn.A());
 volVectorField HbyA(constrainHbyA(rAU*UEqn.H(), U, p));
 surfaceScalarField phiHbyA("phiHbyA", fvc::flux(HbyA));
 
-volScalarField& alpha = coupling.alpha();
-
 if (pimple.ddtCorr())
 {
     phiHbyA += MRF.zeroFilter(fvc::interpolate(rAU)*fvc::ddtCorr(U, phi, Uf));
@@ -39,13 +37,13 @@ constrainPressure(p, U, phiHbyA, rAtU(), MRF);
 // Non-orthogonal pressure corrector loop
 while (pimple.correctNonOrthogonal())
 {
-    volScalarField ddtAlpha = fvc::ddt(alpha);
-    // Calculation of new ddtAlpha by using divergence of particle fluxes instead
-    // volScalarField ddtAlpha=fvc::div(Us*(1.0-alpha));
+    volScalarField ddtVoidFraction = fvc::ddt(coupling.voidFraction());
+    // Calculation of new ddtVoidFraction by using divergence of particle fluxes instead
+    // volScalarField ddtVoidFraction=fvc::div(Us*(1.0-coupling.voidFraction()));
 
     fvScalarMatrix pEqn
     (
-        fvm::laplacian(rAtU(), p) == fvc::div(phiHbyA) + ddtAlpha
+        fvm::laplacian(rAtU(), p) == fvc::div(phiHbyA) + ddtVoidFraction
     );
 
     pEqn.setReference(pRefCell, pRefValue);
@@ -67,28 +65,8 @@ U = HbyA - rAtU*fvc::grad(p);
 U.correctBoundaryConditions();
 
 // Correction for DEM IBM
-U=(1.0-alpha)*Us+alpha*U;
-
-fvScalarMatrix IBVolFractionEqn
-(
-    fvm::laplacian(IBVolFraction)
- ==
-    fvc::ddt(alpha)
-  + fvc::div(U)
-);
-
-if(IBVolFraction.needReference())
-{
-    setRefCell(IBVolFraction, pimple.dict(), pRefCell, pRefValue);
-}
-
-IBVolFractionEqn.solve();
-
-U=U-fvc::grad(IBVolFraction);
-U.correctBoundaryConditions();
-
-p=p+IBVolFraction/U.mesh().time().deltaT();
-p.correctBoundaryConditions();
+// Correction for DEM FD/IBM
+coupling.IBMCorrect(p, U, rho, Us, pimple.dict()); 
 
 fvOptions.correct(U);
 

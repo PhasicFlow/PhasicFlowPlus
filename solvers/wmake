@@ -18,6 +18,7 @@ elif [ "$WM_PROJECT_VERSION" = "v2406" ] || [ "$WM_PROJECT_VERSION" = "v2412" ];
     wmake ./unresolvedSpherePFPlus/v24
     wmake ./unresolvedGrainPFPlus/v24
     wmake ./resolvedSpherePFPlus/v24
+    wmake ./resolvedSphereVoFPFPlus/v24
 else
     echo "  -> Error: Unknown OpenFOAM version: $WM_PROJECT_VERSION"
     echo "  -> Cannot proceed with build"
