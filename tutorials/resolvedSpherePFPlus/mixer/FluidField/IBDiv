@@ -10,7 +10,7 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    object      IBVolFraction;
+    object      IBDiv;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -20,9 +20,22 @@ internalField   uniform 0;
 
 boundaryField
 {
+    rotor
+    {
+        type zeroGradient;
+    }
     walls
     {
-        type            zeroGradient;
+        type    fixedValue;
+        value           uniform 0;
+    }
+    body
+    {
+        type zeroGradient;
+    }
+    "AMIFace.*"
+    {
+        type            cyclicAMI;
     }
 }
 

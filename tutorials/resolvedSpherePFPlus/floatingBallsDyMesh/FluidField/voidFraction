@@ -10,7 +10,7 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    object      alpha;
+    object      voidFraction;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -20,9 +20,18 @@ internalField   uniform 1;
 
 boundaryField
 {
-    walls
+    inlet
     {
-            type zeroGradient;
+        type fixedValue;
+        value uniform 1;
+    }
+    outlet
+    {
+        type zeroGradient;
+    }
+    fixedWalls
+    {
+        type zeroGradient;
     }
 }
 

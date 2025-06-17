@@ -45,7 +45,7 @@ solvers
       relTol          0;
   }
 
-  IBVolFraction
+  IBDiv
   {
       solver          GAMG;
       smoother        DIC;
@@ -53,9 +53,9 @@ solvers
       relTol          0.01;
   }
 
-  IBVolFractionFinal
+  IBDivFinal
   {
-      $IBVolFraction;
+      $IBDiv;
       relTol          0;
   }
 }
