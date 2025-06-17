@@ -30,7 +30,7 @@ divSchemes
     div(U)          Gauss linear;
     div(phi,U)      Gauss upwind;
     div((nuEff*dev2(T(grad(U))))) Gauss linear;
-    div(((alpha*nuEff)*dev(grad(U).T()))) Gauss linear;
+    div(((voidFraction*nuEff)*dev(grad(U).T()))) Gauss linear;
 }
 
 laplacianSchemes

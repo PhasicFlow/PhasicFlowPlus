@@ -63,7 +63,7 @@ solvers
         relTol          0;
     }
 
-    IBVolFraction
+    IBDiv
     {
         solver          GAMG;
         smoother        GaussSeidel;
@@ -71,7 +71,7 @@ solvers
         relTol          0;
     }
 
-    IBVolFractionFinal
+    IBDivFinal
     {
         solver          GAMG;
         smoother        GaussSeidel;
