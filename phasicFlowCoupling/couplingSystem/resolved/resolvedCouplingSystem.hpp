@@ -26,6 +26,7 @@ Licence:
 
 #include "triSurface.H"
 #include "triSurfaceSearch.H"
+#include "fvCFD.H"
 
 #include "couplingSystem.hpp"
 #include "virtualConstructor.hpp"
@@ -39,9 +40,12 @@ class resolvedCouplingSystem
 :
 	public couplingSystem
 {
+private:
+	Foam::volScalarField IBDiv_;
+
 protected:
 
-	Foam::volScalarField alpha_;
+	Foam::volScalarField voidFraction_;
 	
 public:
 
@@ -66,18 +70,18 @@ public:
 		return this->subDict("resolved");
 	}
 
-	/// Const access to alpha
+	/// Const access to voidFraction
 	inline
-	const Foam::volScalarField& alpha()const
+	const Foam::volScalarField& voidFraction()const
 	{
-		return alpha_;
+		return voidFraction_;
 	}
 
-	/// Access to alpha
+	/// Access to voidFraction
 	inline
-	Foam::volScalarField& alpha()
+	Foam::volScalarField& voidFraction()
 	{
-		return alpha_;
+		return voidFraction_;
 	}
 
 	/// Access to fluid torque
@@ -106,11 +110,19 @@ public:
 	void calculateFluidInteraction
 	(
 		const Foam::volScalarField& p,	
-		const Foam::volScalarField& rho,
 		const Foam::volSymmTensorField& devRhoReff,
 		const Foam::PtrList<Foam::triSurface>& particleSTLs
 	);
 
+	/// Updating the pressure and velocity using Fictitious domain IBM
+	void IBMCorrect
+	(
+		Foam::volScalarField& p,
+		Foam::volVectorField& U,
+		const Foam::volScalarField rho,
+		const Foam::volVectorField Us,
+		const Foam::dictionary pDict
+	);
 }; 
 
 } // pFlow::coupling

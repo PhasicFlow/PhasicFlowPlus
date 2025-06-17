@@ -21,6 +21,7 @@ EXE_INC = \
     -I$(pFlow_INCLUDE_DIR)/Utilities \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/sampling/lnInclude \
     -I$(LIB_SRC)/triSurface/lnInclude \
     -I$(LIB_SRC)/Pstream/mpi/lnInclude \
     -I$(LIB_SRC)/surfMesh/lnInclude 
@@ -39,6 +40,7 @@ BASE_LIBS = \
 	-lOpenFOAM \
 	-lfiniteVolume \
 	-lmeshTools \
+    -lsampling \
 	-lsurfMesh 
 
 OF90_LIBS = \
