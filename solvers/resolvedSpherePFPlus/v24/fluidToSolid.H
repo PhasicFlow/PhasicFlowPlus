@@ -3,8 +3,7 @@ Foam::volSymmTensorField devRhoReff = -rho*turbulence->nu()*dev(twoSymm(fvc::gra
 // Calculating the fluid to solid interaction
 coupling.calculateFluidInteraction
 (
-	p,
-	rho,
+	p*rho, // Correcting kinematic pressure
 	devRhoReff,
 	particleSTLs
 );

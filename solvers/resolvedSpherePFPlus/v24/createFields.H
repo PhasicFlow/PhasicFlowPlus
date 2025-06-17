@@ -43,21 +43,6 @@ volVectorField Us
     dimensionedVector("Us", dimVelocity, vector(0.0,0.0,0.0))
 );
 
-Info<< "Reading field immersed boundary volume fraction\n" << endl;
-volScalarField IBVolFraction
-(
-    IOobject
-    (
-        "IBVolFraction",
-        runTime.timeName(),
-        mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE
-    ),
-    mesh,
-    dimensionedScalar("IBVolFraction", dimensionSet(0,2,-1,0,0,0,0), 0.0)
-);
-
 Info<< "Creating/Reading field particleID\n" << endl;
 pFlow::uniquePtr<volScalarField> particleIDPtr = nullptr;
 
@@ -132,7 +117,7 @@ if (mesh.dynamic())
                 IOobject::READ_IF_PRESENT,
                 IOobject::AUTO_WRITE
             ),
-            fvc::interpolate(U * coupling.alpha())
+            fvc::interpolate(U * coupling.voidFraction())
         ) 
     );
 }
