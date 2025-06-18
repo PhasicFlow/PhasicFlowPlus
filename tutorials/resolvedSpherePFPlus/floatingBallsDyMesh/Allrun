@@ -1,0 +1,46 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # Run from this directory
+
+# Using two cores for DEM simulations
+export OMP_NUM_THREADS=2
+
+# Source tutorial run functions
+# First run OpenFoam Aplication
+
+echo "\n<--------------------------------------------------------------------->"
+echo "1) Running blockmesh"
+echo "<--------------------------------------------------------------------->\n"
+blockMesh
+
+echo "\n<--------------------------------------------------------------------->"
+echo "2) Running Step 1 (0-2 DEM) "
+echo "<--------------------------------------------------------------------->\n"
+
+echo " 2.1) add Particle "
+particlesPhasicFlow
+echo " 2.2) add Geometry "
+geometryPhasicFlow
+echo " 2.3) Running "
+sphereGranFlow
+
+echo "\n<--------------------------------------------------------------------->"
+echo "3) Running Step 2 (2-6 CFD-DEM) "
+echo "<--------------------------------------------------------------------->\n"
+
+echo "3.1) Copy Orginal Data to 2s (P , U , Alpha ) "
+cp ./FluidField/* ./2
+echo "3.2) Preparing for parallel processing "
+decomposePar
+echo "3.3) Running "
+mpirun -np 4 resolvedSpherePFPlus -parallel
+echo "3.4) Reconstructing "
+reconstructParMesh
+reconstructPar
+
+echo "\n<--------------------------------------------------------------------->"
+echo "4) Making VTK File "
+echo "<--------------------------------------------------------------------->\n"
+foamToVTK -time 2:6
+pFlowToVTK -t 2:6
+
+#------------------------------------------------------------------------------

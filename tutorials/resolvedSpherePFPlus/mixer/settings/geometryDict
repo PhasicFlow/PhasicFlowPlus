@@ -1,0 +1,52 @@
+/* -------------------------------*- C++ -*--------------------------------- *\ 
+|  phasicFlow File                                                            | 
+|  copyright: www.cemf.ir                                                     | 
+\* ------------------------------------------------------------------------- */  
+
+objectName 	geometryDict;
+objectType 	dictionary;
+fileFormat 	ASCII;
+/* ------------------------------------------------------------------------- */
+
+// motion model: all surfaces are fixed
+motionModel rotatingAxis; 
+
+surfaces
+{
+	walls
+	{
+		type 	 foamPatchWall;   	// type of the wall
+		patch 	 walls;				// patch name in polyMesh
+		material wallMat;   		// material name of this wall
+		motion 	 none;				// motion component name 
+	}
+
+	body
+	{
+		type 	 foamPatchWall; 	// type of the wall
+		patch 	 body;				// patch name in polyMesh
+		material wallMat;   		// material name of this wall
+		motion 	 none;				// motion component name 
+	}
+
+	rotor
+	{
+		type 	 foamPatchWall;   	// type of the wall
+		patch 	 rotor;				// patch name in polyMesh
+		material wallMat;   		// material name of this wall
+		motion 	 rotAxis;			// motion component name 
+	}
+		
+}
+
+// information for rotatingAxisMotion motion model 
+rotatingAxisInfo
+{
+	rotAxis 
+	{
+		p1 (0.0 0.0 0.0);	// first point for the axis of rotation 
+		p2 (0.0 0.0 1.0);	// second point for the axis of rotation
+		omega 6.2832; 		// rotation speed (rad/s)
+		startTime 4;		// start time for rotation (s)
+	}
+}
