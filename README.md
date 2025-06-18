@@ -16,7 +16,26 @@ The following parts are being developed at the moment:
 * Resolved solver for CFD-DEM
 * Modifying some parts for better functionality and performance  
 
-## How to build version 0.1
+## How to build PhasicFlowPlus
+### Version-1.0
+Version-1.0 is compatible with PhasicFlow-v-1.0 and OpenFOAM-v24. You need to [install phasicFlow-v-1.0](https://github.com/PhasicFlow/phasicFlow/wiki/How-to-build-PhasicFlow%E2%80%90v%E2%80%901.0) and then [install OpenFOAM-v24](https://www.cemf.ir/installing-openfoam-v2412-on-ubuntu-and-windows/) on your computer. After that, follow the following steps to install PhasicFlowPlus.
+- **Step 1:** copy the source code into `~/PhasicFlow` folder:
+    ```bash
+    cd ~/PhasicFlow
+    wget https://github.com/PhasicFlow/PhasicFlowPlus/archive/refs/heads/main.zip
+    unzip -q main.zip
+    mv PhasicFlowPlus-main/ PhasicFlowPlus
+    # Note:
+    #   Instead of using wget, you could directly clone it in director ~/PhasicFlow
+    #   use the command: git clone https://github.com/PhasicFlow/PhasicFlowPlus.git  
+    ```
+- **Step 2:** build the software:
+    ```bash
+    cd ~/PhasicFlow/PhasicFlowPlus
+    ./Allwmake
+    ```
+
+### Version-0.1 
 First, you need to [install PhasicFlow-v0.1](https://github.com/PhasicFlow/phasicFlow/wiki/How-to-Build-PhasicFlow) and OpenFoam-v9 (For now, it is only tested with [OpenFOAM-v9](https://openfoam.org/download/9-source/)) on your computer. After that, copy [PhasicFlowPlus-v0.1](https://github.com/PhasicFlow/PhasicFlowPlus/releases/tag/v-0.1) on your computer. The `PhasicFlowPlus` folder shoule be located beside `phasicFlow` folder on your computer (in ~/PhasicFlow/ folder). Navigate to the root directory of the code and enter the following commands to install the code.
 
 ```
