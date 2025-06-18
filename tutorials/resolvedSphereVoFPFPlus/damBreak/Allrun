@@ -24,7 +24,7 @@ echo " 2.3) Running DEM "
 sphereGranFlow
 
 echo "\n<--------------------------------------------------------------------->"
-echo "3) Running Step 2 (2-4 CFD-DEM) "
+echo "3) Running Step 2 (2-6 CFD-DEM) "
 echo "<--------------------------------------------------------------------->\n"
 
 echo "3.1) Copy Orginal Data to 0s (P_rgh , U , voidFraction, IBVolFraction, alpha.water) "
@@ -40,7 +40,7 @@ reconstructPar
 echo "\n<--------------------------------------------------------------------->"
 echo "4) Making VTK File "
 echo "<--------------------------------------------------------------------->\n"
-foamToVTK -time 2:4
-pFlowToVTK -t 2:4
+foamToVTK -time 2:6
+pFlowToVTK -t 2:6
 
 #------------------------------------------------------------------------------
