@@ -8,7 +8,7 @@ objectType dicrionary;
 fileFormat 	ASCII;
 
 materials   (sphereMat wallMat); // a list of materials names
-densities   (1200 2500);      // density of materials [kg/m3]
+densities   (800 2500);      // density of materials [kg/m3]
 
 contactListType   sortedContactList;
 
