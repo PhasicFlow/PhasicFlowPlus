@@ -53,4 +53,3 @@ bool pFlow::Plus::eventObserver::subscribe(const eventSubscriber& subscriber)
 	subscribed_ = subscriber_->subscribe(this);
 	return subscribed_;
 }
-

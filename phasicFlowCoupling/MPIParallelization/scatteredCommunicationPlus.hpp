@@ -160,7 +160,7 @@ public:
 		return true;
 	}
 
-	bool distribute(span<T>& sendBuff, span<T>& recvb)
+	bool distribute(span<T>& sendBuff, span<T>& recvb)const
 	{
 		
 		procVector<Request> requests(true);

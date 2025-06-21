@@ -26,13 +26,10 @@ Licence:
 #include "indexedOctree.H"
 #include "treeDataCell.H"
 
-//#include "fvMesh.H"
-//
-//
 
-//#include <map>
 
 // phasicFlow
+#include "procCMField.hpp"
 #include "box.hpp"
 
 
@@ -41,49 +38,33 @@ namespace pFlow::coupling
 
 class couplingMesh
 {
-protected:
+private:
 
-	// - protected data members
+	// - private data members
 
 		/// Reference to fvMesh
-		Foam::fvMesh& 		mesh_;
+		Foam::fvMesh& 					mesh_;
 
-		/// Is mesh static
-		bool 				meshStatic_;
+		/// number of cells in the mesh
+		Foam::label 					nCells_;
 
-		/// Cctree for cell search
+		/// cell indices of particles in this processor 
+		Plus::procCMField<Foam::label> 	parCellIndex_;
+
+		/// number of particles found in this mesh
+		int32 							numInMesh_ = 0;
+
+		/// Octree for cell search
 		mutable uniquePtr<Foam::indexedOctree<Foam::treeDataCell>>
 							cellTreeSearch_ = nullptr;
 
-		/// The mesh domain expansion ratio
-		/// Number of times the largest particle in the simulation
-		Foam::scalar		domainExpansionRatio_;
-
-		/// Time intervals between domain updates
-		Foam::scalar 		domainUpdateInterval_;
-
-		/// Last time of domain update
-		Foam::scalar 		lastTimeUpdated_ = 0;
-
-		/// Mesh decomposition mode for locating points in the mesh
-		/// Options are: 
-		/// 	1) facePlanes
-		/// 	2) cellTets
-		/// 	3) faceDiagonalTriangles
-		/// 	4) faceCenterTriangles
-		Foam::word 			decompositionMode_;
-		
 		/// Actual bounding box around mesh points
-		mutable box 		meshBox_;
+		mutable box 		meshBox_;	
 
 		/// cell decomposition mode
 		Foam::polyMesh::cellDecomposition 		cellDecompositionMode_;
 
-		/// If everything is constructed for the first time
-		bool 				firstConstruction_ = false;
-		
-
-	// - protected member functions
+	// - member functions
 
 		/// Calculate the actual bounding box mesh based on points
 		void calculateBox()const;
@@ -91,10 +72,7 @@ protected:
 		/// Reset the search tree structure
 		void resetTree()const;
 
-
-	/*Foam::label findCellSeed(
-		const Foam::point& loc,
-    	const Foam::label seedCellId);*/
+		void mapParticles();
 
 public:
 
@@ -102,7 +80,8 @@ public:
 
 		couplingMesh(
 			const Foam::dictionary& dict,
-			Foam::fvMesh& mesh
+			Foam::fvMesh& mesh,
+			const Plus::centerMassField& centerMass
 			);
 
 		couplingMesh(const couplingMesh&)=delete;
@@ -123,13 +102,6 @@ public:
 		const auto& mesh()const
 		{
 			return mesh_;
-		}
-
-		/// Domain extension ratio
-		inline
-		auto domainExpansionRatio()const
-		{
-			return domainExpansionRatio_;
 		}
 
 		/// Return cosnt ref to mesh box
@@ -167,24 +139,34 @@ public:
 			return mesh_.changing();
 		}
 		
-		/// Update the coupling mesh components
-		/// This should always be called before any mesh querries
-		/// and after mesh motion (if any).
-		void update(Foam::scalar t, Foam::scalar fluidDt);
+        /// Update the coupling mesh components
+        /// This should always be called before any mesh querries
+        /// and after mesh motion (if any).
+        void update();
 
-		/// Check if the domain should be updated at time t
-		/// In fluid loop, the current time is dt ahead of coupling time, 
-		/// so the function is notified to consider this. 
-		bool checkForDomainUpdate
-		(
-			Foam::scalar t, 
-			Foam::scalar fluidDt, 
-			bool insideFluidLoop = true
-		);
+        /// cell index of each particle center 
+        inline
+		const Plus::procCMField<Foam::label>& parCellIndex()const
+        {
+            return parCellIndex_;
+        }
 
+		inline
+		const Plus::centerMassField& centerMass()const
+		{
+			return parCellIndex_.centerMass();
+		}
+
+        int32 numInMesh()const
+        {
+            return numInMesh_;
+        }
+
+        /// Report (output) number of center mass points found in all processors 
+		/// It is effective only in master processor 
+		void reportNumInMesh()const;
 		
-		
-		
+        /// check if a point is located in a specific cell
 		bool pointInCell(
 			const Foam::point& p, 
 			Foam::label celli)const;

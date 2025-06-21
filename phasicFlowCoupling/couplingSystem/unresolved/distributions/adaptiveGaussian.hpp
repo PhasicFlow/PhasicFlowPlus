@@ -72,5 +72,4 @@ public:
 } // end pFlow::coupling
 
 
-
 #endif //__adaptiveGaussian_hpp__

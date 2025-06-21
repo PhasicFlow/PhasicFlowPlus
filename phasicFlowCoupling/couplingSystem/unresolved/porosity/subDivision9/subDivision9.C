@@ -46,20 +46,23 @@ bool pFlow::coupling::subDivision9::internalFieldUpdate()
 	
 	auto& solidVol = solidVoldTmp.ref();
 	const auto& cntrMass = centerMass();
-	size_t numPar = cntrMass.size();
+	const size_t numPar = cntrMass.size();
+	const auto& parCellInd = parCellIndex();
+	const auto& parDiam = particleDiameter();
+	const auto& cmesh = cMesh();
 
-	#pragma omp parallel for 
+	#pragma omp parallel for schedule (dynamic)
 	for(size_t i=0; i<numPar; i++)
 	{
 
-		const Foam::label cntrCellId = parCellIndex_[i];
+		const Foam::label cntrCellId = parCellInd[i];
 		if( cntrCellId < 0 )continue;
 
 		Foam::FixedList<realx3, 8> points;
 		Foam::FixedList<Foam::label, 8> cellIds;
 
 		const realx3 pPos = cntrMass[i];
-		const real pRad = particleDiameter_[i]/2;
+		const real pRad = parDiam[i]/2;
 		
 		// 4*Pi/3 = 4.1887902047864
 		const real pSubVol = static_cast<real>(4.1887902047864/9.0) *
@@ -85,7 +88,7 @@ bool pFlow::coupling::subDivision9::internalFieldUpdate()
 		}
 
 		Foam::label nCellIds = 0;
-		cMesh_.findPointsInCells(points, cntrCellId, nCellIds, cellIds );
+		cmesh.findPointsInCells(points, cntrCellId, nCellIds, cellIds );
 		
 		for(auto ci=0; ci<nCellIds; ci++ )
 		{

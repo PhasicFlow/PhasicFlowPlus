@@ -53,13 +53,16 @@ template<typename DistributorType>
 void pFlow::coupling::sphereUnresolvedCouplingSystem<DistributorType>::calculatePorosity()
 {
 	porosityTimer_.start();
-	if(requiresDistribution_)
-	{
-		porosity_().mapCentersBeforeCalcPorosity();
-		this->cellDistribution().updateWeights(porosity_->particleCellIndex(), this->particleDiameter());
-	}
+
+	// update coupling mesh and map particles 
+	this->cMesh().update();
+	
+	// update weights for distribution
+	this->cellDistribution().updateWeights(this->cMesh().parCellIndex(), this->particleDiameter());
+
+	// calculate porosity 
 	porosity_->calculatePorosity();
-	porosity_->reportNumInMesh();
+
 	porosityTimer_.end();
 
 	Foam::Info<<Blue_Text("Porosity time: ")<<porosityTimer_.lastTime()<<" s\n";

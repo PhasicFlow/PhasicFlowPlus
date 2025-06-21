@@ -21,20 +21,6 @@ Licence:
 #include "couplingSystem.hpp"
 
 
-bool pFlow::coupling::couplingSystem::updateMeshBoxes()
-{
-
-	auto domain = couplingMesh_.meshBox();
-
-	if(! collectAllToAll(domain, meshBoxes_))
-	{
-		fatalErrorInFunction<<"could not corrlect meshBox into the master"<<endl;
-		return false;
-	}
-
-	return true;
-}
-
 pFlow::coupling::couplingSystem::couplingSystem(
 		word shapeTypeName, 
 		Foam::fvMesh& mesh,
@@ -53,34 +39,69 @@ pFlow::coupling::couplingSystem::couplingSystem(
             IOobject::NO_WRITE
         )
     ),
-    Plus::procCommunication(),
-	couplingMesh_(subDict("particleMapping"), mesh),
-	procDEMSystem_(shapeTypeName+"DEMSystem", argc, argv, requireRVel),
-	couplingTimers_("coupling", procDEMSystem_.getTimers()),
-	cfdTimers_("CFD", procDEMSystem_.getTimers()),
-	getDataTimer_("get data from DEM", &couplingTimers_),
-	sendDataTimer_("send data to DEM", &couplingTimers_),
-	centerMass_(),
-	particleID_("particleID",centerMass_),
-	particleDiameter_("diameter",centerMass_),
-	particleVelocity_("velocity", centerMass_),
-	particleRVelocity_("rVelocity", centerMass_),
-	fluidForce_("fluidForce",centerMass_),
-	fluidTorque_("fluidTorque",centerMass_),
+	particleMapping_(subDict("particleMapping")),
+	couplingMesh_
+	(
+		subDict("particleMapping"), 
+		mesh,
+		particleMapping_.centerMass()
+	),
+	procDEMSystem_
+	(
+		shapeTypeName+"DEMSystem", 
+		argc, 
+		argv, 
+		requireRVel
+	),
+	couplingTimers_
+	(
+		"coupling", 
+		procDEMSystem_.getTimers()
+	),
+	cfdTimers_
+	(
+		"CFD", 
+		procDEMSystem_.getTimers()
+	),
+	getDataTimer_
+	(
+		"get data from DEM", 
+		&couplingTimers_
+	),
+	sendDataTimer_
+	(
+		"send data to DEM", 
+		&couplingTimers_
+	),
+	particleID_
+	(
+		"particleID",
+		particleMapping_.centerMass()
+	),
+	particleDiameter_
+	(
+		"diameter",
+		particleMapping_.centerMass()
+	),
+	particleVelocity_
+	(
+		"velocity", 
+		particleMapping_.centerMass()
+	),
+	particleRVelocity_(
+		"rVelocity", 
+		particleMapping_.centerMass()
+	),
+	fluidForce_(
+		"fluidForce",
+		particleMapping_.centerMass()
+	),
+	fluidTorque_(
+		"fluidTorque",
+		particleMapping_.centerMass()
+	),
 	requireRVel_(requireRVel)
-{
-	
-	auto domain = couplingMesh_.meshBox();
-
-	if(! collectAllToAll(domain, meshBoxes_))
-	{
-		fatalErrorInFunction<<"could not corrlect meshBox into the master"<<endl;
-		Plus::processor::abort(0);
-	}
-
-	pFlow::mOutput<<"meshBoxes:\n"<<meshBoxes_<<pFlow::endl;
-
-}
+{}
 
 bool pFlow::coupling::couplingSystem::getDataFromDEM(real t, real fluidDt)
 {
@@ -90,69 +111,11 @@ bool pFlow::coupling::couplingSystem::getDataFromDEM(real t, real fluidDt)
 	getDataTimer_.start();
 	procDEMSystem_.getDataFromDEM();
 
-	if( couplingMesh_.checkForDomainUpdate(t, fluidDt) )
-	{
-		Foam::Info<<Blue_Text("Sub-domains have been updated at time ")<< 
-		Yellow_Text(t) <<Foam::endl;
-
-		if(!procDEMSystem_.updateParticleDistribution(
-			couplingMesh_.domainExpansionRatio(), 
-			meshBoxes_))
-		{
-			fatalErrorInFunction;
-			Plus::processor::abort(0);
-			return false;
-		}
-
-		auto numParsInDomains = procDEMSystem_.numParInDomainMaster();
-
-		if( auto [thisNoPars, success] =  
-			distributeMasterToAll(numParsInDomains); !success)
-		{
-			fatalErrorInFunction<<
-			"failed to distribute particle numbers among processors"<<endl;
-			Plus::processor::abort(0);
-			return false;
-		}
-		else
-		{
-			if(!centerMass_.checkForNewSize(thisNoPars))
-			{
-				fatalErrorInFunction<<
-				"cannot change the size of containers to new size "<< 
-				thisNoPars<<endl;
-				Plus::processor::abort(0);
-				return false;
-			}
-			
-		}
-		
-		// first cunstructs index distribution
-		auto parIndexInDomains = procDEMSystem_.parIndexInDomainsMaster();
-
-		if(!realScatteredComm_.changeDataMaps(parIndexInDomains))
-		{
-			fatalErrorInFunction<<
-			"error in creating index block for real type"<<endl;
-			Plus::processor::abort(0);
-			return false;
-		}
-
-		if(!realx3ScatteredComm_.changeDataMaps(parIndexInDomains))
-		{
-			fatalErrorInFunction<<
-			"error in creating index block for realx3 type"<<endl;
-			Plus::processor::abort(0);
-			return false;
-		}
-	}
-
-	// update position and diameter in each processor
-	distributeParticles();
+	if( !particleMapping_.update(t, fluidDt, procDEMSystem_, couplingMesh_) ) return false;
 
 	// update velocity in each processor
 	distributeParticleFields();
-
+	
 	getDataTimer_.end();
 	return true;
 }
@@ -204,7 +167,7 @@ bool pFlow::coupling::couplingSystem::collectFluidForce()
 
 	auto thisForce = makeSpan(fluidForce_);
 	
-	if(!realx3ScatteredComm_.collectSum(thisForce, allForce))
+	if(!particleMapping_.realx3ScatteredComm().collectSum(thisForce, allForce))
 	{
 		fatalErrorInFunction<<
 		"Faild to perform collective sum over processors for fluid force"<<endl;
@@ -221,7 +184,7 @@ bool pFlow::coupling::couplingSystem::collectFluidTorque()
 	for(uint32 i=0; i<allTorque.size(); i++)
 		allTorque[i] = zero3;
 	auto thisTorque = makeSpan(fluidTorque_);
-	if(!realx3ScatteredComm_.collectSum(thisTorque, allTorque))
+	if(!particleMapping_.realx3ScatteredComm().collectSum(thisTorque, allTorque))
 	{
 		fatalErrorInFunction<<
 		"Faild to perform collective sum over processors for fluid torque"<<endl;
@@ -231,71 +194,56 @@ bool pFlow::coupling::couplingSystem::collectFluidTorque()
 	return true;	
 }
 
-bool pFlow::coupling::couplingSystem::distributeParticles()
-{
-	auto allDiam = procDEMSystem_.particlesDiameterAllMaster();
-	auto thisDiam = makeSpan(particleDiameter_);
-
-	if(!realScatteredComm_.distribute(allDiam, thisDiam))
-	{
-		fatalErrorInFunction<<
-		"cannot distribute particle diameters to processors"<<endl;
-		Plus::processor::abort(0);
-		return false;
-	}
-
-	auto allPos = procDEMSystem_.particlesCenterMassAllMaster();
-	auto thisPos = makeSpan(centerMass_);
-	if(!realx3ScatteredComm_.distribute(allPos, thisPos))
-	{
-		fatalErrorInFunction<<
-		"cannot distribute particle positions to processors"<<endl;
-		Plus::processor::abort(0);
-		return false;
-	}
-
-	/*auto allID = procDEMSystem_.particleIdAllMaster();
-	auto thisID = makeSpan(particleID_);
-
-	if(!realScatteredComm_.distribute(allID, thisID))
-	{
-		fatalErrorInFunction<<
-		"cannot distribute particle IDs to processors"<<endl;
-		Plus::processor::abort(0);
-		return false;
-	}*/
-
-	return true;
-
-}
 
 bool pFlow::coupling::couplingSystem::distributeParticleFields()
 {
-	auto allVel = procDEMSystem_.particlesVelocityAllMaster();
-	auto thisVel = makeSpan(particleVelocity_);
-	if(!realx3ScatteredComm_.distribute(allVel, thisVel))
-	{
-		fatalErrorInFunction<<
-		"cannot distribute particle velocity among processors"<<endl;
-		Plus::processor::abort(0);
-		return false;
-	}
-
-	if( requireRVel_)
-	{
-		auto allRVel = procDEMSystem_.particlesRVelocityAllMaster();
-		auto thisRVel = makeSpan(particleRVelocity_);
-		if(!realx3ScatteredComm_.distribute(allRVel, thisRVel))
-		{
-			fatalErrorInFunction<<
-			"cannot distribute particle rotational velocity among processors"<<endl;
-			Plus::processor::abort(0);
-			return false;
-		}
-	}
 	
+    auto allDiam = procDEMSystem_.particlesDiameterAllMaster();
+    auto thisDiam = makeSpan(particleDiameter_);
 
-	return true;
+    if(!particleMapping_.realScatteredComm().distribute(allDiam, thisDiam))
+    {
+        fatalErrorInFunction<<
+        "cannot distribute particle diameters to processors"<<endl;
+        Plus::processor::abort(0);
+        return false;
+    }
+
+    auto allVel = procDEMSystem_.particlesVelocityAllMaster();
+    auto thisVel = makeSpan(particleVelocity_);
+    if(!particleMapping_.realx3ScatteredComm().distribute(allVel, thisVel))
+    {
+        fatalErrorInFunction<<
+        "cannot distribute particle velocity among processors"<<endl;
+        Plus::processor::abort(0);
+        return false;
+    }
+
+    if( requireRVel_)
+    {
+        auto allRVel = procDEMSystem_.particlesRVelocityAllMaster();
+        auto thisRVel = makeSpan(particleRVelocity_);
+        if(!particleMapping_.realx3ScatteredComm().distribute(allRVel, thisRVel))
+        {
+            fatalErrorInFunction<<
+            "cannot distribute particle rotational velocity among processors"<<endl;
+            Plus::processor::abort(0);
+            return false;
+        }
+    }
+
+    /*auto allID = procDEMSystem_.particleIdAllMaster();
+    auto thisID = makeSpan(particleID_);
+
+    if(!particleMapping_.uint32ScatteredComm().distribute(allID, thisID))
+    {
+        fatalErrorInFunction<<
+        "cannot distribute particle IDs to processors"<<endl;
+        Plus::processor::abort(0);
+        return false;
+    }*/
+
+    return true;
 }
 
 bool pFlow::coupling::couplingSystem::iterate(real upToTime, bool writeTime, const word& timeName)

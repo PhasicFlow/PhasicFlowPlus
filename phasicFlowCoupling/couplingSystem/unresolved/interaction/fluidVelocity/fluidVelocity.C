@@ -19,30 +19,26 @@ Licence:
 -----------------------------------------------------------------------------*/
 
 
-#include "PIC.hpp"
-#include "self.hpp"
+#include "fluidVelocity.hpp"
+#include "couplingMesh.hpp"
 
-
-pFlow::coupling::PIC::PIC(
-	const unresolvedCouplingSystem& CS,
-	const couplingMesh& 			cMesh,
-	const Plus::realProcCMField& 	parDiam)
+pFlow::coupling::fluidVelocity::fluidVelocity
+(
+    const word &type, 
+    const Foam::volVectorField &U, 
+    const couplingMesh &cMesh
+)
 :
-	porosity(CS, cMesh, parDiam)
+    Uf_(U),
+    interpolate_(type == "particle"),
+    Up_
+    (
+        "Up",
+        cMesh.centerMass()
+    )
 {
-
 }
 
-bool pFlow::coupling::PIC::internalFieldUpdate()
+void pFlow::coupling::fluidVelocity::interpolate(const couplingMesh &cMesh)
 {
-	
-	self selfCellDist;
-	
-	auto solidVolTmp = calculateSolidVol(selfCellDist);
-
-    Foam::fieldRef(*this) = Foam::max(
-        1 - solidVolTmp/this->mesh().V(), 
-        static_cast<Foam::scalar>(this->alphaMin()) );
-
-	return true;
 }
