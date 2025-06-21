@@ -19,6 +19,7 @@ Licence:
 -----------------------------------------------------------------------------*/
 
 #include "diffusion.hpp"
+#include "self.hpp"
 #include "unresolvedCouplingSystem.hpp"
 
 Foam::tmp<Foam::fvMatrix<Foam::scalar>> pFlow::coupling::diffusion::fvmDdt
@@ -82,31 +83,14 @@ pFlow::coupling::diffusion::diffusion(
 
 bool pFlow::coupling::diffusion::internalFieldUpdate()
 {
-	
-	auto solidVoldTmp = Foam::volScalarField::Internal::New(
-		"solidVol",
-		this->mesh(),
-		Foam::dimensioned("solidVol", Foam::dimVol, Foam::scalar(0))
-	);
 
-	auto& solidVol = solidVoldTmp.ref();
+	self selfCellDist;
 	
-	const auto& cntrMass = centerMass(); 
-	const size_t numPar = cntrMass.size();
+	auto solidVolTmp = calculateSolidVol(selfCellDist);
 
-	#pragma omp parallel for
-	for(size_t i=0; i<numPar; i++)
-	{
-		const auto cellId = parCellIndex_[i];
-		if( cellId >= 0 )
-		{
-			#pragma omp atomic
-			solidVol[cellId] += 
-				static_cast<real>(3.14159265358979/6)*
-				pFlow::pow(particleDiameter_[i], static_cast<real>(3.0));
-				
-		}
-	}
+    Foam::fieldRef(*this) = Foam::max(
+        1 - solidVolTmp/this->mesh().V(), 
+        static_cast<Foam::scalar>(this->alphaMin()) );
 
 	auto picAlphaTmp = Foam::volScalarField::New(
 		"picAlpha",
@@ -117,7 +101,7 @@ bool pFlow::coupling::diffusion::internalFieldUpdate()
 
 	Foam::volScalarField& picAlpha = picAlphaTmp.ref();
 	
-	Foam::fieldRef(picAlpha) = Foam::min(solidVol/this->mesh().V(), 1.0);
+	Foam::fieldRef(picAlpha) = Foam::min(solidVolTmp/this->mesh().V(), 1.0);
 	picAlpha.correctBoundaryConditions();
 	
 	
@@ -131,7 +115,9 @@ bool pFlow::coupling::diffusion::internalFieldUpdate()
 		);
 		alphaEq.solve(picSolDict_);
 	}
-        Info<<"*********************************************************\n";
+
+    //Info<<"*********************************************************\n";
+	
 	Foam::fieldRef(*this) = 1.0-picAlpha.internalField();
 
 	return true;

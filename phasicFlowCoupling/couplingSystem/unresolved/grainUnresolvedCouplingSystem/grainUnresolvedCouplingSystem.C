@@ -25,7 +25,7 @@ bool pFlow::coupling::grainUnresolvedCouplingSystem<DistributorType>::
 	
 	auto allCG = this->pDEMSystem().particlesCourseGrainFactorMasterAllMaster();
 	auto thisCG = makeSpan(courseGrainFactor_);
-	if(!this->realMappedComm().distribute(allCG, thisCG))
+	if(!this->parMapping().realScatteredComm().distribute(allCG, thisCG))
 	{
 		fatalErrorInFunction<<
 		"cannot distribute particle course grain factor among processors"<<endl;
@@ -71,15 +71,16 @@ template<typename DistributorType>
 void pFlow::coupling::grainUnresolvedCouplingSystem<DistributorType>::calculatePorosity()
 {
 	porosityTimer_.start();
-	if(requiresDistribution_)
-	{
-		porosity_().mapCentersBeforeCalcPorosity();
-		this->cellDistribution().updateWeights(
-			porosity_->particleCellIndex(),
-			this->particleDiameter());
-	}
+
+	// update coupling mesh and map particles 
+	this->cMesh().update();
+	
+	// update weights for distribution
+	this->cellDistribution().updateWeights(this->cMesh().parCellIndex(), this->particleDiameter());
+
+	// calculate porosity 
 	porosity_->calculatePorosity();
-	porosity_->reportNumInMesh();
+
 	porosityTimer_.end();
 
 	Foam::Info<<Blue_Text("Porosity time: ")<<porosityTimer_.lastTime()<<" s\n";

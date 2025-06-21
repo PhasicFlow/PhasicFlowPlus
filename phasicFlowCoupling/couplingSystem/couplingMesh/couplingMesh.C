@@ -4,6 +4,7 @@
 
 #include "couplingMesh.hpp"
 #include "processorPlus.hpp"
+#include "procCommunicationPlus.hpp"
 #include "streams.hpp"
 
 void pFlow::coupling::couplingMesh::calculateBox()const
@@ -20,7 +21,7 @@ void pFlow::coupling::couplingMesh::calculateBox()const
          static_cast<real>(upper[1]), 
          static_cast<real>(upper[2])});
 
-    Foam::Info<< Blue_Text("Bounding box has been updated.")<<Foam::endl;
+    REPORT(1)<< Blue_Text("Bounding box has been updated.")<<END_REPORT;
 
 }
 
@@ -56,44 +57,63 @@ void pFlow::coupling::couplingMesh::resetTree()const
         )
     );
 
-    Foam::Info<< Blue_Text("Search tree has been reset.")<<Foam::endl;
+    REPORT(1)<< Blue_Text("Search tree has been reset.")<<END_REPORT;
+     
 }
 
+void pFlow::coupling::couplingMesh::mapParticles()
+{
+    const auto& cm = parCellIndex_.centerMass();
+    const size_t numPar = cm.size();
+    numInMesh_ = 0;
+    
+    #pragma omp parallel for reduction(+:numInMesh_)
+    for(size_t i = 0; i<numPar; i++)
+    {
+        auto cellId = findCellTree(cm[i], parCellIndex_[i]);
+        parCellIndex_[i] = cellId;
+        if( cellId >= 0 ) numInMesh_++;	
+    }
+}
 
 pFlow::coupling::couplingMesh::couplingMesh
 (
 	const Foam::dictionary& dict,
-    Foam::fvMesh& mesh
+    Foam::fvMesh& mesh, 
+    const Plus::centerMassField& centerMass
 ) 
 :
 	mesh_(mesh),
-    meshStatic_(!mesh.dynamic()),
-    domainExpansionRatio_
-    (
-        Foam::max(lookupDict<Foam::scalar>(dict, "domainExpansionRatio"), 0.5)
-    ),
-    domainUpdateInterval_
-    (
-        lookupDict<Foam::scalar>(dict, "domainUpdateInterval")
-    ),
-    decompositionMode_
-    (
-        lookupDict<Foam::word>(dict, "decompositionMode")
-    )
+    parCellIndex_
+	(
+		"parCellIndex",
+		static_cast<Foam::label>(-1),
+		centerMass,
+		true
+	)
 {
 
-    if(decompositionMode_ == "facePlanes") 
+    /// Mesh decomposition mode for locating points in the mesh
+    /// Options are: 
+    /// 	1) facePlanes
+    /// 	2) cellTets
+    /// 	3) faceDiagonalTriangles
+    /// 	4) faceCenterTriangles
+	Foam::word decompositionMode(
+        lookupDict<Foam::word>(dict, "decompositionMode"));
+
+    if(decompositionMode == "facePlanes") 
         cellDecompositionMode_ = Foam::polyMesh::FACE_PLANES;
-    else if(decompositionMode_ == "cellTets")
+    else if(decompositionMode == "cellTets")
         cellDecompositionMode_ = Foam::polyMesh::CELL_TETS;
-    else if(decompositionMode_ == "faceDiagonalTriangles")
+    else if(decompositionMode == "faceDiagonalTriangles")
         cellDecompositionMode_ = Foam::polyMesh::FACE_DIAG_TRIS;
-    else if(decompositionMode_ == "faceCenterTriangles")
+    else if(decompositionMode == "faceCenterTriangles")
         cellDecompositionMode_ = Foam::polyMesh::FACE_CENTRE_TRIS;
     else
     {
         fatalErrorInFunction<<
-        "Wrong deompositionMode"<< decompositionMode_ <<
+        "Wrong deompositionMode"<< decompositionMode <<
         " in dictionary "<< dict.name() <<endl;
         Plus::processor::abort(0);
         return;
@@ -107,24 +127,15 @@ pFlow::coupling::couplingMesh::couplingMesh
     {
         (void)mesh.tetBasePtIs();
     }
-    resetTree();
+
+    nCells_ = mesh_.nCells();
     calculateBox();
+    resetTree();
 }
 
 
-void pFlow::coupling::couplingMesh::update(Foam::scalar t, Foam::scalar fluidDt)
+void pFlow::coupling::couplingMesh::update()
 {
-    
-    checkForDomainUpdate(t, fluidDt);
-    
-    // for the first time, they should be constructed anyway
-    if(!firstConstruction_) 
-    {
-        firstConstruction_ = true;
-        calculateBox();
-        resetTree();
-    }
-
     // for dynamic mesh, bounding box and search tree should be 
     // updated every time step
     if( dynamic() )
@@ -132,38 +143,28 @@ void pFlow::coupling::couplingMesh::update(Foam::scalar t, Foam::scalar fluidDt)
         calculateBox();
         resetTree();
     }
-    
+    nCells_ = mesh_.nCells();
+    mapParticles();
+    reportNumInMesh();
 }
 
-bool pFlow::coupling::couplingMesh::checkForDomainUpdate
-(
-    Foam::scalar t, 
-    Foam::scalar fluidDt,
-    bool insideFluidLoop
-)
+void pFlow::coupling::couplingMesh::reportNumInMesh()const
 {
-    if(insideFluidLoop) t -= fluidDt;
+    Plus::procCommunication proc;
+	if( auto [numInMeshAll, success] = proc.collectAllToMaster(numInMesh_); success)
+	{
+		if(Plus::processor::isMaster())
+		{
+			int32 s=0;
+			for(auto v:numInMeshAll) s += v;
 
-    if( !firstConstruction_ )
-    {
-        lastTimeUpdated_ = t;
-        return true;
-    }
-
-    if( std::abs(t-lastTimeUpdated_) < static_cast<real>(0.98*fluidDt) )
-    {
-        lastTimeUpdated_ = t;
-        return true;
-    }
-    
-    if( std::abs(t-(lastTimeUpdated_+domainUpdateInterval_)) < static_cast<real>(0.98*fluidDt))
-    {
-        lastTimeUpdated_ = t;
-        return true;
-    }
-
-    return false;
+			output<<Blue_Text("Particles located in processor meshes:") << 
+			Yellow_Text(numInMeshAll)<<
+			" => "<< Yellow_Text(s)<< endl;
+		}
+	}
 }
+
 
 bool pFlow::coupling::couplingMesh::pointInCell
 (
@@ -299,7 +300,7 @@ pFlow::coupling::couplingMesh::findPointInCellTree
 	Foam::label cellId
 )const
 {
-	if (cellId == -1)
+	if (cellId == -1 || cellId >= nCells_ )
     {
         
         return cellTreeSearch_().findInside(p);
@@ -327,7 +328,7 @@ pFlow::coupling::couplingMesh::findPointSphereInCellTree
 )const
 {
 	// first find the cellId if not known
-	if (cellId == -1)
+	if (cellId == -1 || cellId >= nCells_ )
     {
         cellId = cellTreeSearch_().findInside(p);
 
@@ -343,7 +344,7 @@ pFlow::coupling::couplingMesh::findPointSphereInCellTree
     
     // the point may have been moved to another cell, find new cell
     cellId = cellTreeSearch_().findInside(p);
-    if(cellId ==-1)
+    if(cellId ==-1 || cellId >= nCells_)
     {
     	sphereInCell = false;
     	return cellId;
@@ -365,7 +366,7 @@ pFlow::coupling::couplingMesh::findPointSphereInCellTree
 )const
 {
 	// first find the cellId if not known
-	if (cellId == -1)
+	if (cellId == -1 || cellId >= nCells_)
     {
         cellId = cellTreeSearch_().findInside(p);
 
@@ -382,7 +383,7 @@ pFlow::coupling::couplingMesh::findPointSphereInCellTree
     
     // the point may have been moved to another cell, find new cell
     cellId = cellTreeSearch_().findInside(p);
-    if(cellId ==-1)
+    if(cellId ==-1 || cellId >= nCells_)
     {
     	smallInCell = false;
         largeInCell = false;
@@ -400,37 +401,24 @@ pFlow::coupling::couplingMesh::findCellTree
     Foam::label cellId
 )const
 {
-    if (cellId == -1)
+    Foam::point pp (p.x(), p.y(), p.z());
+    if (cellId == -1 || cellId >= nCells_)
     {
-        //output<<"cellId \n";
-        return cellTreeSearch_().findInside(
-            Foam::point(p.x(), p.y(), p.z())
-            );
+        return cellTreeSearch_().findInside(pp);
     }
     else
     {
-        if (mesh_.pointInCell(
-            Foam::point(p.x(), p.y(), p.z()),
-            cellId,
-            cellDecompositionMode_))
+        if (pointInCell(
+            pp,
+            cellId))
         {
             return cellId;
         }
         else
         {
-            return cellTreeSearch_().findInside(
-            Foam::point(p.x(), p.y(), p.z())
-            );     
+            return cellTreeSearch_().findInside(pp);     
         }
     }
-    /*Foam::point pt(p.x(), p.y(), p.z());
-
-    if(cellId != -1 && 
-        mesh_.pointInCell(pt, cellId, cellDecompositionMode_)
-        ) return cellId;
-
-    return mesh_.findCell(pt, Foam::polyMesh::CELL_TETS);*/
-
 }
 
 Foam::labelList pFlow::coupling::couplingMesh::findSphere
@@ -450,66 +438,3 @@ Foam::labelList pFlow::coupling::couplingMesh::findSphere
     return  cellTreeSearch_().findBox(searchBox);
 }
 
-/*Foam::label 
-pFlow::coupling::couplingMesh::findCellSeed
-(
-    const Foam::point& loc,
-    const Foam::label seedCellId
-)
-{
-    if (mesh_.pointInCell(loc, seedCellId, cellDecompMode_))
-    {
-        return seedCellId;
-    }
-
-    Foam::label  curCelli = seedCellId;
-    Foam::scalar nearestDistSqr = magSqr(mesh_.cellCentres()[seedCellId] - loc);
-
-    while(true)
-    {
-        // Try neighbours of curCelli
-
-        const auto& cFaces = mesh_.cells()[curCelli];
-
-        Foam::label nearestCelli = -1;
-
-        forAll(cFaces, i)
-        {
-            Foam::label facei = cFaces[i];
-
-            if (mesh_.isInternalFace(facei))
-            {
-                Foam::label celli = mesh_.faceOwner()[facei];
-                if (celli == curCelli)
-                {
-                    celli = mesh_.faceNeighbour()[facei];
-                }
-
-                // Check if this is the correct cell
-                if (mesh_.pointInCell(loc, celli, cellDecompMode_))
-                {
-                    return celli;
-                }
-
-                // Also calculate the nearest cell
-                Foam::scalar distSqr = Foam::magSqr(mesh_.cellCentres()[celli] - loc);
-
-                if (distSqr < nearestDistSqr)
-                {
-                    nearestDistSqr = distSqr;
-                    nearestCelli = celli;
-                }
-            }
-        }
-
-        if (nearestCelli == -1)
-        {
-            return -1;
-        }
-
-        // Continue with the nearest cell
-        curCelli = nearestCelli;
-    }
-
-    return -1;
-}*/

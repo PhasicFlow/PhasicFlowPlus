@@ -60,11 +60,13 @@ protected:
 	/// private member functions 
 	void setSuSpToZero();
 
+	inline
 	Foam::volVectorField& Su()
 	{
 		return Su_;
 	}
 
+	inline
 	Foam::volScalarField& Sp()
 	{
 		return Sp_;
@@ -95,11 +97,13 @@ public:
 	Foam::tmp<Foam::volVectorField> 
 	pressureGradient(const Foam::volScalarField& rho)const;
 
+	inline
 	const Foam::volVectorField& Su()const
 	{
 		return Su_;
 	}
 
+	inline
 	const Foam::volScalarField& Sp()const
 	{
 		return Sp_;
@@ -111,14 +115,27 @@ public:
 		return isCompressible_;
 	}
 	
-	const auto& particleCellIndex()const
+	const porosity& Porosity()const
 	{
-		return porosity_.particleCellIndex();
+		return porosity_;
 	}
 
+	inline
+	const auto& parCellIndex()const
+	{
+		return porosity_.parCellIndex();
+	}
+
+	inline
 	const Foam::fvMesh& mesh()const
 	{
 		return porosity_.mesh();
+	}
+
+	inline 
+	const auto& cMesh()const
+	{
+		return porosity_.cMesh();
 	}
 
 	const Foam::volScalarField& alpha()const

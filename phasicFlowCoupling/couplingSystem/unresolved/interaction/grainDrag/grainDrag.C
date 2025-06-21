@@ -33,7 +33,7 @@ void pFlow::coupling::grainDrag<DistributorType, DragClosureType, useCellDistrib
 	self selfDictribution;
 	const auto& cellDist = this->cellDistribution();
 
-	const auto& parCells =  this->particleCellIndex();
+	const auto& parCells =  this->parCellIndex();
 	const auto& nu = this->mesh().template lookupObject<Foam::volScalarField>("nu");
 	const auto& rho = this->mesh().template lookupObject<Foam::volScalarField>("rho");
 	const auto& Vcells = this->mesh().V();
@@ -44,12 +44,10 @@ void pFlow::coupling::grainDrag<DistributorType, DragClosureType, useCellDistrib
 	// gets pressure gradient 
 	auto pGradPtr = this->pressureGradient(rho);
 	const auto& pGrad = pGradPtr();
-	
-
 
 	size_t numPar = parCells.size();
 
-#pragma omp parallel for
+#pragma omp parallel for schedule (dynamic)
 	for(size_t parIndx=0; parIndx<numPar; parIndx++)
 	{
 		auto cellIndx = parCells[parIndx];

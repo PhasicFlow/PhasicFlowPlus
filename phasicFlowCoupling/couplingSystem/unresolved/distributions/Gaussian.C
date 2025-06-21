@@ -18,128 +18,9 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-#include <set>
 
-// from OpenFOAM
 #include "Gaussian.hpp"
 #include "couplingMesh.hpp"
-
-void pFlow::coupling::Gaussian::parseNeighbors(
-	const Foam::label 		targetCelli,
-	const Foam::vector& 	targetCellCentre, 
-	const Foam::scalar 		searchLen,
-	const Foam::scalar 		celli,
-	std::set<Foam::label>& 	finalList,
-	const Foam::label 		layerNumber)
-{
-	const Foam::labelList& neigborCells = mesh_.cellCells(celli);
-	const Foam::vectorField& cellC = mesh_.cellCentres(); 
-	const Foam::scalar cellV = mesh_.cellVolumes()[targetCelli];
-	const Foam::scalar lCell = 0.5* Foam::pow(cellV, 0.33333);
-	// first find all the cells around 
-	int found = 0; 
-	for(auto nghbrCelli:neigborCells)
-	{
-		if(nghbrCelli==targetCelli || finalList.count(nghbrCelli) == 1) continue;
-		
-		Foam::scalar dist = Foam::mag(cellC[nghbrCelli] - targetCellCentre);	
-		if(dist <= searchLen + lCell)
-		{
-			found++;
-			finalList.insert(nghbrCelli);
-		}
-	}
-
-    if(layerNumber <=4 && found != 0)
-    {
-    	for(auto nghbrCelli:neigborCells)
-    	{
-    		parseNeighbors
-    		(
-    			targetCelli,
-    			targetCellCentre,
-    			searchLen,
-    			nghbrCelli,
-    			finalList,
-    			layerNumber+1
-    		);
-    	}
-    }
-}
-
-
-void pFlow::coupling::Gaussian::constructLists(const Foam::scalar searchLen)
-{
-
-	if(!mesh_.hasCellCells())
-	{
-		mesh_.cellCells();
-	}
-
-	const Foam::vectorField& cellC = mesh_.cellCentres();
-	const Foam::scalarField& cellV = mesh_.cellVolumes();
-	const auto& bndris = mesh_.boundary();
-	const auto nCells = cellC.size();
-	
-	// check for capacity and size 
-	if(nCells != neighborList_.size() )
-	{
-		neighborList_.clear();
-		neighborList_.setSize(nCells);
-		boundaryCell_.clear();
-		boundaryCell_.setSize(nCells);
-	}
-	
-	// loop over all cells
-	// TODO: later this should be recursive calls 
-	#pragma omp parallel for
-	for(Foam::label celli = 0; celli < nCells; celli++) 
-	{
-		const Foam::vector& ci = cellC[celli];
-		const Foam::scalar  lCell = 0.5* Foam::pow(cellV[celli], 0.33333);
-		
-		std::set<Foam::label> finalList;
-
-		finalList.insert(celli);
-
-        parseNeighbors(celli, ci, searchLen, celli, finalList, 1);        
-         
-        neighborList_[celli].setSize(finalList.size());
-        Foam::label n = 0;
-        for(auto nbr:finalList)
-        {
-        	neighborList_[celli][n]=nbr;
-        	n++;
-        }
-
-		
-		Foam::label nghbrB = -1;
-		Foam::label nghbrFaceIndex = -1;
-		Foam::scalar minDistance = 1.0e15;
-		for(Foam::label nB = 0; nB < bndris.size(); nB++)
-		{
-			//const labelUList& faceCells = bndris[nB].faceCells();
-			const auto& bndry = bndris[nB];
-
-			for(auto j =0; j<bndry.size(); j++)
-			{
-				auto cellFaceDist = Foam::mag(ci - bndry.Cf()[j]);
-				if( cellFaceDist < searchLen + lCell)
-				{
-					if(cellFaceDist<minDistance)
-					{
-						nghbrB = nB;
-						nghbrFaceIndex = j;
-						minDistance = cellFaceDist;
-					}		
-				}
-			}
-		}
-		
-		boundaryCell_[celli] = std::pair<Foam::label, Foam::label>{nghbrB, nghbrFaceIndex};
-	}
-
-}
 
 
 pFlow::coupling::Gaussian::Gaussian
@@ -149,38 +30,35 @@ pFlow::coupling::Gaussian::Gaussian
 	const Plus::centerMassField& centerMass
 )
 :
-	neighborLength_(lookupDict<Foam::scalar>(dict, "neighborLength")),
-	lengthExtent_(lookupOrDefaultDict<Foam::scalar>(dict, "lengthExtent", 3.0)),
-	weights_("weights",centerMass),
-	mesh_(cMesh.mesh())
+	distribution(dict, cMesh, centerMass),	
+	standardDeviation_(lookupDict<Foam::scalar>(dict, "standardDeviation")),
+	distLengthExtent_(lookupOrDefaultDict<Foam::scalar>(dict, "distLengthExtent", 3.5))
 {
-	constructLists(lengthExtent_*neighborLength_);
-
+	constructLists(distLengthExtent_*standardDeviation_);
 }
-
 
 void pFlow::coupling::Gaussian::updateWeights
 (
 	const Plus::procCMField<Foam::label> & parCellIndex,
-		const Plus::procCMField<real> &
+	const Plus::procCMField<real> &
 )
 {
 
 	const auto& centerMass = weights_.centerMass();
 	const size_t numPar = centerMass.size();
-	const Foam::scalar b2 = Foam::pow(neighborLength_,2);
+	const Foam::scalar b2 = Foam::pow(standardDeviation_,2);
 	const Foam::vectorField& allCellCntr = mesh_.cellCentres();
 	
 	// lambda for distribution function 
 	auto distFunc  = [b2](const Foam::vector& x) -> Foam::scalar
 	{
-		return Foam::exp(-dot(x,x)/b2);
+		return Foam::exp(-Foam::dot(x,x)/(2*b2));
 	};
 
 	auto distFunc2 = [b2](const Foam::vector& x, const Foam::scalar dist)-> Foam::scalar
 	{
-		auto ksi2 = dot(x,x)/b2;
-		auto shifted_ksi2 = (dot(x,x)+4*dist*dist)/b2;
+		auto ksi2 = Foam::dot(x,x)/(2*b2);
+		auto shifted_ksi2 = (dot(x,x)+4*dist*dist)/(2*b2);
 		return Foam::exp(-ksi2)+Foam::exp(-shifted_ksi2);
 	};
 	
@@ -189,19 +67,17 @@ void pFlow::coupling::Gaussian::updateWeights
 	{
 		
 		const Foam::label targetCellId = parCellIndex[i];
-		auto& weightsI = weights_[i];
+		auto& weightsPar = weights_[i];
 
-		weightsI.clear();
+		weightsPar.clear();
 		if( targetCellId < 0 )continue;
 		
 		// get all the neighbors of cell 
-		const Foam::labelList& neighbors = neighborList_[targetCellId];
+		const auto& neighbors = neighborList_[targetCellId];
 		
 		// center of particle 
 		const realx3& cp = centerMass[i];
 		Foam::vector CP{cp.x(), cp.y(), cp.z()};	
-
-		weightsI.reserve(neighbors.size());
 		
 		Foam::scalar pSubTotal = 0;
 		
@@ -210,11 +86,12 @@ void pFlow::coupling::Gaussian::updateWeights
 		if( bndryIndex == -1 )
 		{
 			// this is not a boundary cell 
-			for(auto j:neighbors)
-			{
-				Foam::scalar k = distFunc(CP - allCellCntr[j]);
-				weightsI.push_back(k);
-				pSubTotal += k;
+			
+			for(auto cellId:neighbors)
+			{	
+				Foam::scalar f = distFunc(CP - allCellCntr[cellId]);
+				weightsPar.push_back({cellId,f});
+				pSubTotal += f;	
 			}
 		}
 		else
@@ -225,22 +102,25 @@ void pFlow::coupling::Gaussian::updateWeights
 			const Foam::vector normal = Foam::normalised(bndry.Sf()[faceIndex]);
 			Foam::scalar parFaceDist = std::abs(normal & parFace);
 
-			for(auto j:neighbors)
+			for(auto cellId:neighbors)
 			{	
-				Foam::scalar k;
-				if(bndryIndex== boundaryCell_[j].first )
+				Foam::scalar f;
+				if(bndryIndex== boundaryCell_[cellId].first )
 				{
-					k = distFunc2(CP - allCellCntr[j], parFaceDist);
+					f = distFunc2(CP - allCellCntr[cellId], parFaceDist);
 				}
 				else
-					k = distFunc(CP - allCellCntr[j]);
-				weightsI.push_back(k);
-				pSubTotal += k;
+				{
+					f = distFunc(CP - allCellCntr[cellId]);
+				}	
+				weightsPar.push_back({cellId, f});
+				pSubTotal += f;
 			}
 
 		}
-		pSubTotal = Foam::max(pSubTotal, static_cast<Foam::scalar>(1.0e-15));
-		for(auto& w:weightsI) w /= pSubTotal;
+		
+		pSubTotal = Foam::max(pSubTotal, static_cast<Foam::scalar>(1.0e-10));
+		for(auto& [i, w]:weightsPar) w /= pSubTotal;
 	}
 
 }

@@ -17,58 +17,55 @@ Licence:
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 -----------------------------------------------------------------------------*/
-#ifndef __Gaussian2_hpp__ 
-#define __Gaussian2_hpp__
 
-// from PhasicFlowPlus
-#include "distribution.hpp"
+#ifndef __fluidVelocity_hpp__
+#define __fluidVelocity_hpp__
 
+// from OpenFOAM
+#include "OFCompatibleHeader.hpp"
+#include "procCMFields.hpp"
 
 namespace pFlow::coupling
 {
 
 class couplingMesh;
 
-class Gaussian2
-:
-	public distribution
-{	
-private:
-	
-	// radius of circle for cell neighbor list 
-	Foam::scalar 				standardDeviation_;
+class fluidVelocity
+{
+    const Foam::volVectorField&     Uf_;
 
-	Foam::scalar 				distLengthExtent_;
+    const bool                      interpolate_ = false;
+
+    Plus::realx3ProcCMField         Up_;
 
 public:
 
-	/// Type info
-	TypeInfoNV("Gaussian2");
+    fluidVelocity(
+        const word& type, 
+        const Foam::volVectorField& U,
+        const couplingMesh& cMesh);
 
-	/// Construct from dictionary 
-	Gaussian2(
-		Foam::dictionary 		dict, 
-		const couplingMesh& 	cMesh,
-		const Plus::centerMassField& centerMass);
+    void interpolate(const couplingMesh& cMesh);
 
-	/// Destructor
-	~Gaussian2() = default;
+    inline
+    Foam::vector uFluid(Foam::scalar celli, size_t parIdx)const
+    {
+        /*if(interpolate_)
+        {
+            const auto& up = Up_[parIdx]; 
+            return Foam::vector{up.x(), up.y(), up.z()};
+        }
+        else
+        {
+            return Uf_[celli];
+        }*/
 
-	inline
-	auto standardDeviation()const
-	{
-		return standardDeviation_;
-	}
+        return Uf_[celli];
+    }
 
-	void updateWeights(
-		const Plus::procCMField<Foam::label> & parCellIndex,
-		const Plus::procCMField<real> & parDiameter);
+};
 
-	
-
-}; 
-
-} // pFlow::coupling
+}
 
 
-#endif
+#endif //__fluidVelocity_hpp__

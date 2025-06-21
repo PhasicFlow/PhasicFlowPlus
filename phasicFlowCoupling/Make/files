@@ -12,8 +12,9 @@ couplingSystem/unresolved/distributions/distribution.C
 couplingSystem/unresolved/distributions/Gaussian.C
 couplingSystem/unresolved/distributions/adaptiveGaussian.C
 couplingSystem/unresolved/distributions/GaussianIntegral.C
-couplingSystem/unresolved/distributions/Gaussian2.C
+couplingSystem/unresolved/distributions/GaussianOld.C
 couplingSystem/unresolved/distributions/self.C
+
 
 couplingSystem/unresolved/porosity/porosity/porosity.C
 couplingSystem/unresolved/porosity/PIC/PIC.C
@@ -23,19 +24,22 @@ couplingSystem/unresolved/porosity/subDivision29/subDivision29Mod.C
 couplingSystem/unresolved/porosity/porosityCellDistribution/porosityCellDistributions.C
 couplingSystem/unresolved/porosity/diffusion/diffusion.C
 
+couplingSystem/couplingMesh/particleMapping.C
+couplingSystem/couplingMesh/couplingMesh.C
+couplingSystem/couplingSystem.C
+couplingSystem/unresolved/unresolvedCouplingSystem/unresolvedCouplingSystem.C
+couplingSystem/unresolved/sphereUnresolvedCouplingSystem/sphereUnresolvedCouplingSystems.C
+couplingSystem/unresolved/grainUnresolvedCouplingSystem/grainUnresolvedCouplingSystems.C
+
+
+couplingSystem/unresolved/interaction/fluidVelocity/fluidVelocity.C
+couplingSystem/unresolved/interaction/solidVelocity/solidVelocity.C
 couplingSystem/unresolved/interaction/dragClosures/DiFelice.C
 couplingSystem/unresolved/interaction/dragClosures/ErgunWenYu.C
 couplingSystem/unresolved/interaction/dragClosures/Rong.C
 couplingSystem/unresolved/interaction/drag/drags.C
 couplingSystem/unresolved/interaction/sphereDrag/sphereDrags.C
 couplingSystem/unresolved/interaction/grainDrag/grainDrags.C
-
-
-couplingSystem/couplingSystem.C
-couplingSystem/couplingMesh/couplingMesh.C
-couplingSystem/unresolved/unresolvedCouplingSystem/unresolvedCouplingSystem.C
-couplingSystem/unresolved/sphereUnresolvedCouplingSystem/sphereUnresolvedCouplingSystems.C
-couplingSystem/unresolved/grainUnresolvedCouplingSystem/grainUnresolvedCouplingSystems.C
 
 couplingSystem/resolved/resolvedCouplingSystem.C
 

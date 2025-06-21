@@ -22,7 +22,8 @@ Licence:
 #define __sphereDrag_hpp__
 
 #include "drag.hpp"
-
+#include "fluidVelocity.hpp"
+#include "solidVelocity.hpp"
 
 namespace pFlow::coupling
 {
@@ -42,7 +43,14 @@ private:
 
 	DragClosureType 			dragClosure_;
 
+	uniquePtr<fluidVelocity> 	fluidVelocityPtr_ = nullptr;
 
+	uniquePtr<solidVelocity>    solidVelocityPtr_ = nullptr;
+	
+	Foam::word 			fVelocityType_;
+	
+	Foam::word 			sVelocityType_;
+	
 	void calculateDragForce
 	(
 		const DragClosureType& 			dragClosure,
