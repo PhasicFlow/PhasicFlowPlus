@@ -107,8 +107,6 @@ int main(int argc, char *argv[])
                 // This is an explicit coupling, 
                 // fluid data from previous time step
                 // DEM data from previous time step 
-                coupling.cMesh().update(t, dt);
-                coupling.updateMeshBoxes();
                 coupling.getDataFromDEM(t, dt);
                 coupling.calculatePorosity();
                 coupling.calculateFluidInteraction();
