@@ -137,8 +137,8 @@ int main(int argc, char *argv[])
             {
                 mesh.update();
 
-                coupling.cMesh().update(runTime.time().value(), runTime.deltaT().value());
-                coupling.updateMeshBoxes();
+                coupling.cMesh().update();
+                //coupling.updateMeshBoxes();
 
                 if (mesh.changing())
                 {
