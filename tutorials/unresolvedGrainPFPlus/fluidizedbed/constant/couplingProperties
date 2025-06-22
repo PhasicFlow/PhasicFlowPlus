@@ -1,0 +1,77 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+	format      ascii;
+	class       dictionary;
+	location    "constant";
+	object      couplingProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+unresolved
+{
+
+    cellDistribution
+    {
+        // type of cell distribution method (if required) 
+        //    self: no distribution (cell itself)
+        //    Gaussian: distribute values on sorounding cells based on a neighbor length
+        //    adaptiveGaussian: similar to Gaussian, but it adapts the distribution 
+        //    GaussianIntegral: Uses Gaussian integral for determining particle distribution 
+        type                adaptiveGaussian; 
+    }
+
+    porosity
+    {
+    	// Options are PIC, subDivision29Mod, subDivision9, diffusion, cellDistribution
+        method      cellDistribution;
+
+        // minimum alpha allowed 
+        alphaMin    0.2;
+    }
+
+    drag
+    {
+        // Drag force closure, other options are ErgunWenYu, Rong
+        type                DiFelice; 
+
+        // Method for calculating the fluid velocity which is used in drag force calculations
+        //   cell: uses fluid velocity of the cell that contains the particle center 
+        //   particle: uses interpolated fluid velocity on the particle center based on 
+        //             cell values around particle
+        fluidVelocity       cell;
+
+        // Method for calculating the solid velocity which is used in drag calculations 
+        //   cell: solid velocity is averaged on the cell using cellDistribution method 
+        //         and this average value is used as particle velocity in calculations 
+        //   particle: the actual particle velocity is used in calculations 
+        solidVelocity       particle;  
+
+        // Whether to distribute calculated particle drag force onto cells
+        //   off: add the calculated drag force on the cell itself
+        //   on: distributes the calculated drag force on cells (using cellDistribution method)
+        cellDistribution    on; 
+
+        // residual Reynolds number 
+        residualRe          10e-6;
+    }
+
+}
+
+particleMapping
+{
+	// based on the maximum particle diameter in the simulation.
+    domainExpansionRatio    1;
+
+    domainUpdateInterval    0.01;
+
+    decompositionMode       facePlanes;
+}
+
+// ************************************************************************* //
