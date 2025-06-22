@@ -38,7 +38,7 @@ private:
 	// radius of circle for cell neighbor list 
 	Foam::scalar 				standardDeviation_;
 
-	Foam::scalar 				distLengthExtent_;
+	Foam::label 				maxLayers_;
 
 public:
 

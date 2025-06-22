@@ -6,6 +6,7 @@
 #include "processorPlus.hpp"
 #include "procCommunicationPlus.hpp"
 #include "streams.hpp"
+#include "schedule.hpp"
 
 void pFlow::coupling::couplingMesh::calculateBox()const
 {
@@ -67,7 +68,7 @@ void pFlow::coupling::couplingMesh::mapParticles()
     const size_t numPar = cm.size();
     numInMesh_ = 0;
     
-    #pragma omp parallel for reduction(+:numInMesh_)
+    #pragma ParallelRegion reduction(+:numInMesh_)
     for(size_t i = 0; i<numPar; i++)
     {
         auto cellId = findCellTree(cm[i], parCellIndex_[i]);

@@ -76,7 +76,7 @@ void pFlow::coupling::sphereDrag<DistributorType, DragClosureType, useCellDistri
 
 	size_t numPar = parCells.size();
 
-#pragma omp parallel for schedule (dynamic)
+	#pragma ParallelRegion
 	for(size_t parIndx=0; parIndx<numPar; parIndx++)
 	{
 		auto cellIndx = parCells[parIndx];
@@ -90,10 +90,6 @@ void pFlow::coupling::sphereDrag<DistributorType, DragClosureType, useCellDistri
 			auto vp =  Foam::constant::mathematical::pi/6 * Foam::pow(dp,3.0);
 
 			Foam::vector up = solidVelocity.vSolid(cellIndx, parIndx);
-			/*up = {
-				parVelocity[parIndx].x(), 
-				parVelocity[parIndx].y(),
-				parVelocity[parIndx].z()};*/
 
 			Foam::vector ur = fluidVelocity.uFluid(cellIndx, parIndx)-up;
 			Foam::scalar Re = ef * rhoi * Foam::mag(ur) * dp /mui;

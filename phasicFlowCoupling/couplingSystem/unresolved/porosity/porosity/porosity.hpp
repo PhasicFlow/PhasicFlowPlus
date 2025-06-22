@@ -30,6 +30,7 @@ Licence:
 // from phasicFlow-coupling
 #include "couplingMesh.hpp"
 #include "procCMFields.hpp"
+#include "schedule.hpp"
 
 namespace pFlow::coupling
 {
@@ -81,7 +82,7 @@ protected:
 		const Foam::label numPar = centerMass().size();
 		const auto& parCellInd = parCellIndex();
 
-		#pragma omp parallel for  //schedule (dynamic)
+		#pragma ParallelRegion
 		for(Foam::label i=0; i<numPar; i++)
 		{
 			Foam::scalar pVol = pFlow::Pi/6 *

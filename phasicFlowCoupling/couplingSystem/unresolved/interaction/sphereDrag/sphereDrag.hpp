@@ -24,6 +24,7 @@ Licence:
 #include "drag.hpp"
 #include "fluidVelocity.hpp"
 #include "solidVelocity.hpp"
+#include "schedule.hpp"
 
 namespace pFlow::coupling
 {
@@ -94,10 +95,8 @@ public:
 		if constexpr (useCellDistribution)
 			return true;
 		else
-			return false;
+			return sVelocityType_ == "cell";
 	}
-	
-	
 }; 
 
 } // pFlow::coupling

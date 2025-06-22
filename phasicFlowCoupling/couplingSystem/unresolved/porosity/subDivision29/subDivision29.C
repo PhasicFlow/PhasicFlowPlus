@@ -19,10 +19,10 @@ Licence:
 -----------------------------------------------------------------------------*/
 
 
-#include "omp.h"
+//#include "omp.h"
 
 #include "subDivision29.hpp"
-
+#include "schedule.hpp"
 
 const pFlow::real sin_45[] = {0.7071067811865475,  0.7071067811865475, -0.7071067811865475, -0.7071067811865475};
 const pFlow::real cos_45[] = {0.7071067811865475, -0.7071067811865475, -0.7071067811865475,  0.7071067811865475};
@@ -56,7 +56,7 @@ bool pFlow::coupling::subDivision29::internalFieldUpdate()
 	const auto& parDiam = particleDiameter();
 	const auto& cmesh = cMesh();
 
-	#pragma omp parallel for schedule (dynamic)
+	#pragma ParallelRegion
 	for(size_t i=0; i<numPar; i++)
 	{
 

@@ -36,7 +36,7 @@ class GaussianIntegral
 private:
 	
 	// radius of circule for cell neighbor list 
-	Foam::scalar 				distLength_;
+	Foam::label 				maxLayers_;
 
 public:
 

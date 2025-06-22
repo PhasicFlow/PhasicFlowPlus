@@ -46,7 +46,7 @@ private:
 
 	Foam::label 			  nSteps_;
 
-	Foam::scalar 			  boundLength_;
+	Foam::scalar 			  standardDeviation_;
 
 	Foam::scalar 			  intTime_;
 
