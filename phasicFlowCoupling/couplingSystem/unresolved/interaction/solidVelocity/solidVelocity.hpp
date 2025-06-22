@@ -6,10 +6,10 @@
 #include "procCMFields.hpp"
 #include "couplingMesh.hpp"
 #include "porosity.hpp"
+#include "schedule.hpp"
 
 namespace pFlow::coupling
 {
-
 
 class solidVelocity
 {
@@ -47,7 +47,7 @@ public:
             Us_[celli] = Foam::Zero;
         }
 
-        #pragma omp parallel for schedule (dynamic)
+        #pragma ParallelRegion
         for(size_t i=0; i<numPar; i++)
         {
             Foam::scalar pVol = pFlow::Pi/6 *
@@ -81,6 +81,12 @@ public:
             const auto& up = Up_[parIdx]; 
             return Foam::vector{up.x(), up.y(), up.z()};
         }
+    }
+
+    inline 
+    bool requireCellDistribution()const
+    {
+        return distribute_;
     }
 };
 

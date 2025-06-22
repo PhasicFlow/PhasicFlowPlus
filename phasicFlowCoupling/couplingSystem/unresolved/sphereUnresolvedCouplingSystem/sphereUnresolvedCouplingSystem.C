@@ -57,8 +57,9 @@ void pFlow::coupling::sphereUnresolvedCouplingSystem<DistributorType>::calculate
 	// update coupling mesh and map particles 
 	this->cMesh().update();
 	
-	// update weights for distribution
-	this->cellDistribution().updateWeights(this->cMesh().parCellIndex(), this->particleDiameter());
+	// update weights for distribution (if coupling requires it)
+	if(requiresDistribution_)
+		this->cellDistribution().updateWeights(this->cMesh().parCellIndex(), this->particleDiameter());
 
 	// calculate porosity 
 	porosity_->calculatePorosity();

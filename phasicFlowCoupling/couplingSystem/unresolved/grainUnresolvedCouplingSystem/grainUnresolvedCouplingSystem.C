@@ -76,7 +76,8 @@ void pFlow::coupling::grainUnresolvedCouplingSystem<DistributorType>::calculateP
 	this->cMesh().update();
 	
 	// update weights for distribution
-	this->cellDistribution().updateWeights(this->cMesh().parCellIndex(), this->particleDiameter());
+	if(requiresDistribution_)
+		this->cellDistribution().updateWeights(this->cMesh().parCellIndex(), this->particleDiameter());
 
 	// calculate porosity 
 	porosity_->calculatePorosity();

@@ -20,6 +20,7 @@ Licence:
 
 #include "distribution.hpp"
 #include "couplingMesh.hpp"
+#include "schedule.hpp"
 
 void pFlow::coupling::distribution::constructLists(
     const Foam::scalar searchLen,
@@ -47,7 +48,7 @@ void pFlow::coupling::distribution::constructLists(
 	}
 	
 	// loop over all cells
-	#pragma omp parallel for
+	#pragma ParallelRegion
 	for(Foam::label celli = 0; celli < nCells; celli++) 
 	{
         const Foam::vector& ci = cellC[celli];

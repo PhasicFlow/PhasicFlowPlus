@@ -21,7 +21,7 @@ Licence:
 // from OpenFOAM
 #include "GaussianIntegral.hpp"
 #include "couplingMesh.hpp"
-
+#include "schedule.hpp"
 
 
 pFlow::coupling::GaussianIntegral::GaussianIntegral
@@ -32,9 +32,9 @@ pFlow::coupling::GaussianIntegral::GaussianIntegral
 )
 :
 	distribution(dict, cMesh, centerMass),
-	distLength_(lookupOrDefaultDict(dict, "distLength", static_cast<Foam::scalar>(1.0)))
+	maxLayers_(lookupOrDefaultDict(dict, "maxLayers", static_cast<Foam::label>(1)))
 {
-	constructLists(distLength_);
+	constructLists(1.0, maxLayers_);
 }
 
 
@@ -49,7 +49,7 @@ void pFlow::coupling::GaussianIntegral::updateWeights
 	const Foam::scalarField& cellV = mesh_.cellVolumes();
 	const Foam::vectorField& cellC = mesh_.cellCentres(); 
 
-	#pragma omp parallel for
+	#pragma ParallelRegion
 	for(size_t i=0; i<numPar; i++)
 	{
 		const Foam::label targetCellId = parCellIndex[i];

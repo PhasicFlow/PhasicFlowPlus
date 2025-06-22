@@ -21,7 +21,7 @@ Licence:
 
 #include "Gaussian.hpp"
 #include "couplingMesh.hpp"
-
+#include "schedule.hpp"
 
 pFlow::coupling::Gaussian::Gaussian
 (
@@ -32,9 +32,9 @@ pFlow::coupling::Gaussian::Gaussian
 :
 	distribution(dict, cMesh, centerMass),	
 	standardDeviation_(lookupDict<Foam::scalar>(dict, "standardDeviation")),
-	distLengthExtent_(lookupOrDefaultDict<Foam::scalar>(dict, "distLengthExtent", 3.5))
+	maxLayers_(lookupOrDefaultDict<Foam::label>(dict, "maxLayers", 2))
 {
-	constructLists(distLengthExtent_*standardDeviation_);
+	constructLists(2.5*standardDeviation_, maxLayers_);
 }
 
 void pFlow::coupling::Gaussian::updateWeights
@@ -62,7 +62,7 @@ void pFlow::coupling::Gaussian::updateWeights
 		return Foam::exp(-ksi2)+Foam::exp(-shifted_ksi2);
 	};
 	
-	#pragma omp parallel for 
+	#pragma ParallelRegion
 	for(size_t i=0; i<numPar; i++)
 	{
 		
