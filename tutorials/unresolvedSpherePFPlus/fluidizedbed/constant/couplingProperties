@@ -23,7 +23,7 @@ unresolved
         //    self: no distribution (cell itself)
         //    Gaussian: distribute values on sorounding cells based on a neighbor length
         //    adaptiveGaussian: similar to Gaussian, but it adapts the distribution 
-        //    GaussianIntegral 
+        //    GaussianIntegral: Uses Gaussian integral for determining particle distribution 
         type                adaptiveGaussian; 
     }
 
@@ -41,16 +41,24 @@ unresolved
         // Drag force closure, other options are ErgunWenYu, Rong
         type                DiFelice; 
 
-        // type of fluid velocity used in the drag force calculations
+        // Method for calculating the fluid velocity which is used in drag force calculations
         //   cell: uses fluid velocity of the cell that contains the particle center 
-        //   interpolation: uses averaged fluid velocity based on cell velocities around particle
-        fluidVelocity       cell;  
+        //   particle: uses interpolated fluid velocity on the particle center based on 
+        //             cell values around particle
+        fluidVelocity       cell;
 
-        // weather to distribute calculated drag force on cells
-        //   off: set the calculated drag force on cell itself
-        //   on: distributed the calculated drag force on cells (using cellDistribution method)
+        // Method for calculating the solid velocity which is used in drag calculations 
+        //   cell: solid velocity is averaged on the cell using cellDistribution method 
+        //         and this average value is used as particle velocity in calculations 
+        //   particle: the actual particle velocity is used in calculations 
+        solidVelocity       particle;  
+
+        // Whether to distribute calculated particle drag force onto cells
+        //   off: add the calculated drag force on the cell itself
+        //   on: distributes the calculated drag force on cells (using cellDistribution method)
         cellDistribution    off; 
 
+        // residual Reynolds number 
         residualRe          10e-6;
     }
 

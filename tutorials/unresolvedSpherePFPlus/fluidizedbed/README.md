@@ -64,24 +64,26 @@ The most important setup file for CFD-DEM simulation is `constant/couplingProper
 
 `unresolved` sub-dictionary contains these parts:
 
-- `cellDistribution`: This part defines the method of distributing particle properties (like volume, drag force) across the cells. The options are `self`, `Gaussian`, `GassianIntegral`, and `adaptiveGaussian`:
+- `cellDistribution`: This part defines the method of distributing particle properties (like volume, drag force) across the cells. The options are:
 
   - `self`: distributes property over the cell on which the center of particles is located.
   - `Gaussian`: distributes property over the surrounding cells based on a Gaussian distribution, using a specified `standardDeviation` value (distribution width).
   - `GaussianIntegral`: similar to `Gaussian`, but it uses the integral of the Gaussian function for distribution.
-  - `adaptiveGaussian`: method is used, which adapts the distribution based on the local cell size and particle size. This is the most flexible and accurate statistical method for distributing particle properties across the cells.
+  - `adaptiveGaussian`: similar to Gaussian method, but it adapts the distribution based on the local cell size and particle size. This is the most flexible and accurate statistical method for distributing particle properties across the cells.
 
-- `porosity`: This part defines the method for calculating porosity. The options are `PIC`, `subDivision29Mod`, `subDivision9`, `diffusion`, and `cellDistribution`:
-
+- `porosity`: This part defines the method for calculating porosity. The options are:
   - `PIC`: Particle-In-Cell method.
   - `subDivision29`, `subDivision29Mod` and `subDivision9`: These methods are used for calculating porosity based on the subdivision of particles into equal volumes and mapping these sub-volumes onto the surrounding cells for calculating porosity.
   - `diffusion`: This method uses a diffusion model to calculate porosity.
   - `cellDistribution`: This method uses the cell distribution function defined in the `cellDistribution` sub-dictionary to distribute particle volume over cells and finally calculate porosity.
 
-- `drag`: This part defines the drag force closure model. The options are `DiFelice`, `ErgunWenYu`, and `Rong`. 
+- `drag`: This part defines the drag force closure model. The options are `DiFelice`, `ErgunWenYu`, and `Rong`.
   - `fluidVelocity`: This parameter defines how the fluid velocity at the center point of the particle is calculated:
     - `cell`: Uses the fluid velocity of the cell that contains the particle center.
-    - `interpolation`: Uses averaged fluid velocity based on cell velocities around the particle.
+    - `particle`: uses interpolated fluid velocity on the particle center based on cell values around particle.
+  - `solidVelocity`: This parameter defines how solid phase velocity is treated for drag force calculations:
+    - `cell`: solid velocity is averaged on the cell using cellDistribution method and this average value is used as particle velocity in calculations.
+    - `particle`: the actual particle velocity is used in calculations.
   - `cellDistribution`: This parameter defines whether the calculated drag force is distributed on cells or not. The options are `on` and `off`.
 
 ```C++
@@ -95,13 +97,13 @@ unresolved
         //    self: no distribution (cell itself)
         //    Gaussian: distribute values on sorounding cells based on a neighbor length
         //    adaptiveGaussian: similar to Gaussian, but it adapts the distribution 
-        //    GaussianIntegral 
+        //    GaussianIntegral: Uses Gaussian integral for determining particle distribution 
         type                adaptiveGaussian; 
     }
 
     porosity
     {
-        // Options are PIC, subDivision29Mod, subDivision9, diffusion, cellDistribution
+    	  // Options are PIC, subDivision29Mod, subDivision9, diffusion, cellDistribution
         method      cellDistribution;
 
         // minimum alpha allowed 
@@ -113,16 +115,24 @@ unresolved
         // Drag force closure, other options are ErgunWenYu, Rong
         type                DiFelice; 
 
-        // type of fluid velocity used in the drag force calculations
+        // Method for calculating the fluid velocity which is used in drag force calculations
         //   cell: uses fluid velocity of the cell that contains the particle center 
-        //   interpolation: uses averaged fluid velocity based on cell velocities around particle
-        fluidVelocity       cell;  
+        //   particle: uses interpolated fluid velocity on the particle center based on 
+        //             cell values around particle
+        fluidVelocity       cell;
 
-        // weather to distribute calculated drag force on cells
-        //   off: set the calculated drag force on cell itself
-        //   on: distributed the calculated drag force on cells (using cellDistribution method)
+        // Method for calculating the solid velocity which is used in drag calculations 
+        //   cell: solid velocity is averaged on the cell using cellDistribution method 
+        //         and this average value is used as particle velocity in calculations 
+        //   particle: the actual particle velocity is used in calculations 
+        solidVelocity       particle;  
+
+        // Whether to distribute calculated particle drag force onto cells
+        //   off: add the calculated drag force on the cell itself
+        //   on: distributes the calculated drag force on cells (using cellDistribution method)
         cellDistribution    off; 
 
+        // residual Reynolds number 
         residualRe          10e-6;
     }
 
