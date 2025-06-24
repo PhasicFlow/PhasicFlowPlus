@@ -23,6 +23,9 @@ Licence:
 
 #include "drag.hpp"
 #include "grainUnresolvedCouplingSystem.hpp"
+#include "fluidVelocity.hpp"
+#include "solidVelocity.hpp"
+#include "schedule.hpp"
 
 namespace pFlow::coupling
 {
@@ -43,6 +46,14 @@ private:
 	DragClosureType 				dragClosure_;
 
 	const Plus::realProcCMField& 	courseGrainFactor_;
+
+	uniquePtr<fluidVelocity> 	fluidVelocityPtr_ = nullptr;
+
+	uniquePtr<solidVelocity>    solidVelocityPtr_ = nullptr;
+	
+	Foam::word 			fVelocityType_;
+	
+	Foam::word 			sVelocityType_;
 
 	void calculateDragForce
 	(
@@ -87,7 +98,7 @@ public:
 		if constexpr (useCellDistribution)
 			return true;
 		else
-			return false;
+			return sVelocityType_ == "cell";
 	}
 	
 	

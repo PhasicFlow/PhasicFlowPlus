@@ -28,7 +28,7 @@ Licence:
 #include "box.hpp"
 
 // from phasicFlow-coupling
-#include "scatteredCommunicationPlus.hpp"
+#include "particleMapping.hpp"
 #include "procCMFields.hpp"
 #include "procDEMSystemPlus.hpp"
 #include "couplingMesh.hpp"
@@ -40,18 +40,13 @@ namespace pFlow::coupling
 
 class couplingSystem
 :
-	public Foam::IOdictionary,
-	public Plus::procCommunication
+	public Foam::IOdictionary
 {
 private:
 	
-	couplingMesh 							couplingMesh_;
+	particleMapping 			particleMapping_;
 
-	Plus::procVector<box> 					meshBoxes_;
-
-	Plus::scatteredCommunication<real> 		realScatteredComm_;
-
-	Plus::scatteredCommunication<realx3> 	realx3ScatteredComm_;
+	couplingMesh 				couplingMesh_;
 
 	Plus::procDEMSystem 		procDEMSystem_;
 
@@ -62,8 +57,6 @@ private:
 	Timer 						getDataTimer_;
 
 	Timer 						sendDataTimer_;
-
-	Plus::centerMassField 		centerMass_;
 
 	Plus::uint32ProcCMField     particleID_;
 
@@ -91,21 +84,15 @@ protected:
 	bool distributeParticleFields();
 
 	inline
-	auto& realx3MappedComm() 
-	{
-		return realx3ScatteredComm_;
-	}
-
-	inline 
-	auto& realMappedComm()
-	{
-		return realScatteredComm_;
-	}
-
-	inline
 	Plus::procDEMSystem& pDEMSystem()
 	{
 		return procDEMSystem_;
+	}
+
+	inline 
+	particleMapping& parMapping()
+	{
+		return particleMapping_;
 	}
 
 	inline
@@ -160,16 +147,11 @@ public:
 	virtual 
 	~couplingSystem() = default;
 
-	bool updateMeshBoxes();
-
 	virtual
 	bool getDataFromDEM(real t, real dt);
 
 	virtual
 	bool sendDataToDEM(real t, real dt);
-
-	/*virtual
-	void calculateFluidInteraction() =0;*/
 
 	void sendFluidForceToDEM();
 
@@ -181,12 +163,24 @@ public:
 	auto& cMesh()
 	{
 		return couplingMesh_;
-	}	
+	}
+	
+	inline
+	const auto& cMesh()const
+	{
+		return couplingMesh_;
+	}
+
+	inline 
+	const particleMapping& parMapping()const
+	{
+		return particleMapping_;
+	}
 
 	inline 
 	auto numParticles()const
 	{
-		return centerMass_.size();
+		return centerMass().size();
 	}
 
 	inline 
@@ -198,7 +192,13 @@ public:
 	inline
 	Plus::centerMassField& centerMass()
 	{
-		return centerMass_;
+		return particleMapping_.centerMass();
+	}
+
+	inline
+	const Plus::centerMassField& centerMass()const
+	{
+		return particleMapping_.centerMass();
 	}
 
 	inline 
@@ -222,7 +222,7 @@ public:
 	inline 
 	const Plus::procVector<box>& meshBoxes()const
 	{
-		return meshBoxes_;
+		return particleMapping_.meshBoxes();
 	}
 
 	inline 

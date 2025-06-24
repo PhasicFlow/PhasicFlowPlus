@@ -39,11 +39,10 @@ bool pFlow::coupling::PIC::internalFieldUpdate()
 	self selfCellDist;
 	
 	auto solidVolTmp = calculateSolidVol(selfCellDist);
-	//auto& solidVol = .ref();
 
-	Foam::fieldRef(*this) = Foam::max(
-		1 - solidVolTmp/this->mesh().V(), 
-		static_cast<Foam::scalar>(this->alphaMin()) );
+    Foam::fieldRef(*this) = Foam::max(
+        1 - solidVolTmp/this->mesh().V(), 
+        static_cast<Foam::scalar>(this->alphaMin()) );
 
 	return true;
 }

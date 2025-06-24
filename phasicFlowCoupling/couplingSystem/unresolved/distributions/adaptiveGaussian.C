@@ -18,9 +18,10 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-#define distributed
+//#define distributed1
 
 #include "adaptiveGaussian.hpp"
+#include "schedule.hpp"
 
 pFlow::coupling::adaptiveGaussian::adaptiveGaussian
 (
@@ -30,10 +31,9 @@ pFlow::coupling::adaptiveGaussian::adaptiveGaussian
 )
 :
     distribution(dict, cMesh, centerMass),
-    distLength_(lookupOrDefaultDict(dict, "distLength", static_cast<Foam::scalar>(1.0))),
-    maxLayers_(lookupOrDefaultDict(dict, "maxLayers", static_cast<Foam::label>(2)))
+    maxLayers_(lookupOrDefaultDict(dict, "maxLayers", static_cast<Foam::label>(1)))
 {
-    constructLists(distLength_, maxLayers_);
+    constructLists(1.0, maxLayers_);
 }
 
 void pFlow::coupling::adaptiveGaussian::updateWeights
@@ -47,7 +47,7 @@ void pFlow::coupling::adaptiveGaussian::updateWeights
 	const Foam::scalarField& cellV = mesh_.cellVolumes();
 	const Foam::vectorField& cellC = mesh_.cellCentres(); 
 
-  //#pragma omp parallel for
+    #pragma ParallelRegion
 	for(size_t i=0; i<numPar; i++)
 	{
 		const Foam::label targetCellId = parCellIndex[i];
@@ -67,47 +67,46 @@ void pFlow::coupling::adaptiveGaussian::updateWeights
     
     const Foam::scalar dx_dp = dcell/dp;
     // work like PIC
-    if(dx_dp>10.0)
+    if(dx_dp>7.0)
     {
         parWeights.push_back({targetCellId,1.0});
         continue;      
     }
-#ifdef distributed
+
+#ifdef distributed1
     
     Foam::scalar pSubTotal = 0;
     for(auto cellId:neighbors)
     {
-      auto dcell_D = Foam::pow(cellV[cellId], 0.333333);
-      auto dx_dp_D = dcell_D/ dp ;
-      auto std2_D = Foam::pow(stdDeviation(dx_dp_D,dcell_D),2);
-      
-      Foam::vector xx = cellC[cellId] - cp;
-      Foam::scalar dist2 = Foam::dot(xx,xx);
-      Foam::scalar f= Foam::exp(-0.5*dist2/std2_D);
-      if( f>1.0e-4)
-      {
-        parWeights.push_back({cellId,f});
-        pSubTotal += f;
-      }
-
-      
-      
+        auto dcell_D = Foam::pow(cellV[cellId], 0.333333);
+        auto dx_dp_D = dcell_D/ dp ;
+        auto std2_D = Foam::pow(stdDeviation(dx_dp_D,dcell_D),2);
+        
+        Foam::vector xx = cellC[cellId] - cp;
+        Foam::scalar dist2 = Foam::dot(xx,xx);
+        Foam::scalar f= Foam::exp(-0.5*dist2/std2_D);
+        if( f>1.0e-3)
+        {
+            //selected ++;
+            parWeights.push_back({cellId,f});
+            pSubTotal += f;
+        }
     }
     
 #else
   const auto std2 = Foam::pow(stdDeviation(dx_dp,dcell),2);
 
-  Foam::scalar pSubTotal = 0;
-  for(auto cellId:neighbors)
-  {
-    Foam::vector xx = cellC[cellId] - cp;
-    Foam::scalar dist2 = Foam::dot(xx,xx);
-    if( Foam::scalar f = Foam::exp(-0.5*dist2/std2); f>1.0e-5)
+    Foam::scalar pSubTotal = 0;
+    for(auto cellId:neighbors)
     {
-      parWeights.push_back({cellId,f});
-      pSubTotal += f;
+        Foam::vector xx = cellC[cellId] - cp;
+        Foam::scalar dist2 = Foam::dot(xx,xx);
+        if( Foam::scalar f = Foam::exp(-0.5*dist2/std2); f>1.0e-3)
+        {
+            parWeights.push_back({cellId,f});
+            pSubTotal += f;
+        }
     }
-  }
 #endif
 		pSubTotal = Foam::max(pSubTotal, static_cast<Foam::scalar>(1.0e-10));
 		for(auto& [cellid, w]:parWeights) w /= pSubTotal;     

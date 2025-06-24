@@ -115,6 +115,10 @@ public:
 		return "grain";
 	}
 	
+	bool requireCellDistribution()const override
+    {
+        return requiresDistribution_;
+    }
 	
 };
 

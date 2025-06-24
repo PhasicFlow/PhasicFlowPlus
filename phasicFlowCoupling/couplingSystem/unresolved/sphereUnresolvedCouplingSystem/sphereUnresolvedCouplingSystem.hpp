@@ -36,7 +36,7 @@ class sphereUnresolvedCouplingSystem
 {
 private:
 
-	uniquePtr<porosity>								porosity_ = nullptr;
+	uniquePtr<porosity>					porosity_ = nullptr;
 
 	uniquePtr<drag<DistributorType>> 	drag_ = nullptr;
 
@@ -50,56 +50,60 @@ private:
 
 public:
 
-	TypeInfoTemplate11("sphereUnresolvedCouplingSystem", DistributorType);
+    TypeInfoTemplate11("sphereUnresolvedCouplingSystem", DistributorType);
 
-	sphereUnresolvedCouplingSystem(
-		word shapeTypeName, 
-		Foam::fvMesh& mesh,
-		int argc, 
-		char* argv[]);
+    sphereUnresolvedCouplingSystem(
+        word shapeTypeName, 
+        Foam::fvMesh& mesh,
+        int argc, 
+        char* argv[]);
 
-	sphereUnresolvedCouplingSystem(const sphereUnresolvedCouplingSystem&) = delete;
-	
-	sphereUnresolvedCouplingSystem& operator=(const sphereUnresolvedCouplingSystem&) = delete;
+    sphereUnresolvedCouplingSystem(const sphereUnresolvedCouplingSystem&) = delete;
 
-	sphereUnresolvedCouplingSystem(sphereUnresolvedCouplingSystem&&) = delete;
+    sphereUnresolvedCouplingSystem& operator=(const sphereUnresolvedCouplingSystem&) = delete;
 
-	sphereUnresolvedCouplingSystem& operator=(sphereUnresolvedCouplingSystem&&) = delete;
+    sphereUnresolvedCouplingSystem(sphereUnresolvedCouplingSystem&&) = delete;
 
-	~sphereUnresolvedCouplingSystem() override = default;
+    sphereUnresolvedCouplingSystem& operator=(sphereUnresolvedCouplingSystem&&) = delete;
 
-	add_vCtor
-	(
-		unresolvedCouplingSystem,
-		sphereUnresolvedCouplingSystem,
-		word
-	);
+    ~sphereUnresolvedCouplingSystem() override = default;
+
+    add_vCtor
+    (
+        unresolvedCouplingSystem,
+        sphereUnresolvedCouplingSystem,
+        word
+    );
 
 
-	void calculateFluidInteraction() override;
+    void calculateFluidInteraction() override;
 
-	void calculatePorosity() override;
+    void calculatePorosity() override;
 
-	const Foam::volScalarField& alpha()const override
-	{
-		return porosity_().alpha();
-	}
+    const Foam::volScalarField& alpha()const override
+    {
+        return porosity_().alpha();
+    }
 
-	const Foam::volScalarField& Sp()const override
-	{
-		return drag_().Sp();
-	}
-	
-	const Foam::volVectorField& Su()const override
-	{
-		return drag_().Su();
-	}
+    const Foam::volScalarField& Sp()const override
+    {
+        return drag_().Sp();
+    }
 
-	word shapeTypeName() const override
-	{
-		return "sphere";
-	}
-	
+    const Foam::volVectorField& Su()const override
+    {
+        return drag_().Su();
+    }
+
+    word shapeTypeName() const override
+    {
+        return "sphere";
+    }
+
+    bool requireCellDistribution()const override
+    {
+        return requiresDistribution_;
+    }
 	
 };
 

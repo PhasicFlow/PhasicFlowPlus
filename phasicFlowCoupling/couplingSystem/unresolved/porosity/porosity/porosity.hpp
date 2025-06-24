@@ -30,6 +30,7 @@ Licence:
 // from phasicFlow-coupling
 #include "couplingMesh.hpp"
 #include "procCMFields.hpp"
+#include "schedule.hpp"
 
 namespace pFlow::coupling
 {
@@ -46,7 +47,7 @@ class porosity
 :
 	public Foam::volScalarField
 {
-protected:
+private:
 
 	/// Minimum fluid porosity allowed in each cell
 	Foam::scalar					alphaMin_;
@@ -57,16 +58,6 @@ protected:
 	/// Reference to diameter of particles in this processor 
 	const Plus::realProcCMField&  	particleDiameter_;
 
-	/// cell indices of particles in this processor 
-	Plus::procCMField<Foam::label> 	parCellIndex_;
-
-	int32 							numInMesh_ = 0;
-
-	void mapCenters();
-
-	bool centersMappedBefore_ = false;
-
-
 protected:
 
 	void setAlphaMin(Foam::scalar newAlphaMin)
@@ -75,8 +66,10 @@ protected:
 	}	
 
 	template<typename DistributorType>
-	Foam::tmp<Foam::volScalarField::Internal>
-		calculateSolidVol(const DistributorType& distributor)
+	Foam::tmp<Foam::volScalarField::Internal> calculateSolidVol
+	(
+		const DistributorType& distributor
+	)
 	{
 		auto solidVolTmp = Foam::volScalarField::Internal::New
 		(
@@ -85,17 +78,17 @@ protected:
 		 	Foam::dimensioned("solidVol", Foam::dimVol, Foam::scalar(0))
 		);
 
-		
 		auto& solidVol = solidVolTmp.ref();
 		const Foam::label numPar = centerMass().size();
+		const auto& parCellInd = parCellIndex();
 
-		#pragma omp parallel for
+		#pragma ParallelRegion
 		for(Foam::label i=0; i<numPar; i++)
 		{
 			Foam::scalar pVol = pFlow::Pi/6 *
 					Foam::pow(particleDiameter_[i], static_cast<real>(3.0));
 
-			const Foam::label cellId = parCellIndex_[i];
+			const Foam::label cellId = parCellInd[i];
 			if( cellId >= 0 )
 			{
 				distributor.distributeValue_OMP(i, cellId, solidVol, pVol);				
@@ -104,8 +97,6 @@ protected:
 
 		return solidVolTmp;
 	}
-
-
 
 public:
 
@@ -162,6 +153,19 @@ public:
 		{
 			return cMesh_.mesh();
 		}
+
+		inline 
+		auto& cMesh()
+		{
+			return cMesh_;
+		}
+
+		inline 
+		const auto& cMesh()const
+		{
+			return cMesh_;
+		}
+
 		/// Return alphaMin
 		inline
 		real alphaMin()const
@@ -171,9 +175,9 @@ public:
 
 		/// Return cell index of particles 
 		inline 
-		const auto& particleCellIndex()const
+		const auto& parCellIndex()const
 		{
-			return parCellIndex_;
+			return cMesh_.parCellIndex();
 		}
 
 		/// Retrun center mass position of particles 
@@ -190,11 +194,6 @@ public:
 			return particleDiameter_;
 		}
 
-		void mapCentersBeforeCalcPorosity()
-		{
-			centersMappedBefore_ = true;
-			mapCenters();
-		}
 		/// Calculate porosity based on particles positions 
 		void calculatePorosity();
 
@@ -205,12 +204,8 @@ public:
 		/// Return number of center mass points found in this mesh (processor)
 		int32 numInMesh()const
 		{
-			return numInMesh_;
+			return cMesh_.numInMesh();
 		}
-
-		/// Report (output) number of center mass points found in all processors 
-		/// It is effective only in master processor 
-		void reportNumInMesh()const;
 
 		virtual 
 		bool requireCellDistribution()const

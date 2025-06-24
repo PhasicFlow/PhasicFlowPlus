@@ -19,7 +19,7 @@ Licence:
 -----------------------------------------------------------------------------*/
 
 #include "subDivision29Mod.hpp"
-
+#include "schedule.hpp"
 
 const pFlow::real sin_45[] = {0.7071067811865475,  0.7071067811865475, -0.7071067811865475, -0.7071067811865475};
 const pFlow::real cos_45[] = {0.7071067811865475, -0.7071067811865475, -0.7071067811865475,  0.7071067811865475};
@@ -49,26 +49,29 @@ bool pFlow::coupling::subDivision29Mod::internalFieldUpdate()
 	auto& solidVol = solidVoldTmp.ref();
 	const auto& cntrMass = centerMass();	
 	const size_t numPar = cntrMass.size();
+	const auto& parCellInd = parCellIndex();
+	const auto& parDiam = particleDiameter();
+	const auto& cmesh = cMesh();
 	
 
-	#pragma omp parallel for schedule (dynamic)
+	#pragma ParallelRegion
 	for(size_t i=0; i<numPar; i++)
 	{
-		const Foam::label cntrCellId = parCellIndex_[i];
+		const Foam::label cntrCellId = parCellInd[i];
 		if( cntrCellId < 0 )continue;
 
 		bool fullInside;
 		bool halfInside;
 
 		const Foam::point 	pPos{cntrMass[i].x(),cntrMass[i].y(),cntrMass[i].z()};
-		const Foam::scalar 	pRad = particleDiameter_[i]/2;
+		const Foam::scalar 	pRad = parDiam[i]/2;
 		
 		// 4*Pi/3 = 4.1887902047864
 		const real pSubVol = static_cast<real>(4.1887902047864/29.0) *
 					pFlow::pow(pRad, static_cast<real>(3.0));
 
 		
-		cMesh_.pointSphereInCell(
+		cmesh.pointSphereInCell(
 			pPos, 
 			0.62392*pRad, 
 			0.917896*pRad, 
@@ -121,7 +124,7 @@ bool pFlow::coupling::subDivision29Mod::internalFieldUpdate()
 
 
 			Foam::label nCellIds = 0;
-			cMesh_.findPointsInCells(hpoints, cntrCellId,nCellIds, hcellIds );
+			cmesh.findPointsInCells(hpoints, cntrCellId,nCellIds, hcellIds );
 			
 			for(auto ci=0; ci<nCellIds; ci++ )
 			{
@@ -172,7 +175,7 @@ bool pFlow::coupling::subDivision29Mod::internalFieldUpdate()
 			}
 
 			Foam::label nCellIds = 0;
-			cMesh_.findPointsInCells(points, cntrCellId,nCellIds, cellIds);
+			cmesh.findPointsInCells(points, cntrCellId,nCellIds, cellIds);
 			
 			for(auto ci=0; ci<nCellIds; ci++ )
 			{

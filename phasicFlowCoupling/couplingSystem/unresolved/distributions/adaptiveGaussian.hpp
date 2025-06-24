@@ -33,10 +33,7 @@ class adaptiveGaussian
     public distribution
 {
     
-   // radius of circule for cell neighbor list 
-	Foam::scalar 				distLength_;
-
-    Foam::label                 maxLayers_;
+    Foam::label         maxLayers_;
 
     const static inline Foam::scalar   a_ = 0.6142275;
     const static inline Foam::scalar   exponent_ = -0.6195039;
@@ -70,7 +67,6 @@ public:
 }; // end adaptiveGaussian
 
 } // end pFlow::coupling
-
 
 
 #endif //__adaptiveGaussian_hpp__

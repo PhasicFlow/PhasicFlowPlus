@@ -19,6 +19,7 @@ Licence:
 -----------------------------------------------------------------------------*/
 
 #include "diffusion.hpp"
+#include "self.hpp"
 #include "unresolvedCouplingSystem.hpp"
 
 Foam::tmp<Foam::fvMatrix<Foam::scalar>> pFlow::coupling::diffusion::fvmDdt
@@ -63,18 +64,18 @@ pFlow::coupling::diffusion::diffusion(
 	(
 		Foam::max(1, lookupDict<Foam::label>(CS.unresolvedDict().subDict("porosity"), "nSteps"))
 	),
-	boundLength_
+	standardDeviation_
 	(
-		lookupDict<Foam::scalar>(CS.unresolvedDict().subDict("porosity"), "boundLength")
+		lookupDict<Foam::scalar>(CS.unresolvedDict().subDict("porosity"), "standardDeviation")
 	),
-	intTime_(boundLength_*boundLength_/4),
+	intTime_(standardDeviation_*standardDeviation_/4),
 	dt_("dt", Foam::dimTime, intTime_/nSteps_),
 	DT_("DT", Foam::dimDynamicViscosity/Foam::dimDensity, 1.0),
 	picSolDict_("picSolDict")
 {
 	
 	picSolDict_.add("relTol", 0);
-	picSolDict_.add("tolerance", 1.0e-8);
+	picSolDict_.add("tolerance", 1.0e-7);
 	picSolDict_.add("solver", "smoothSolver");
 	picSolDict_.add("smoother", "symGaussSeidel");
 }
@@ -82,42 +83,20 @@ pFlow::coupling::diffusion::diffusion(
 
 bool pFlow::coupling::diffusion::internalFieldUpdate()
 {
+	self selfCellDist;
 	
-	auto solidVoldTmp = Foam::volScalarField::Internal::New(
-		"solidVol",
-		this->mesh(),
-		Foam::dimensioned("solidVol", Foam::dimVol, Foam::scalar(0))
-	);
-
-	auto& solidVol = solidVoldTmp.ref();
-	
-	const auto& cntrMass = centerMass(); 
-	const size_t numPar = cntrMass.size();
-
-	#pragma omp parallel for
-	for(size_t i=0; i<numPar; i++)
-	{
-		const auto cellId = parCellIndex_[i];
-		if( cellId >= 0 )
-		{
-			#pragma omp atomic
-			solidVol[cellId] += 
-				static_cast<real>(3.14159265358979/6)*
-				pFlow::pow(particleDiameter_[i], static_cast<real>(3.0));
-				
-		}
-	}
+	auto solidVolTmp = calculateSolidVol(selfCellDist);
 
 	auto picAlphaTmp = Foam::volScalarField::New(
-		"picAlpha",
+		"Alpha.s",
 		this->mesh(),
-		Foam::dimensioned("picAlpha", Foam::dimless, Foam::scalar(0)),
+		Foam::dimensioned("Alpha.s", Foam::dimless, Foam::scalar(0)),
 		"zeroGradient"
 	);
 
 	Foam::volScalarField& picAlpha = picAlphaTmp.ref();
 	
-	Foam::fieldRef(picAlpha) = Foam::min(solidVol/this->mesh().V(), 1.0);
+	Foam::fieldRef(picAlpha) = Foam::min(solidVolTmp/this->mesh().V(), 1.0);
 	picAlpha.correctBoundaryConditions();
 	
 	
@@ -131,8 +110,9 @@ bool pFlow::coupling::diffusion::internalFieldUpdate()
 		);
 		alphaEq.solve(picSolDict_);
 	}
-        Info<<"*********************************************************\n";
-	Foam::fieldRef(*this) = 1.0-picAlpha.internalField();
+	
+	Foam::fieldRef(*this) = Foam::max(1.0-picAlpha.internalField(),
+							static_cast<Foam::scalar>(this->alphaMin()));
 
 	return true;
 }

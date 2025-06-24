@@ -134,8 +134,8 @@ int main(int argc, char *argv[])
                 // Do any mesh changes
                 mesh.controlledUpdate();
 
-                coupling.cMesh().update(runTime.time().value(), runTime.deltaT().value());
-                coupling.updateMeshBoxes();
+                coupling.cMesh().update();
+                //coupling.updateMeshBoxes();
 
                 if (mesh.changing())
                 {

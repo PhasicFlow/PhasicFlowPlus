@@ -89,6 +89,9 @@ public:
 	virtual 
 	word shapeTypeName() const= 0;
 
+	virtual 
+	bool requireCellDistribution()const = 0;
+
 	static
 	uniquePtr<unresolvedCouplingSystem> create
 	(

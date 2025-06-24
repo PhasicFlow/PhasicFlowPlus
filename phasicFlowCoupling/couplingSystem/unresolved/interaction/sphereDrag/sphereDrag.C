@@ -23,20 +23,47 @@ void pFlow::coupling::sphereDrag<DistributorType, DragClosureType, useCellDistri
 	calculateDragForce
 	(
 		const DragClosureType& 			dragClosure,
-		const Foam::volVectorField& 	fluidVelocity,
+		const Foam::volVectorField& 	U,
 		const Plus::realx3ProcCMField& 	parVelocity,
 		const Plus::realProcCMField& 	diameter,
 		Plus::realx3ProcCMField& 		particleForce
 	)
 {
 
+	if(!fluidVelocityPtr_)
+	{
+		fluidVelocityPtr_ = makeUnique<fluidVelocity>(
+			fVelocityType_,
+			U,
+			this->cMesh()
+		);
+	}
+
+	if(!solidVelocityPtr_)
+	{
+		solidVelocityPtr_ = makeUnique<solidVelocity>(
+			sVelocityType_,
+			parVelocity,
+			this->cMesh()
+		);
+	}
+
+	auto& fluidVelocity = fluidVelocityPtr_();
+	fluidVelocity.interpolate(this->cMesh());
+
+	auto& solidVelocity = solidVelocityPtr_();
+	solidVelocity.average(
+		this->cellDistribution(),
+		this->Porosity());
+
 	self selfDictribution;
 	const auto& cellDist = this->cellDistribution();
 
-	const auto& parCells =  this->particleCellIndex();
+	const auto& parCells =  this->parCellIndex();
 	const auto& nu = this->mesh().template lookupObject<Foam::volScalarField>("nu");
 	const auto& rho = this->mesh().template lookupObject<Foam::volScalarField>("rho");
 	const auto& Vcells = this->mesh().V();
+
 	const auto& alpha = this->alpha();
 	auto& Su = this->Su();
 	auto& Sp = this->Sp();
@@ -49,7 +76,7 @@ void pFlow::coupling::sphereDrag<DistributorType, DragClosureType, useCellDistri
 
 	size_t numPar = parCells.size();
 
-#pragma omp parallel for
+	#pragma ParallelRegion
 	for(size_t parIndx=0; parIndx<numPar; parIndx++)
 	{
 		auto cellIndx = parCells[parIndx];
@@ -60,14 +87,11 @@ void pFlow::coupling::sphereDrag<DistributorType, DragClosureType, useCellDistri
 			auto mui = nu[cellIndx]* rhoi;
 			auto ef = alpha[cellIndx];
 			auto dp = diameter[parIndx];
-			auto vp = Foam::constant::mathematical::pi/6 * Foam::pow(dp,3.0);
+			auto vp =  Foam::constant::mathematical::pi/6 * Foam::pow(dp,3.0);
 
-			Foam::vector up = {
-				parVelocity[parIndx].x(), 
-				parVelocity[parIndx].y(),
-				parVelocity[parIndx].z()};
+			Foam::vector up = solidVelocity.vSolid(cellIndx, parIndx);
 
-			Foam::vector ur = fluidVelocity[cellIndx]-up;
+			Foam::vector ur = fluidVelocity.uFluid(cellIndx, parIndx)-up;
 			Foam::scalar Re = ef * rhoi * Foam::mag(ur) * dp /mui;
 
 			Foam::scalar sp = 3 * Foam::constant::mathematical::pi * mui * ef * dp * dragClosure.dimlessDrag(Re, ef);
@@ -107,6 +131,36 @@ pFlow::coupling::sphereDrag<DistributorType, DragClosureType, useCellDistributio
 	DragType(uCS, prsty),
 	dragClosure_(uCS.unresolvedDict().subDict("drag"))
 {
+	const auto& dict = uCS.unresolvedDict().subDict("drag");
+
+	Foam::word fVelType(dict.lookup("fluidVelocity"));
+	Foam::word sVelType(dict.lookup("solidVelocity"));
+
+	if(fVelType == "particle" || fVelType == "cell" )
+	{
+		fVelocityType_ = fVelType;
+	}
+	else
+	{
+		fatalErrorInFunction
+			<<"Valid options for fluidVelocity in dictionary "
+			<<dict.name()
+			<<" are: particles, cell"<<endl;
+		Plus::processor::abort(0);
+	}
+
+	if(sVelType == "particle" || sVelType == "cell" )
+	{
+		sVelocityType_ = sVelType;
+	}
+	else
+	{
+		fatalErrorInFunction
+			<<"Valid options for solidVelocity in dictionary "
+			<<dict.name()
+			<<" are: particles, cell"<<endl;
+		Plus::processor::abort(0);
+	}
 
 }
 
