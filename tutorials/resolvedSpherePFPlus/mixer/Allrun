@@ -8,8 +8,11 @@ export OMP_NUM_THREADS=2
 # First run OpenFoam Aplication
 
 echo "\n<--------------------------------------------------------------------->"
-echo "1) The AMI mesh has been previously generate "
+echo "1) Generating the CFD mesh "
 echo "<--------------------------------------------------------------------->\n"
+cd mesh
+./Allmesh
+cd ..
 
 echo "\n<--------------------------------------------------------------------->"
 echo "2) Running Step 1 (0-4 DEM) "
