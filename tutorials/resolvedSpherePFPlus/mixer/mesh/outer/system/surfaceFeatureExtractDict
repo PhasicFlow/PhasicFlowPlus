@@ -1,0 +1,98 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      surfaceFeatureExtractDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+body.stl
+{
+    // How to obtain raw features (extractFromFile || extractFromSurface)
+    extractionMethod    extractFromSurface;
+
+    // Mark edges whose adjacent surface normals are at an angle less
+    // than includedAngle as features
+    // - 0  : selects no edges
+    // - 180: selects all edges
+    includedAngle       150;
+
+    subsetFeatures
+    {
+        // Keep nonManifold edges (edges with >2 connected faces)
+        nonManifoldEdges       no;
+
+        // Keep open edges (edges with 1 connected face)
+        openEdges       yes;
+    }
+
+
+    // Write options
+
+    // Write features to obj format for postprocessing
+    writeObj            yes;
+}
+
+rotor.stl
+{
+    // How to obtain raw features (extractFromFile || extractFromSurface)
+    extractionMethod    extractFromSurface;
+
+    // Mark edges whose adjacent surface normals are at an angle less
+    // than includedAngle as features
+    // - 0  : selects no edges
+    // - 180: selects all edges
+    includedAngle       150;
+
+    subsetFeatures
+    {
+        // Keep nonManifold edges (edges with >2 connected faces)
+        nonManifoldEdges       no;
+
+        // Keep open edges (edges with 1 connected face)
+        openEdges       yes;
+    }
+
+
+    // Write options
+
+    // Write features to obj format for postprocessing
+    writeObj            yes;
+}
+
+AMIFace.stl
+{
+    // How to obtain raw features (extractFromFile || extractFromSurface)
+    extractionMethod    extractFromSurface;
+
+    // Mark edges whose adjacent surface normals are at an angle less
+    // than includedAngle as features
+    // - 0  : selects no edges
+    // - 180: selects all edges
+    includedAngle       150;
+
+    subsetFeatures
+    {
+        // Keep nonManifold edges (edges with >2 connected faces)
+        nonManifoldEdges       no;
+
+        // Keep open edges (edges with 1 connected face)
+        openEdges       yes;
+    }
+
+
+    // Write options
+
+    // Write features to obj format for postprocessing
+    writeObj            yes;
+}
+
+// ************************************************************************* //
