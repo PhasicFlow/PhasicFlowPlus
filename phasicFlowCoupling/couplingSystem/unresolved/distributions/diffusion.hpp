@@ -80,7 +80,10 @@ public:
 
     void smoothenField(Foam::volVectorField& field)const;
 
-    
+    bool requireCellDistribution()const 
+	{
+		return false;
+	}
 };
 
 }

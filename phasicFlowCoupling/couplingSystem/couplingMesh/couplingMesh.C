@@ -114,8 +114,9 @@ pFlow::coupling::couplingMesh::couplingMesh
     else
     {
         fatalErrorInFunction<<
-        "Wrong deompositionMode"<< decompositionMode <<
-        " in dictionary "<< dict.name() <<endl;
+        "Wrong deompositionMode: "<< decompositionMode <<
+        " in dictionary "<< dict.name()<<
+        ". Options are: cellTets, facePlanes, faceDiagonalTriangles, faceCenterTriangles" <<endl;
         Plus::processor::abort(0);
         return;
     }

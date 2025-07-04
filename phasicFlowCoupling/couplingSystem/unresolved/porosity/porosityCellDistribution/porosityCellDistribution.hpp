@@ -73,7 +73,7 @@ public:
 
 	bool requireCellDistribution()const override
 	{
-		return true;
+		return cellDistributor_.requireCellDistribution();
 	}
 	
 }; 

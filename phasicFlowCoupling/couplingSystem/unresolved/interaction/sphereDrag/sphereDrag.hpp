@@ -93,7 +93,7 @@ public:
 	bool requireCellDistribution()const override
 	{
 		if constexpr (useCellDistribution)
-			return true;
+			return this->cellDistribution().requireCellDistribution();
 		else
 			return sVelocityType_ == "cell";
 	}
