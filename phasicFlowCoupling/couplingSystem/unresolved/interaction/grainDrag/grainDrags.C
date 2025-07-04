@@ -24,6 +24,7 @@ Licence:
 #include "GaussianOld.hpp"
 #include "GaussianIntegral.hpp"
 #include "adaptiveGaussian.hpp"
+#include "diffusion.hpp"
 
 #include "DiFelice.hpp"
 #include "Rong.hpp"
@@ -88,6 +89,18 @@ template class pFlow::coupling::grainDrag   \
 template class pFlow::coupling::grainDrag   \
     <                                       \
         pFlow::coupling::adaptiveGaussian,  \
+        closure,                            \
+        false                               \
+    >;                                      \
+template class pFlow::coupling::grainDrag   \
+    <                                       \
+        pFlow::coupling::diffusion,         \
+        closure,                            \
+        true                                \
+    >;                                      \
+template class pFlow::coupling::grainDrag   \
+    <                                       \
+        pFlow::coupling::diffusion,         \
         closure,                            \
         false                               \
     >;                            

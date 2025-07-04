@@ -115,6 +115,11 @@ public:
 		internalField[parCellIndx] += val;
 	}
 
+	void smoothenField(Foam::volVectorField& field)const
+    {}
+
+    void smoothenField(Foam::volScalarField& field)const
+	{}
 }; 
 
 } // pFlow::coupling

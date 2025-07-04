@@ -64,6 +64,7 @@ public:
         const Plus::procCMField<real> & parDiameter
     );
 
+
 }; // end adaptiveGaussian
 
 } // end pFlow::coupling

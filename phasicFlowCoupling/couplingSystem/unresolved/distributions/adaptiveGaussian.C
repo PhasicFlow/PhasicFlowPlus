@@ -18,7 +18,7 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-//#define distributed1
+#define distributed1
 
 #include "adaptiveGaussian.hpp"
 #include "schedule.hpp"

@@ -18,79 +18,71 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-#ifndef __diffusion_hpp__ 
+#ifndef __diffusion_hpp__
 #define __diffusion_hpp__
 
-#include "virtualConstructor.hpp"
+// from OpenFOAM
+#include "OFCompatibleHeader.hpp"
 
-// from phasicFlow-coupling
-#include "porosity.hpp"
+// from phasicFlow
+#include "typeInfo.hpp"
+
+// from phasicFlowPlus
+#include "procCMField.hpp"
+#include "self.hpp"
 
 
 namespace pFlow::coupling
 {
 
-/**
- * Particle In Cell (diffusion) model for porosity calculation
- * 
- * This model only considers the particle center and if the particle center 
- * resides inside a cell, it is assumed that the whole volume of the particle
- * is located in that cell.
- * 
- */
+class couplingMesh;
+
 class diffusion
-: 
-	public porosity
+:
+    public self
 {
-private:
+    Foam::label 			    nSteps_;
 
-	Foam::label 			  nSteps_;
+	Foam::scalar 			    standardDeviation_;
 
-	Foam::scalar 			  standardDeviation_;
+	Foam::scalar 			    intTime_;
 
-	Foam::scalar 			  intTime_;
+	Foam::dimensionedScalar     dt_;
 
-	Foam::dimensionedScalar   dt_;
+	Foam::dimensionedScalar     DT_;
 
-	Foam::dimensionedScalar   DT_;
+	Foam::dictionary            smoothSolDict_;
 
-	Foam::dictionary          picSolDict_;
-
-
-
-	Foam::tmp<Foam::fvMatrix<Foam::scalar>> fvmDdt
+    Foam::tmp<Foam::fvMatrix<Foam::scalar>> fvmDdt
     (
         const Foam::volScalarField& sField
-    );
+    )const;
+
+    Foam::tmp<Foam::fvMatrix<Foam::vector>> fvmDdt
+    (
+        const Foam::volVectorField& sField
+    )const;
 
 public:
 
-	/// Type info
-	TypeInfo("diffusion");
+    /// Type info
+	TypeInfoNV("diffusion");
 
 	/// Construc from dictionary 
 	diffusion(
-		const unresolvedCouplingSystem& CS,
-		const couplingMesh& 			cMesh,
-		const Plus::realProcCMField& 	parDiam);
+		Foam::dictionary 		dict, 
+		const couplingMesh& 	cMesh,
+		const Plus::centerMassField& centerMass);
 
-	/// Destructor
-	virtual ~diffusion() = default;
+    ~diffusion()=default;
 
-	/// Add this constructor to the list of virtual constructors
-	add_vCtor
-	(
-		porosity,
-		diffusion,
-		dictionary
-	);
+    void smoothenField(Foam::volScalarField& field)const;
 
-	bool internalFieldUpdate() override;
+    void smoothenField(Foam::volVectorField& field)const;
 
-	
-}; 
+    
+};
 
-} // pFlow::coupling
+}
 
-
-#endif
+#endif //__diffusion_hpp__

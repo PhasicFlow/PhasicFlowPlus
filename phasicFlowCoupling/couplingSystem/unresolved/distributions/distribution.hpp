@@ -151,6 +151,13 @@ public:
         }
     }
 
+    void smoothenField(Foam::volVectorField& field)const
+    {}
+
+    void smoothenField(Foam::volScalarField& field)const
+	{}
+
+
 }; // end distribution
 
 

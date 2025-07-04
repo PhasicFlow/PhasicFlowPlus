@@ -65,6 +65,8 @@ public:
         {
             Us_[celli] /= Foam::max( (1-alpha[celli])*cellVol[celli], Foam::SMALL);
         }
+
+        distributor.smoothenField(Us_);
         Us_.correctBoundaryConditions();
 
     }

@@ -70,11 +70,11 @@ The most important setup file for CFD-DEM simulation is `constant/couplingProper
   - `Gaussian`: distributes property over the surrounding cells based on a Gaussian distribution, using a specified `standardDeviation` value (distribution width).
   - `GaussianIntegral`: similar to `Gaussian`, but it uses the integral of the Gaussian function for distribution.
   - `adaptiveGaussian`: similar to Gaussian method, but it adapts the distribution based on the local cell size and particle size. This is the most flexible and accurate statistical method for distributing particle properties across the cells.
+  - `diffusion`: uses diffusion smoothing to distribute particle properties across cells.
 
 - `porosity`: This part defines the method for calculating porosity. The options are:
   - `PIC`: Particle-In-Cell method.
   - `subDivision29`, `subDivision29Mod` and `subDivision9`: These methods are used for calculating porosity based on the subdivision of particles into equal volumes and mapping these sub-volumes onto the surrounding cells for calculating porosity.
-  - `diffusion`: This method uses a diffusion model to calculate porosity.
   - `cellDistribution`: This method uses the cell distribution function defined in the `cellDistribution` sub-dictionary to distribute particle volume over cells and finally calculate porosity.
 
 - `drag`: This part defines the drag force closure model. The options are `DiFelice`, `ErgunWenYu`, and `Rong`.
@@ -98,12 +98,13 @@ unresolved
         //    Gaussian: distribute values on sorounding cells based on a neighbor length
         //    adaptiveGaussian: similar to Gaussian, but it adapts the distribution 
         //    GaussianIntegral: Uses Gaussian integral for determining particle distribution 
+        //    diffusion: uses diffusion smoothing to distribute particle properties across cells
         type                adaptiveGaussian; 
     }
 
     porosity
     {
-    	  // Options are PIC, subDivision29Mod, subDivision9, diffusion, cellDistribution
+    	  // Options are PIC, subDivision29Mod, subDivision9, cellDistribution
         method      cellDistribution;
 
         // minimum alpha allowed 

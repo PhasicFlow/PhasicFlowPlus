@@ -118,6 +118,18 @@ void pFlow::coupling::grainDrag<DistributorType, DragClosureType, useCellDistrib
 		Su[i] /= Vcells[i];
 		Sp[i] /= Vcells[i];	
 	}
+
+	if constexpr (useCellDistribution)
+	{
+		cellDist.smoothenField(Su);
+		cellDist.smoothenField(Sp);
+	}
+	else
+	{
+		selfDictribution.smoothenField(Su);
+		selfDictribution.smoothenField(Sp);
+	}
+
 }
 
 
@@ -182,4 +194,7 @@ pFlow::coupling::grainDrag<DistributorType, DragClosureType, useCellDistribution
 	particleForce = realx3(0,0,0);
 
 	calculateDragForce(dragClosure_, fluidVelocity, parVelocity, diameter, particleForce);
+
+	this->Sp().correctBoundaryConditions();
+	this->Su().correctBoundaryConditions();
 }
