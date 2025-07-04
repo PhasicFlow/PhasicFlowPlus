@@ -25,10 +25,12 @@ Licence:
 #include "GaussianOld.hpp"
 #include "GaussianIntegral.hpp"
 #include "adaptiveGaussian.hpp"
+#include "diffusion.hpp"
 
 template class pFlow::coupling::sphereUnresolvedCouplingSystem<pFlow::coupling::self>;
 template class pFlow::coupling::sphereUnresolvedCouplingSystem<pFlow::coupling::Gaussian>;
 template class pFlow::coupling::sphereUnresolvedCouplingSystem<pFlow::coupling::GaussianOld>;
 template class pFlow::coupling::sphereUnresolvedCouplingSystem<pFlow::coupling::GaussianIntegral>;
 template class pFlow::coupling::sphereUnresolvedCouplingSystem<pFlow::coupling::adaptiveGaussian>;
+template class pFlow::coupling::sphereUnresolvedCouplingSystem<pFlow::coupling::diffusion>;
 

@@ -25,9 +25,11 @@ Licence:
 #include "GaussianOld.hpp"
 #include "GaussianIntegral.hpp"
 #include "adaptiveGaussian.hpp"
+#include "diffusion.hpp"
 
 template class pFlow::coupling::porosityCellDistribution<pFlow::coupling::self>;
 template class pFlow::coupling::porosityCellDistribution<pFlow::coupling::Gaussian>;
 template class pFlow::coupling::porosityCellDistribution<pFlow::coupling::GaussianOld>;
 template class pFlow::coupling::porosityCellDistribution<pFlow::coupling::GaussianIntegral>;
 template class pFlow::coupling::porosityCellDistribution<pFlow::coupling::adaptiveGaussian>;
+template class pFlow::coupling::porosityCellDistribution<pFlow::coupling::diffusion>;

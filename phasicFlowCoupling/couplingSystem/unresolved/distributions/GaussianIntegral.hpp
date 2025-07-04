@@ -58,6 +58,7 @@ public:
 		const Plus::procCMField<real> & parDiameter
 	);
 
+
 }; 
 
 } // pFlow::coupling

@@ -23,13 +23,14 @@ unresolved
         //    self: no distribution (cell itself)
         //    Gaussian: distribute values on sorounding cells based on a neighbor length
         //    adaptiveGaussian: similar to Gaussian, but it adapts the distribution 
-        //    GaussianIntegral: Uses Gaussian integral for determining particle distribution 
+        //    GaussianIntegral: Uses Gaussian integral for determining particle distribution
+        //    diffusion: uses diffusion smoothing for property distribution over cells.  
         type                adaptiveGaussian; 
     }
 
     porosity
     {
-    	// Options are PIC, subDivision29Mod, subDivision9, diffusion, cellDistribution
+    	// Options are PIC, subDivision29Mod, subDivision9, cellDistribution
         method      cellDistribution;
 
         // minimum alpha allowed 

@@ -23,15 +23,11 @@ template<typename DistributorType>
 void pFlow::coupling::drag<DistributorType>::setSuSpToZero()
 {
 	// initialize all terms to zero
-	Su_ = Foam::dimensionedVector(
-    	Su_.name(),
-    	Su_.dimensions(),
-    	Foam::vector(0,0,0));
-
-	Sp_ = Foam::dimensionedScalar(
-		Sp_.name(), 
-		Sp_.dimensions(), 
-		0.0);
+	forAll(Su_, celli)
+	{
+		Su_[celli] = Foam::vector(0,0,0);
+		Sp_[celli] = 0.0;
+	}
 }
 
 

@@ -160,6 +160,11 @@ public:
 		}
 	}
 
+	void smoothenField(Foam::volScalarField& field)const
+	{}
+
+	void smoothenField(Foam::volVectorField& field)const
+	{}
 }; 
 
 } // pFlow::coupling

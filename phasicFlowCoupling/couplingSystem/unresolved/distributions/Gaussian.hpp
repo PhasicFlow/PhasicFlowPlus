@@ -64,8 +64,6 @@ public:
 		const Plus::procCMField<Foam::label> & parCellIndex,
 		const Plus::procCMField<real> & parDiameter);
 
-	
-
 }; 
 
 } // pFlow::coupling

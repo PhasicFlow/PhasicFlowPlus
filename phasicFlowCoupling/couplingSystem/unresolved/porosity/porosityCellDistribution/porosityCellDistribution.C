@@ -41,9 +41,26 @@ bool pFlow::coupling::porosityCellDistribution<DistributorType>::internalFieldUp
     
     auto solidVolTmp = calculateSolidVol(cellDistributor_);
 
-    Foam::fieldRef(*this) = Foam::max(
+    volScalarField& alphaField = *this;
+    const auto& V = this->mesh().V();
+    auto alphaMin = this->alphaMin();
+    const auto& solidVol = solidVolTmp();
+
+    forAll(alphaField, celli)
+    {
+        alphaField[celli] = 1 - solidVol[celli]/V[celli];
+    }
+
+    cellDistributor_.smoothenField(alphaField);
+
+    forAll(alphaField, celli)
+    {
+        alphaField[celli] = Foam::max(alphaField[celli], alphaMin);
+    }
+
+    /*Foam::fieldRef(alphafield) = Foam::max(
         1 - solidVolTmp/this->mesh().V(), 
-        static_cast<Foam::scalar>(this->alphaMin()) );
+        static_cast<Foam::scalar>(this->alphaMin()) );*/
 
 	return true;
 }
