@@ -58,6 +58,10 @@ public:
 		const Plus::procCMField<real> & parDiameter
 	);
 
+	bool requireCellDistribution()const 
+	{
+		return true;
+	}
 
 }; 
 

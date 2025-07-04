@@ -63,7 +63,11 @@ public:
 	void updateWeights(
 		const Plus::procCMField<Foam::label> & parCellIndex,
 		const Plus::procCMField<real> & parDiameter);
-
+	
+	bool requireCellDistribution()const 
+	{
+		return true;
+	}
 }; 
 
 } // pFlow::coupling

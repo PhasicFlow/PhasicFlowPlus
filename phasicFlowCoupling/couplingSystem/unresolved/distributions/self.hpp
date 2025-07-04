@@ -120,6 +120,11 @@ public:
 
     void smoothenField(Foam::volScalarField& field)const
 	{}
+
+	bool requireCellDistribution()const 
+	{
+		return false;
+	}
 }; 
 
 } // pFlow::coupling
