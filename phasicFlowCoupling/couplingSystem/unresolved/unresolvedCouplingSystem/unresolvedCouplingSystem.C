@@ -82,6 +82,9 @@ pFlow::uniquePtr<pFlow::coupling::unresolvedCouplingSystem>
 
     if( wordvCtorSelector_.search(couplingType))
 	{
+		REPORT(0) << "Creating unresolved coupling system "
+				  << Green_Text(couplingType) 
+				  << " ..." << END_REPORT;	
 		return wordvCtorSelector_[couplingType] (shapeTypeName, mesh, argc, argv);
 	}
 	else

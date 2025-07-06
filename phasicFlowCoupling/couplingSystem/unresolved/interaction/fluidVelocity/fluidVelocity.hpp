@@ -32,10 +32,12 @@ class couplingMesh;
 
 class fluidVelocity
 {
+    /// fluid velocity at cell center
     const Foam::volVectorField&     Uf_;
 
     const bool                      interpolate_ = false;
 
+    /// interpolate fluid velocity at particle center of mass
     Plus::realx3ProcCMField         Up_;
 
 public:
@@ -50,7 +52,7 @@ public:
     inline
     Foam::vector uFluid(Foam::scalar celli, size_t parIdx)const
     {
-        /*if(interpolate_)
+        if(interpolate_)
         {
             const auto& up = Up_[parIdx]; 
             return Foam::vector{up.x(), up.y(), up.z()};
@@ -58,9 +60,7 @@ public:
         else
         {
             return Uf_[celli];
-        }*/
-
-        return Uf_[celli];
+        }
     }
 
 };
