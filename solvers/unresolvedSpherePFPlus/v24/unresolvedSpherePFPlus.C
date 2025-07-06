@@ -95,12 +95,13 @@ int main(int argc, char *argv[])
         Info<< "Time = " << runTime.timeName() << nl << endl;        
 
         //coupling.cfdTimers().start();
-                
+        coupling.cfdTimers().start();        
         // --- Pressure-velocity PIMPLE corrector loop
         while (pimple.loop())
         {
             if(pimple.firstIter())
             {
+                coupling.cfdTimers().pause();
                 auto t = runTime.time().value();
                 auto dt = runTime.deltaT().value();
                 // DEM and coupling calculations should be done only once
@@ -114,6 +115,7 @@ int main(int argc, char *argv[])
                 coupling.calculateFluidInteraction();
                 coupling.sendDataToDEM(t, dt);
                 coupling.iterate(t, runTime.writeTime(), runTime.timeName());    
+                coupling.cfdTimers().start();
             }
                 
             if (pimple.firstIter() || moveMeshOuterCorrectors)

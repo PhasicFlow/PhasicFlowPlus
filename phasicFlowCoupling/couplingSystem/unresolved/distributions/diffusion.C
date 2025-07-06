@@ -138,9 +138,11 @@ void pFlow::coupling::diffusion::smoothenField(Foam::volScalarField &field)const
 	
 	
 	// start of Time loop
-    Foam::Info<< "Diffusion: smoothing field " << 
-                  field.name() << " with " << nSteps_ << 
-                  " steps." << Foam::endl;
+    Foam::Info<< Blue_Text("Diffusion: smoothing field ") << 
+                 Blue_Text(field.name()) << 
+                 Blue_Text(" with ") << 
+                 Yellow_Text(nSteps_ )<< 
+                 Blue_Text(" steps.") << Foam::endl;
                 
 	for(Foam::label i=0; i<nSteps_; i++)
 	{
@@ -179,9 +181,11 @@ void pFlow::coupling::diffusion::smoothenField(Foam::volVectorField& field)const
 	
 	
 	// start of Time loop
-    Foam::Info<< "Diffusion: smoothing field " << 
-                  field.name() << " with " << nSteps_ << 
-                  " steps." << Foam::endl;
+    Foam::Info<< Blue_Text("Diffusion: smoothing field ") << 
+                Blue_Text(field.name()) << 
+                Blue_Text(" with ") << 
+                Yellow_Text(nSteps_ )<< 
+                Blue_Text(" steps.") << Foam::endl;
 
 	for(Foam::label i=0; i<nSteps_; i++)
 	{

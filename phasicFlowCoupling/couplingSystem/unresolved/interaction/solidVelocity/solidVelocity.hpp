@@ -13,11 +13,12 @@ namespace pFlow::coupling
 
 class solidVelocity
 {
-
+    /// particle velocity at center mass of particle 
     const Plus::realx3ProcCMField&  Up_;
 
     const bool                      distribute_;
 
+    /// averaged solid velocity at cell center
     Foam::volVectorField            Us_;
 
 public:

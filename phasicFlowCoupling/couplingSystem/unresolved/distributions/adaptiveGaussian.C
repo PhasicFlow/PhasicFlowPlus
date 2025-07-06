@@ -21,6 +21,7 @@ Licence:
 //#define distributed1
 
 #include "adaptiveGaussian.hpp"
+#include "streams.hpp"
 #include "schedule.hpp"
 
 pFlow::coupling::adaptiveGaussian::adaptiveGaussian
@@ -33,6 +34,12 @@ pFlow::coupling::adaptiveGaussian::adaptiveGaussian
     distribution(dict, cMesh, centerMass),
     maxLayers_(lookupOrDefaultDict(dict, "maxLayers", static_cast<Foam::label>(1)))
 {
+    
+    smoothingFactor_ =  dict.getOrDefault<Foam::scalar>("smoothingFactor", 
+        static_cast<Foam::scalar>(1.0));
+    REPORT(1) << "Smoothing factor for adaptive Gaussian distribution: "
+        <<  smoothingFactor_ << END_REPORT;
+    
     constructLists(1.0, maxLayers_);
 }
 

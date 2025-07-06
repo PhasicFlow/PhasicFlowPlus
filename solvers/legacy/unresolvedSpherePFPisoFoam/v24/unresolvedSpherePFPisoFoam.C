@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        coupling.cMesh().update(t, dt);
+        //coupling.cMesh().update(t, dt);
         
         coupling.getDataFromDEM(t, dt);
         coupling.calculatePorosity();

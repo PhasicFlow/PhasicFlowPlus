@@ -160,7 +160,7 @@ void pFlow::coupling::couplingMesh::reportNumInMesh()const
 			int32 s=0;
 			for(auto v:numInMeshAll) s += v;
 
-			output<<Blue_Text("Particles located in processor meshes:") << 
+			output<<Blue_Text("Particles located in processor meshes: ") << 
 			Yellow_Text(numInMeshAll)<<
 			" => "<< Yellow_Text(s)<< endl;
 		}

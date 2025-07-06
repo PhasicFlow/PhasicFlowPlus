@@ -38,10 +38,12 @@ class adaptiveGaussian
     const static inline Foam::scalar   a_ = 0.6142275;
     const static inline Foam::scalar   exponent_ = -0.6195039;
 
+    static inline Foam::scalar         smoothingFactor_ = 1.0;
+
     inline 
     Foam::scalar stdDeviation(const Foam::scalar& dx_dp, const Foam::scalar& dcell) const
     {
-        return dcell* a_ * Foam::pow(dx_dp, exponent_);
+        return dcell* smoothingFactor_* a_ * Foam::pow(dx_dp, exponent_);
     }
 
 public:

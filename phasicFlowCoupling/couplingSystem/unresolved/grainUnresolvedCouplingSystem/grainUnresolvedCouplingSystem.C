@@ -84,7 +84,9 @@ void pFlow::coupling::grainUnresolvedCouplingSystem<DistributorType>::calculateP
 
 	porosityTimer_.end();
 
-	Foam::Info<<Blue_Text("Porosity time: ")<<porosityTimer_.lastTime()<<" s\n";
+	Foam::Info<<Blue_Text("Porosity time: ")<< 
+				Yellow_Text(porosityTimer_.lastTime())<<
+				Yellow_Text(" s")<<Foam::endl;
 }
 
 template<typename DistributorType>
@@ -102,5 +104,7 @@ void pFlow::coupling::grainUnresolvedCouplingSystem<DistributorType>::calculateF
 	}
 	interactionTimer_.end();
 
-	Foam::Info<<Blue_Text("Interaction time: ")<<interactionTimer_.lastTime()<<" s\n";
+	Foam::Info<<Blue_Text("Interaction time: ")<< 
+				Yellow_Text(interactionTimer_.lastTime())<<
+				Yellow_Text(" s")<<Foam::endl;
 }
