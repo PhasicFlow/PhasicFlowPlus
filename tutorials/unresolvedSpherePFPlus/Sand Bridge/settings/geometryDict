@@ -1,0 +1,34 @@
+/* -------------------------------*- C++ -*--------------------------------- *\ 
+|  phasicFlow File                                                            | 
+|  copyright: www.cemf.ir                                                     | 
+\* ------------------------------------------------------------------------- */  
+objectName 	geometryDict;
+objectType 	dictionary;
+fileFormat  ASCII;
+/*---------------------------------------------------------------------------*/
+
+// motion model: rotating object around an axis
+motionModel stationary; 
+
+
+surfaces
+{
+	
+	body
+	{
+	        // type of the wall
+		type 	 stlWall;
+		
+		// file name in scl folder
+		file 	 b.stl;
+		
+		// material name of this wall
+		material wallMat;
+		
+		// motion component name
+		motion 	 none;
+	}
+
+	
+}
+
