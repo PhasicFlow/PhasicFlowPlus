@@ -5,7 +5,7 @@
 
 ## 0. Problem Definition
 
-In this tutorial, we will simulate a liquid-solid flow to determine when a bridge forms using the unresolved solver `unresolvedSpherePFPlus`. The geometry has dimensions of 0.077 × 0.091 × 0.007 m³, and spherical particles with a diameter of 0.0023 m and a density of 2500 kg/m³ are used. In this simulation, both particles and fluid flow simultaneously. Water is uniformly injected from the upper part of the geometry with a superficial velocity of 0.02 m/s. The simulation runs for a total of 7 seconds.
+In this tutorial, we will simulate a liquid-solid flow to determine when a bridge is formed in a conduit with narrow gap using the unresolved solver `unresolvedSpherePFPlus`. The geometry has dimensions of 0.077 × 0.091 × 0.007 m³, and spherical particles with a diameter of 0.0023 m and a density of 2500 kg/m³ are simulated. In this simulation, both particles and fluid flow simultaneously. Water is uniformly injected from the upper part of the geometry with a superficial velocity of 0.02 m/s. The simulation runs for a total of 7 seconds.
 
 
 
@@ -62,7 +62,7 @@ Open the `foam.foam` file in ParaView to view the CFD results. For DEM results, 
 
 To learn about how to set up a DEM simulation, please refer to the [tutorial page](https://github.com/PhasicFlow/phasicFlow/wiki/Tutorials) of PhasicFlow and other online documents along side this package. Also, you can refer to OpenFOAM tutorials to learn about how to set up a CFD simulation. The solver we are using here, essentially is a combination of DEM and CFD component, with some additional parameters that are essential for unresolved coupling. Here, we only describe the simulation setup files that are specific to the coupling part.
 
-First part about particle insertion in `caseSetup` folder. This configuration enables particle insertion `(active yes)` without collision checking `(collisionCheck No)` into a defined box region called topRegion. Particles are inserted from simulation time 0 to 7 seconds at a rate of 1000 particles per second, with an insertion interval of 0.05 seconds. The insertion region is a thin box defined by the coordinates min (0.005 0.05 0.002) and max (0.075 0.052 0.005). Inserted particles are given an initial velocity of (0 -0.05 0), meaning they move downward. The particle type used for insertion is sphere1, as specified in the mixture section. This setup allows regular particle injection into a narrow area with controlled timing and velocity.
+First part about particle insertion in `caseSetup` folder. This configuration enables particle insertion `(active yes)` in the defined box region called `topRegion`. Particles are inserted from simulation time 0 to 3.5 seconds at a rate of 1000 particles per second, with an insertion interval of 0.049 seconds. The insertion region is a thin box defined by the coordinates min (0.005 0.05 0.002) and max (0.075 0.052 0.005). Inserted particles are given an initial velocity of (0 -0.05 0), meaning they move downward. The particle type used for insertion is `sphere1`, as specified in the mixture section. This setup allows regular particle injection into a narrow area with controlled timing and velocity.
 
 ```C++
 // This activates particle insertion. If set to no, the particle insertion must be done in paritcleDict
@@ -73,8 +73,8 @@ one region is considered for inserting particles.
 */
 topRegion
 {
-  // Controls insertion based on simulation time
-  timeControl  simulationTime;
+    // Controls insertion based on simulation time
+    timeControl  simulationTime;
 
 	// insertion rate (particles/s)
 	rate 	 1000;
@@ -86,39 +86,35 @@ topRegion
 	endTime   	  7;
 
 	// Time Interval between each insertion (s)
-	insertionInterval       0.05;
+	insertionInterval       0.049;
 	
-  // type of insertion region and other option is avalible
-  regionType   box;
+    // type of insertion region and other option is avalible
+    regionType   box;
 	
-  // Coordinates of BoxRegion (m,m,m)
+    // Coordinates of BoxRegion (m,m,m)
 	boxInfo 
 	{
 		min ( 0.005 0.05 0.002); //  (m,m,m)
 		max ( 0.075 0.052 0.005); // (m,m,m)
 	}
 
-   setFields
-   {
-     // initial velocity of inserted particles
-     velocity    realx3 (0 -0.05 0); 
-   }
+    setFields
+    {
+        // initial velocity of inserted particles
+        velocity    realx3 (0 -0.05 0); 
+    }
    
-   mixture
-   {
-      // first layer of inserted particles and use for binary insertion
-      sphere1 1;
-      
- 
+    mixture
+    {
+        // first layer of inserted particles and use for binary insertion
+        sphere1 1;
+    }
 }
 ```
 The most important setup file for CFD-DEM simulation is `constant/couplingProperties`. It contains the parameters for coupling between CFD and DEM, such as drag force closure model, porosity model and etc. It contains two main sub-dictionaries: `unresolved` and `particleMapping`. The `unresolved` dictionary contains the parameters for unresolved coupling, while the `particleMapping` dictionary contains the parameters for particle onto the CFD mesh and MPI parallelization of simulation. To learn more about parameter settings of the file `constant/couplingProperties`, you are refered to [this tutorial on fluidized bed using unresolvedSpherePFPlus](https://github.com/PhasicFlow/PhasicFlowPlus/tree/main/tutorials/unresolvedSpherePFPlus/fluidizedbed).
 
 
-
-`unresolved` sub-dictionary contains these parts:
-
-- `cellDistribution`: This part defines the method of distributing particle properties (like volume, drag force) across the cells. The options are:
+In `unresolved` sub-dictionary the method for mapping properties between particles and cells is defined in `cellDistribution` part. This part defines the method of distributing particle properties (like volume, drag force) across the cells. Here, diffusion-based smoothing is used with these parameters:
 
   - `diffusion`: Uses diffusion smoothing to distribute particle properties across cells.
   - `standardDeviation` : This parameter controls the strength of the diffusion process and must be 3 to 6 time particle diameter

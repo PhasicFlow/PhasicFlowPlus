@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e  # Exit immediately if a command exits with a non-zero status
 cd ${0%/*} || exit 1    # Run from this directory
 
 # Source tutorial run functions
@@ -7,7 +8,7 @@ cd ${0%/*} || exit 1    # Run from this directory
 echo "\n<--------------------------------------------------------------------->"
 echo "1) fluent3DMeshToFoam"
 echo "<--------------------------------------------------------------------->\n"
-fluent3DMeshToFoam a.msh
+fluent3DMeshToFoam conduit.msh
 
 echo "\n<--------------------------------------------------------------------->"
 echo "2) Running Step 1 (0-2 DEM) "
@@ -34,7 +35,6 @@ unresolvedSpherePFPlus
 echo "\n<--------------------------------------------------------------------->"
 echo "4) Making VTK File "
 echo "<--------------------------------------------------------------------->\n"
-foamToVTK 
 pFlowToVTK
-
+touch foam.foam
 #------------------------------------------------------------------------------
