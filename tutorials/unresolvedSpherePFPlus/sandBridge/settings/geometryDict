@@ -28,12 +28,14 @@ surfaces
 		material wallMat;   		// material name of this wall
 		motion 	 none;				// motion component name 
 	}
-	outlet
+	
+	// we are making open to particles so they can exit 
+	/*outlet
 	{
 		type 	 foamPatchWall;   	// type of the wall
 		patch 	 outlet;				// patch name in polyMesh
 		material wallMat;   		// material name of this wall
 		motion 	 none;				// motion component name 
-	}
+	}*/
 }
 

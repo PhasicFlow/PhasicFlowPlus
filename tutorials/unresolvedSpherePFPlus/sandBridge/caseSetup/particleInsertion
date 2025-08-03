@@ -31,7 +31,7 @@ topRegion
 	endTime   	  7;
 
 	// Time Interval between each insertion (s)
-	insertionInterval       0.05;
+	insertionInterval       0.049;
 
         // Coordinates of BoxRegion (m,m,m)
 	boxInfo 

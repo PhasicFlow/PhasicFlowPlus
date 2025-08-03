@@ -14,9 +14,47 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+unresolved
+{
 
+    cellDistribution
+    {
+        // type of cell distribution method (if required) 
+        type      diffusion;
 
+        standardDeviation   0.0075; 
+        
+        nSteps      10;
+    }
 
+    porosity
+    {
+        // Options are PIC, subDivision29, subDivision9, diffusion, cellDistribution
+        method cellDistribution;
+        // minimum alpha allowed 
+        alphaMin    0.2;
+    }
+
+    drag
+    {
+        // Drag force closure, other options are ErgunWenYu, Rong
+        type                DiFelice; 
+
+        // type of fluid velocity used in the drag force calculations
+        //   cell: uses fluid velocity of the cell that contains the particle center 
+        //   interpolation: uses averaged fluid velocity based on cell velocities around particle
+        fluidVelocity       cell;  
+        solidVelocity       particle;
+
+        // weather to distribute calculated drag force on cells
+        //   off: set the calculated drag force on cell itself
+        //   on: distributed the calculated drag force on cells (using cellDistribution method)
+        cellDistribution   on; 
+        
+        residualRe          10e-6;
+    }
+
+}
 
 particleMapping
 {
@@ -26,50 +64,6 @@ particleMapping
     domainUpdateInterval    0.0001;
 
     decompositionMode       facePlanes;
-}
-
-
-unresolved
-{
-
-	cellDistribution
-	{
-		// type of cell distribution method (if required) 
-		//   self: no distribution (cell itself)
-		//   Gaussian: distribute values on sorounding cells based on a neighbor length
-		//   Power: similar to Gaussian, but with power law distribution 
-		type      diffusion;
-                standardDeviation   0.0075; 
-		nSteps      10;
-	}
-
-	porosity
-	{
-		// Options are PIC, subDivision29, subDivision9, diffusion, cellDistribution
-		method cellDistribution;
-		// minimum alpha allowed 
-		alphaMin    0.2;
-	}
-
-	drag
-	{
-		// Drag force closure, other options are ErgunWenYu, Rong
-		type                DiFelice; 
-
-		// type of fluid velocity used in the drag force calculations
-		//   cell: uses fluid velocity of the cell that contains the particle center 
-		//   interpolation: uses averaged fluid velocity based on cell velocities around particle
-		fluidVelocity       cell;  
-		solidVelocity       particle;
-
-		// weather to distribute calculated drag force on cells
-		//   off: set the calculated drag force on cell itself
-		//   on: distributed the calculated drag force on cells (using cellDistribution method)
-		cellDistribution   on; 
-		
-		residualRe          10e-6;
-	}
-
 }
 
 // ************************************************************************* //
