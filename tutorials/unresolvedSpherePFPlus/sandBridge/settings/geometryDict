@@ -1,0 +1,41 @@
+/* -------------------------------*- C++ -*--------------------------------- *\ 
+|  phasicFlow File                                                            | 
+|  copyright: www.cemf.ir                                                     | 
+\* ------------------------------------------------------------------------- */  
+objectName 	geometryDict;
+objectType 	dictionary;
+fileFormat  ASCII;
+/*---------------------------------------------------------------------------*/
+
+// motion model: rotating object around an axis
+motionModel stationary; 
+
+
+surfaces
+{
+	
+	wall
+	{
+		type 	 foamPatchWall;   	// type of the wall
+		patch 	 wall;				// patch name in polyMesh
+		material wallMat;   		// material name of this wall
+		motion 	 none;				// motion component name 
+	}
+	inlet
+	{
+		type 	 foamPatchWall;   	// type of the wall
+		patch 	 inlet;				// patch name in polyMesh
+		material wallMat;   		// material name of this wall
+		motion 	 none;				// motion component name 
+	}
+	
+	// we are making open to particles so they can exit 
+	/*outlet
+	{
+		type 	 foamPatchWall;   	// type of the wall
+		patch 	 outlet;				// patch name in polyMesh
+		material wallMat;   		// material name of this wall
+		motion 	 none;				// motion component name 
+	}*/
+}
+
