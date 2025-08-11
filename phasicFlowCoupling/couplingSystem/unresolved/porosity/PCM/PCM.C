@@ -18,58 +18,31 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-#ifndef __PIC_hpp__ 
-#define __PIC_hpp__
 
-#include "virtualConstructor.hpp"
-
-// from phasicFlow-coupling
-#include "porosity.hpp"
+#include "PCM.hpp"
+#include "self.hpp"
 
 
-namespace pFlow::coupling
+pFlow::coupling::PCM::PCM(
+	const unresolvedCouplingSystem& CS,
+	const couplingMesh& 			cMesh,
+	const Plus::realProcCMField& 	parDiam)
+:
+	porosity(CS, cMesh, parDiam)
 {
 
-/**
- * Particle In Cell (PIC) model for porosity calculation
- * 
- * This model only considers the particle center and if the particle center 
- * resides inside a cell, it is assumed that the whole volume of the particle
- * is located in that cell.
- * 
- */
-class PIC
-: 
-	public porosity
+}
+
+bool pFlow::coupling::PCM::internalFieldUpdate()
 {
-public:
+	
+	self selfCellDist;
+	
+	auto solidVolTmp = calculateSolidVol(selfCellDist);
 
-	/// Type info
-	TypeInfo("PIC");
+    Foam::fieldRef(*this) = Foam::max(
+        1 - solidVolTmp/this->mesh().V(), 
+        static_cast<Foam::scalar>(this->alphaMin()) );
 
-	/// Construc from dictionary 
-	PIC(
-		const unresolvedCouplingSystem& CS,
-		const couplingMesh& 			cMesh,
-		const Plus::realProcCMField& 	parDiam);
-
-	/// Destructor
-	virtual ~PIC() = default;
-
-	/// Add this constructor to the list of virtual constructors
-	add_vCtor
-	(
-		porosity,
-		PIC,
-		dictionary
-	);
-
-	bool internalFieldUpdate() override;
-
-
-}; 
-
-} // pFlow::coupling
-
-
-#endif
+	return true;
+}

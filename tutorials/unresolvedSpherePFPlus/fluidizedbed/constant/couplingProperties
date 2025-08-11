@@ -30,7 +30,7 @@ unresolved
 
     porosity
     {
-    	// Options are PIC, subDivision29Mod, subDivision9, cellDistribution
+    	// Options are PCM, subDivision29Mod, subDivision9, cellDistribution
         method      cellDistribution;
 
         // minimum alpha allowed 
