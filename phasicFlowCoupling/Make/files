@@ -18,7 +18,7 @@ couplingSystem/unresolved/distributions/diffusion.C
 
 
 couplingSystem/unresolved/porosity/porosity/porosity.C
-couplingSystem/unresolved/porosity/PIC/PIC.C
+couplingSystem/unresolved/porosity/PCM/PCM.C
 couplingSystem/unresolved/porosity/subDivision9/subDivision9.C
 couplingSystem/unresolved/porosity/subDivision29/subDivision29.C
 couplingSystem/unresolved/porosity/subDivision29/subDivision29Mod.C
