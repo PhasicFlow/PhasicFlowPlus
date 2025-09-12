@@ -1,0 +1,12 @@
+/* -------------------------------*- C++ -*--------------------------------- *\ 
+|  phasicFlow File                                                            | 
+|  copyright: www.cemf.ir                                                     | 
+\* ------------------------------------------------------------------------- */ 
+objectName     shapes;
+objectType     dictionary;
+fileFormat     ASCII;
+/*---------------------------------------------------------------------------*/
+
+names       (sphereParticle); 
+diameters	(0.002);	  
+materials   (sphereMaterial ); 
