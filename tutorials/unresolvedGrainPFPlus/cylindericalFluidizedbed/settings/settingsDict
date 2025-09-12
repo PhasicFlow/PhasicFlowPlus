@@ -1,0 +1,36 @@
+/* -------------------------------*- C++ -*--------------------------------- *\ 
+|  phasicFlow File                                                            | 
+|  copyright: www.cemf.ir                                                     | 
+\* ------------------------------------------------------------------------- */  
+objectName 	settingsDict;
+objectType 	dictionary;
+fileFormat  ASCII;
+/*---------------------------------------------------------------------------*/
+
+run 		   fluidizedBed;
+
+libs 		   ("libpFCouplingUtilities.so");
+
+dt 			   0.00001; 	// time step for integration (s)
+
+startTime 	   0; 			// start time for simulation 
+
+endTime 	   0.25; 		// end time for simulation 
+
+saveInterval   0.05; 		// time interval for saving the simulation
+
+timePrecision  4;			// maximum number of digits for time folder 
+
+g              (0 0 -9.8);  // gravity vector (m/s2)
+
+includeObjects (diameter);  // save necessary (i.e., required) data on disk
+
+integrationMethod       AdamsBashforth4; 	// integration method
+
+integrationHistory      off;  
+
+writeFormat             ascii; 
+
+timersReport 			Yes;  	// report timers?
+
+timersReportInterval   	0.05;	// time interval for reporting timers
