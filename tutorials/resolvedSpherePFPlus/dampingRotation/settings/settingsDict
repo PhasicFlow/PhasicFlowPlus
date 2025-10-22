@@ -22,17 +22,6 @@ timePrecision   4;			// maximum number of digits for time folder
 
 g 				(0 0 0); // gravity vector (m/s2)
 
-/*
-	Simulation domain
-	every particles that goes outside this domain is deleted.
-*/
-
-domain
-{
-	min (-0.25  -0.25 -0.25);
-	max (0.25  0.25  0.25);
-}
-
 integrationMethod 		AdamsBashforth4; 	// integration method
 
 timersReport 			Yes;  	// report timers?
