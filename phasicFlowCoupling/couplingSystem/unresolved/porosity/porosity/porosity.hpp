@@ -82,7 +82,7 @@ protected:
 		const Foam::label numPar = centerMass().size();
 		const auto& parCellInd = parCellIndex();
 
-		#pragma ParallelRegion
+		#pragma omp parallel for schedule (dynamic)
 		for(Foam::label i=0; i<numPar; i++)
 		{
 			Foam::scalar pVol = pFlow::Pi/6 *

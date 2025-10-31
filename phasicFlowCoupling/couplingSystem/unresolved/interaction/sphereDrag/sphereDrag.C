@@ -49,7 +49,9 @@ void pFlow::coupling::sphereDrag<DistributorType, DragClosureType, useCellDistri
 	}
 
 	auto& fluidVelocity = fluidVelocityPtr_();
-	fluidVelocity.interpolate(this->cMesh());
+	fluidVelocity.interpolate(
+		this->cellDistribution(),
+		this->cMesh());
 
 	auto& solidVelocity = solidVelocityPtr_();
 	solidVelocity.average(
@@ -76,7 +78,7 @@ void pFlow::coupling::sphereDrag<DistributorType, DragClosureType, useCellDistri
 
 	size_t numPar = parCells.size();
 
-	#pragma ParallelRegion
+	#pragma omp parallel for schedule (dynamic)
 	for(size_t parIndx=0; parIndx<numPar; parIndx++)
 	{
 		auto cellIndx = parCells[parIndx];
@@ -92,6 +94,7 @@ void pFlow::coupling::sphereDrag<DistributorType, DragClosureType, useCellDistri
 			Foam::vector up = solidVelocity.vSolid(cellIndx, parIndx);
 
 			Foam::vector ur = fluidVelocity.uFluid(cellIndx, parIndx)-up;
+			
 			Foam::scalar Re = ef * rhoi * Foam::mag(ur) * dp /mui;
 
 			Foam::scalar sp = 3 * Foam::constant::mathematical::pi * mui * ef * dp * dragClosure.dimlessDrag(Re, ef);
@@ -147,7 +150,7 @@ pFlow::coupling::sphereDrag<DistributorType, DragClosureType, useCellDistributio
 	Foam::word fVelType(dict.lookup("fluidVelocity"));
 	Foam::word sVelType(dict.lookup("solidVelocity"));
 
-	if(fVelType == "particle" || fVelType == "cell" )
+	if(fVelType == "particle" || fVelType == "cell" || fVelType == "cellDistribution")
 	{
 		fVelocityType_ = fVelType;
 	}
@@ -156,7 +159,7 @@ pFlow::coupling::sphereDrag<DistributorType, DragClosureType, useCellDistributio
 		fatalErrorInFunction
 			<<"Valid options for fluidVelocity in dictionary "
 			<<dict.name()
-			<<" are: particles, cell"<<endl;
+			<<" are: particle, cell"<<endl;
 		Plus::processor::abort(0);
 	}
 

@@ -21,6 +21,7 @@ Licence:
 #include "distribution.hpp"
 #include "couplingMesh.hpp"
 #include "schedule.hpp"
+#include "streams.hpp"
 
 void pFlow::coupling::distribution::constructLists(
     const Foam::scalar searchLen,
@@ -32,9 +33,8 @@ void pFlow::coupling::distribution::constructLists(
 	}
 
 	const Foam::vectorField& cellC = mesh_.cellCentres();
-	const Foam::scalarField& cellV = mesh_.cellVolumes();
-	const auto& bndris = mesh_.boundary();
-	const auto nCells = cellC.size();
+   	const auto nCells = cellC.size();
+
 	
 	// check for capacity and size 
 	if(static_cast<size_t>(nCells) != neighborList_.size() )
@@ -42,17 +42,13 @@ void pFlow::coupling::distribution::constructLists(
 		neighborList_.clear();
 		neighborList_.reserve(nCells);
         neighborList_.resize(nCells);
-		boundaryCell_.clear();
-		boundaryCell_.reserve(nCells);
-        neighborList_.resize(nCells);
 	}
-	
-	// loop over all cells
-	#pragma ParallelRegion
+
+    // loop over all cells
+	#pragma omp parallel for schedule (dynamic)
 	for(Foam::label celli = 0; celli < nCells; celli++) 
 	{
         const Foam::vector& ci = cellC[celli];
-        const Foam::scalar  lCell = 0.5* Foam::pow(cellV[celli], 0.33333);
         
         std::set<Foam::label> finalList;
 
@@ -64,32 +60,88 @@ void pFlow::coupling::distribution::constructLists(
         {
             neighborList_[celli].push_back(nbr);
         }
-
-		Foam::label nghbrB = -1;
-		Foam::label nghbrFaceIndex = -1;
-		Foam::scalar minDistance = 1.0e15;
-		for(Foam::label nB = 0; nB < bndris.size(); nB++)
-		{
-			//const labelUList& faceCells = bndris[nB].faceCells();
-			const auto& bndry = bndris[nB];
-
-			for(auto j =0; j<bndry.size(); j++)
-			{
-				auto cellFaceDist = Foam::mag(ci - bndry.Cf()[j]);
-				if( cellFaceDist < searchLen + lCell)
-				{
-					if(cellFaceDist<minDistance)
-					{
-						nghbrB = nB;
-						nghbrFaceIndex = j;
-						minDistance = cellFaceDist;
-					}		
-				}
-			}
-		}
-		
-		boundaryCell_[celli] = {nghbrB, nghbrFaceIndex};
 	}
+}
+
+void pFlow::coupling::distribution::constructLists(const Foam::label maxLayers)
+{
+    if(!mesh_.hasPointCells())
+    {
+        mesh_.pointCells();
+        mesh_.cellPoints();
+    }
+
+    const auto nCells = mesh_.nCells();
+    
+    // check for capacity and size 
+	if(static_cast<size_t>(nCells) != neighborList_.size() )
+	{
+		neighborList_.clear();
+		neighborList_.reserve(nCells);
+        neighborList_.resize(nCells);
+	}
+
+    #pragma omp parallel for schedule (dynamic)
+    for(Foam::label celli = 0; celli < nCells; celli++)
+    {
+        
+        std::set<Foam::label> finalList;
+
+        finalList.insert(celli);
+
+        parseNeighbors(celli, 1, maxLayers, celli, finalList);
+
+        neighborList_[celli].clear();
+        for(const auto nbr:finalList)
+        {
+            neighborList_[celli].push_back(nbr);
+        }
+    }
+}
+
+void pFlow::coupling::distribution::parseNeighbors
+(
+    const Foam::label       targetCelli,
+    const Foam::label       layerNumber,
+    const Foam::label       maxLayers, 
+    const Foam::label       celli, 
+    std::set<Foam::label>&  finalList       
+)
+{
+    const labelListList& cellPoints = mesh_.cellPoints();
+    const labelListList& pointCells = mesh_.pointCells();
+
+    const auto& points = cellPoints[celli];
+    
+    std::vector<Foam::label> thisNewCells;
+
+    int nFound = 0;
+    for(const auto& p:points)
+    {
+        const auto& cells = pointCells[p];
+        for(auto c:cells)
+        {
+            if( c == targetCelli || finalList.count(c) == 1) continue;
+            nFound++;
+            thisNewCells.push_back(c);
+            finalList.insert(c);
+        }
+    }
+
+    if( layerNumber < maxLayers && nFound != 0 )
+    {
+        for(const auto& newCell: thisNewCells)
+        {
+            parseNeighbors
+            (
+                targetCelli,
+                layerNumber+1,
+                maxLayers,
+                newCell,
+                finalList
+            );
+        }
+    }
 }
 
 void pFlow::coupling::distribution::parseNeighbors
@@ -122,7 +174,7 @@ void pFlow::coupling::distribution::parseNeighbors
         }
     }
 
-    if(layerNumber <=maxLayers && found != 0)
+    if(layerNumber < maxLayers && found != 0)
     {
         for(auto nghbrCelli:neigborCells)
         {

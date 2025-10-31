@@ -41,6 +41,7 @@ pFlow::coupling::adaptiveGaussian::adaptiveGaussian
         <<  smoothingFactor_ << END_REPORT;
     
     constructLists(1.0, maxLayers_);
+    //constructLists(maxLayers_);
 }
 
 void pFlow::coupling::adaptiveGaussian::updateWeights
@@ -54,7 +55,7 @@ void pFlow::coupling::adaptiveGaussian::updateWeights
 	const Foam::scalarField& cellV = mesh_.cellVolumes();
 	const Foam::vectorField& cellC = mesh_.cellCentres(); 
 
-    #pragma ParallelRegion
+    #pragma omp parallel for schedule (dynamic)
 	for(size_t i=0; i<numPar; i++)
 	{
 		const Foam::label targetCellId = parCellIndex[i];

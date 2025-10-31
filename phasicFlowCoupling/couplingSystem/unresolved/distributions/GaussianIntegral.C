@@ -49,7 +49,7 @@ void pFlow::coupling::GaussianIntegral::updateWeights
 	const Foam::scalarField& cellV = mesh_.cellVolumes();
 	const Foam::vectorField& cellC = mesh_.cellCentres(); 
 
-	#pragma ParallelRegion
+	#pragma omp parallel for schedule (dynamic)
 	for(size_t i=0; i<numPar; i++)
 	{
 		const Foam::label targetCellId = parCellIndex[i];

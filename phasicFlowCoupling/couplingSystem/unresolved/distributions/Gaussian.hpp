@@ -40,6 +40,13 @@ private:
 
 	Foam::label 				maxLayers_;
 
+	 // boundary cells 
+    std::vector<std::pair<Foam::label, Foam::label>>    boundaryCell_;
+
+
+	void constructBoundaryLists(const Foam::scalar searchLen);
+
+
 public:
 
 	/// Type info

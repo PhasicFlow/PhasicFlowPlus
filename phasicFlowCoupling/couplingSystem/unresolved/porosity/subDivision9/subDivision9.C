@@ -52,7 +52,7 @@ bool pFlow::coupling::subDivision9::internalFieldUpdate()
 	const auto& parDiam = particleDiameter();
 	const auto& cmesh = cMesh();
 
-	#pragma ParallelRegion
+	#pragma omp parallel for schedule (dynamic)
 	for(size_t i=0; i<numPar; i++)
 	{
 

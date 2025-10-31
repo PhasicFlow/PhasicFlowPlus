@@ -52,14 +52,13 @@ protected:
     // list of neighbor cells for each cell 
     std::vector<std::vector<Foam::label>>               neighborList_;
     
-    // boundary cells 
-    std::vector<std::pair<Foam::label, Foam::label>>    boundaryCell_;
-
     const Foam::fvMesh&	                                mesh_;
 
     // members
 
     void constructLists(const Foam::scalar searchLen, const Foam::label maxLayers=3);
+    
+    void constructLists(const Foam::label maxLayers = 3);
 
     void parseNeighbors(
 		const Foam::label 		targetCelli,
@@ -69,6 +68,14 @@ protected:
 		std::set<Foam::label>& 	finalList,
 		const Foam::label 		layerNumber,
         const Foam::label 		maxLayers=3);
+
+    void parseNeighbors(
+        const Foam::label       targetCelli,
+        const Foam::label       layerNumber,
+        const Foam::label       maxLayers, 
+        const Foam::label       celli, 
+        std::set<Foam::label>&  finalList       
+    );
 
 public:
     
@@ -151,13 +158,55 @@ public:
         }
     }
 
+    inline 
+    void inverseDistributeValue(
+        Foam::label parIndx,
+        Foam::label parCellIndx,
+        const Foam::volVectorField::Internal& internalField,
+        Foam::vector& val 
+    )const
+    {
+        Foam::vector avVal =Foam::vector(0,0,0);
+
+        const auto& weightsPar = weights_[parIndx];
+        for(const auto& [cellIndx, w]: weightsPar)
+        {
+            avVal += w*internalField[cellIndx];
+        }
+        
+        val = avVal;
+    }
+
+    inline 
+    void inverseDistributeValue(
+        Foam::label parIndx,
+        Foam::label parCellIndx,
+        const Foam::volScalarField::Internal& internalField,
+        Foam::scalar& val 
+    )const
+    {
+        Foam::scalar avVal = 0.0;
+
+        const auto& weightsPar = weights_[parIndx];
+        for(const auto& [cellIndx, w]: weightsPar)
+        {
+            avVal += w*internalField[cellIndx];
+        }
+        
+        val = avVal;
+    }
+
     void smoothenField(Foam::volVectorField& field)const
     {}
 
     void smoothenField(Foam::volScalarField& field)const
 	{}
 
-
+    const Plus::procCMField<std::vector<cellWeight>> weights()const
+    {
+        return weights_;
+    }
+    
 }; // end distribution
 
 

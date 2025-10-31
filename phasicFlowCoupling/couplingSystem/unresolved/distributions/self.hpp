@@ -115,6 +115,28 @@ public:
 		internalField[parCellIndx] += val;
 	}
 
+	inline 
+    void inverseDistributeValue(
+        Foam::label parIndx,
+		Foam::label parCellIndx,
+        const Foam::volVectorField::Internal& internalField,
+        Foam::vector& val 
+    )const
+    {        
+        val = internalField[parCellIndx];
+    }
+
+    inline 
+    void inverseDistributeValue(
+        Foam::label parIndx,
+		Foam::label parCellIndx,
+        const Foam::volScalarField::Internal& internalField,
+        Foam::scalar& val 
+    )const
+    {
+        val = internalField[parCellIndx];
+    }
+
 	void smoothenField(Foam::volVectorField& field)const
     {}
 

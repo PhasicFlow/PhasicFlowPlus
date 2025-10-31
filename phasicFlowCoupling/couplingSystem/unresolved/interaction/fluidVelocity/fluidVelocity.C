@@ -23,29 +23,9 @@ Licence:
 #include "couplingMesh.hpp"
 #include "streams.hpp"
 
-pFlow::coupling::fluidVelocity::fluidVelocity
-(
-    const word &type, 
-    const Foam::volVectorField &U, 
-    const couplingMesh &cMesh
-)
-:
-    Uf_(U),
-    interpolate_(type == "particle"),
-    Up_
-    (
-        "Up",
-        cMesh.centerMass()
-    )
+void pFlow::coupling::fluidVelocity::interpolateCells(const couplingMesh &cMesh)
 {
-}
-
-void pFlow::coupling::fluidVelocity::interpolate(const couplingMesh &cMesh)
-{
-    if(!interpolate_)
-    {
-        return;
-    }
+    
     const auto& mesh = cMesh.mesh();
     if(!mesh.hasCellCentres())
     {
@@ -56,14 +36,14 @@ void pFlow::coupling::fluidVelocity::interpolate(const couplingMesh &cMesh)
     const auto& centerMass = cMesh.centerMass();
     const size_t nPar = centerMass.size();
     
-    #pragma ParallelRegion
+    #pragma omp parallel for schedule (dynamic)
     for(size_t i=0; i<nPar; i++)
     {
         
         const auto celli = parCellIndex[i];
         if(celli == -1)
         {
-            Up_[i] = zero3;
+            Up_[i] = Foam::vector(0,0,0);
             continue;
         } 
 
@@ -88,12 +68,27 @@ void pFlow::coupling::fluidVelocity::interpolate(const couplingMesh &cMesh)
             sumVel += Uf_[cellj] * w;
         }
 
-        Up_[i] =  realx3(sumVel[0] / sum, 
-                         sumVel[1] / sum, 
-                         sumVel[2] / sum);
+        Up_[i] =  sumVel / sum;
                 
     }
     
-
-
 }
+
+pFlow::coupling::fluidVelocity::fluidVelocity
+(
+    const word &type, 
+    const Foam::volVectorField &U, 
+    const couplingMesh &cMesh
+)
+:
+    Uf_(U),
+    interpolate_(type == "particle" || type == "cellDistribution"),
+    cellDistribution_(type == "cellDistribution"),
+    Up_
+    (
+        "Up",
+        cMesh.centerMass()
+    )
+{
+}
+
