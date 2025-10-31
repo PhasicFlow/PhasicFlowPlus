@@ -54,7 +54,7 @@ bool pFlow::coupling::subDivision29Mod::internalFieldUpdate()
 	const auto& cmesh = cMesh();
 	
 
-	#pragma ParallelRegion
+	#pragma omp parallel for schedule (dynamic)
 	for(size_t i=0; i<numPar; i++)
 	{
 		const Foam::label cntrCellId = parCellInd[i];

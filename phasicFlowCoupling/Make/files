@@ -12,7 +12,6 @@ couplingSystem/unresolved/distributions/distribution.C
 couplingSystem/unresolved/distributions/Gaussian.C
 couplingSystem/unresolved/distributions/adaptiveGaussian.C
 couplingSystem/unresolved/distributions/GaussianIntegral.C
-couplingSystem/unresolved/distributions/GaussianOld.C
 couplingSystem/unresolved/distributions/self.C
 couplingSystem/unresolved/distributions/diffusion.C
 

@@ -83,7 +83,6 @@ public:
 		couplingSystem	
 	);
 
-	 
 	void calculateDragForce(
 		const Foam::volVectorField& 	fluidVelocity,
 		const Plus::realx3ProcCMField& 	parVelocity,
@@ -95,7 +94,12 @@ public:
 		if constexpr (useCellDistribution)
 			return this->cellDistribution().requireCellDistribution();
 		else
-			return sVelocityType_ == "cell";
+		{
+			if(fluidVelocityPtr_ && fluidVelocityPtr_->requireCellDistribution()) return true;  
+			if(solidVelocityPtr_ && solidVelocityPtr_->requireCellDistribution()) return true;
+		}
+		
+		return false;
 	}
 }; 
 

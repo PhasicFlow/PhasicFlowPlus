@@ -48,7 +48,7 @@ public:
             Us_[celli] = Foam::Zero;
         }
 
-        #pragma ParallelRegion
+        #pragma omp parallel for schedule (dynamic)
         for(size_t i=0; i<numPar; i++)
         {
             Foam::scalar pVol = pFlow::Pi/6 *

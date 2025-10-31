@@ -18,10 +18,61 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-
 #include "Gaussian.hpp"
 #include "couplingMesh.hpp"
 #include "schedule.hpp"
+
+void pFlow::coupling::Gaussian::constructBoundaryLists
+(
+	const Foam::scalar searchLen
+)
+{
+	if(!mesh_.hasCellCells())
+	{
+		mesh_.cellCells();
+	}
+
+	const Foam::vectorField& cellC = mesh_.cellCentres();
+	const auto nCells = cellC.size();
+	const auto& bndris = mesh_.boundary();
+	
+	// check for capacity and size 
+	if(static_cast<size_t>(nCells) != boundaryCell_.size() )
+	{	
+		boundaryCell_.clear();
+		boundaryCell_.reserve(nCells);
+		boundaryCell_.resize(nCells);
+	}
+
+    // loop over all cells
+	#pragma omp parallel for schedule (dynamic)
+	for(Foam::label celli = 0; celli < nCells; celli++) 
+	{
+        const Foam::vector& ci = cellC[celli];
+        
+		Foam::label nghbrB = -1;
+		Foam::label nghbrFaceIndex = -1;
+		Foam::scalar minDistance = 1.0e15;
+		for(Foam::label nB = 0; nB < bndris.size(); nB++)
+		{
+			//const labelUList& faceCells = bndris[nB].faceCells();
+			const auto& bndry = bndris[nB];
+
+			for(auto j = 0; j<bndry.size(); j++)
+			{
+				auto cellFaceDist = Foam::mag(ci - bndry.Cf()[j]);
+				if( cellFaceDist < searchLen  && cellFaceDist<minDistance)
+				{
+					nghbrB = nB;
+					nghbrFaceIndex = j;
+					minDistance = cellFaceDist;		
+				}
+			}
+		}
+		
+		boundaryCell_[celli] = {nghbrB, nghbrFaceIndex};
+	}
+}
 
 pFlow::coupling::Gaussian::Gaussian
 (
@@ -34,7 +85,8 @@ pFlow::coupling::Gaussian::Gaussian
 	standardDeviation_(lookupDict<Foam::scalar>(dict, "standardDeviation")),
 	maxLayers_(lookupOrDefaultDict<Foam::label>(dict, "maxLayers", 2))
 {
-	constructLists(2.5*standardDeviation_, maxLayers_);
+	constructLists(3*standardDeviation_, maxLayers_);
+	constructBoundaryLists(1.5*standardDeviation_ );
 }
 
 void pFlow::coupling::Gaussian::updateWeights
@@ -62,7 +114,7 @@ void pFlow::coupling::Gaussian::updateWeights
 		return Foam::exp(-ksi2)+Foam::exp(-shifted_ksi2);
 	};
 	
-	#pragma ParallelRegion
+	#pragma omp parallel for schedule (dynamic)
 	for(size_t i=0; i<numPar; i++)
 	{
 		

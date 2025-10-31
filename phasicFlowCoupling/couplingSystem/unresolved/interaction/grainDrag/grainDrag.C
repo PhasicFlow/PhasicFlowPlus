@@ -49,7 +49,9 @@ void pFlow::coupling::grainDrag<DistributorType, DragClosureType, useCellDistrib
 	}
 
 	auto& fluidVelocity = fluidVelocityPtr_();
-	fluidVelocity.interpolate(this->cMesh());
+	fluidVelocity.interpolate(
+		this->cellDistribution(),
+		this->cMesh());
 
 	auto& solidVelocity = solidVelocityPtr_();
 	solidVelocity.average(
@@ -73,7 +75,7 @@ void pFlow::coupling::grainDrag<DistributorType, DragClosureType, useCellDistrib
 
 	size_t numPar = parCells.size();
 
-	#pragma ParallelRegion
+	#pragma omp parallel for schedule (dynamic)
 	for(size_t parIndx=0; parIndx<numPar; parIndx++)
 	{
 		auto cellIndx = parCells[parIndx];
@@ -152,7 +154,7 @@ pFlow::coupling::grainDrag<DistributorType, DragClosureType, useCellDistribution
 	Foam::word fVelType(dict.lookup("fluidVelocity"));
 	Foam::word sVelType(dict.lookup("solidVelocity"));
 
-	if(fVelType == "particle" || fVelType == "cell" )
+	if(fVelType == "particle" || fVelType == "cell" || fVelType == "cellDistribution")
 	{
 		fVelocityType_ = fVelType;
 	}

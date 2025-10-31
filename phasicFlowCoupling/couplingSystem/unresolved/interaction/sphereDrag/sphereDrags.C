@@ -21,7 +21,6 @@ Licence:
 #include "sphereDrag.hpp"
 #include "self.hpp"
 #include "Gaussian.hpp"
-#include "GaussianOld.hpp"
 #include "GaussianIntegral.hpp"
 #include "adaptiveGaussian.hpp"
 #include "diffusion.hpp"
@@ -55,18 +54,6 @@ template class pFlow::coupling::sphereDrag  \
         pFlow::coupling::Gaussian,          \
         closure,                            \
         false                               \
-    >;                                      \
-template class pFlow::coupling::sphereDrag  \
-    <                                       \
-        pFlow::coupling::GaussianOld,       \
-        closure,                            \
-        false                               \
-    >;                                      \
-template class pFlow::coupling::sphereDrag  \
-    <                                       \
-        pFlow::coupling::GaussianOld,       \
-        closure,                            \
-        true                                \
     >;                                      \
 template class pFlow::coupling::sphereDrag  \
     <                                       \
