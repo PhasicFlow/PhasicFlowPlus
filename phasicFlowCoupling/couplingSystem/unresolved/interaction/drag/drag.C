@@ -147,3 +147,14 @@ pFlow::coupling::drag<DistributorType>::create
 
 	return nullptr;
 }
+
+void pFlow::coupling::drag<DistributorType>::calculateDragForce1
+(	
+	const Foam::volVectorField& 	fluidVelocity,
+	const Plus::realx3ProcCMField& 	parVelocity,
+	const Plus::realProcCMField& 	diameter,
+	Plus::realx3ProcCMField& 		particleForce
+)
+{
+	
+}

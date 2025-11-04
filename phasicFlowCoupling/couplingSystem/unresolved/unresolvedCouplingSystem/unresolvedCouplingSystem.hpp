@@ -38,7 +38,8 @@ class unresolvedCouplingSystem
 public:
 
 	unresolvedCouplingSystem(
-		word shapeTypeName, 
+		word shapeTypeName,
+		word couplingSystemType, 
 		Foam::fvMesh& mesh,
 		int argc, 
 		char* argv[]);
@@ -58,44 +59,66 @@ public:
 		unresolvedCouplingSystem,
 		word,
 		(
-			word demSystemName, 
+			word demSystemName,
+			word couplingSystemType, 
 			Foam::fvMesh& mesh,
 			int argc, 
 			char* argv[]
 		),
-		(demSystemName, mesh, argc, argv)
+		(demSystemName, couplingSystemType, mesh, argc, argv)
 	);
 
-	const Foam::dictionary& unresolvedDict()const
-	{
-		return this->subDict("unresolved");
-	}
-
-	virtual 
-	const Foam::volScalarField& alpha()const =0;
-
-	virtual
-	const Foam::volScalarField& Sp()const =0;
+	const Foam::dictionary& unresolvedDict()const;
 	
 	virtual
-	const Foam::volVectorField& Su()const =0;
-
-	virtual
-	void calculateFluidInteraction() =0;
-
-	virtual
 	void calculatePorosity() =0;
+
+	virtual
+	void calculateMomentumCoupling() = 0;
+
+	virtual 
+	void calcualteHeatCoupling() = 0;
+
+	virtual
+	void calculateMassCoupling() = 0;
+	
+	/// @brief volume fraction of fluid (sum of all fluid phases)
+	virtual 
+	Foam::tmp<Foam::volScalarField> alpha()const =0;
+
+	/// @brief  source term for momentum exchange term = Sp*U+Su 
+	/// @return volScalarField as Sp
+	virtual
+	Foam::tmp<Foam::volScalarField> Sp()const =0;
+	
+	/// @brief source term for mumentum exchange term = Sp*U+Su
+	virtual
+	Foam::tmp<Foam::volVectorField> Su()const =0;
+
+	/// @brief source term for heat equation 
+	virtual 
+	Foam::tmp<Foam::volScalarField> heatSource() const = 0;
+
+	/// @brief source term for specie equation 
+	/// @param specieName name of the specie 
+	virtual
+	Foam::tmp<Foam::volScalarField> massSource(const word& specieName)const = 0;
 
 	virtual 
 	word shapeTypeName() const= 0;
 
 	virtual 
+	word couplingSystemType()const = 0;
+
+	virtual 
 	bool requireCellDistribution()const = 0;
 
+	/// create for unresolvedCouplingSystem 
 	static
 	uniquePtr<unresolvedCouplingSystem> create
 	(
-		word demSystemName, 
+		word demSystemName,
+		word couplingSystemType, 
 		Foam::fvMesh& mesh,
 		int argc, 
 		char* argv[]

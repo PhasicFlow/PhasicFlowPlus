@@ -154,6 +154,16 @@ public:
 		const Plus::realx3ProcCMField& 	parVelocity,
 		const Plus::realProcCMField& 	diameter,
 		Plus::realx3ProcCMField& 		particleForce) = 0;
+	
+	
+	virtual 
+	Foam::scalar 
+		dimlessDrag(Foam::scalar Re, Foam::scalar ep) =0;
+
+	void calculateDragForce1(const Foam::volVectorField& 	fluidVelocity,
+		const Plus::realx3ProcCMField& 	parVelocity,
+		const Plus::realProcCMField& 	diameter,
+		Plus::realx3ProcCMField& 		particleForce);
 
 	virtual
 	bool requireCellDistribution()const =0;

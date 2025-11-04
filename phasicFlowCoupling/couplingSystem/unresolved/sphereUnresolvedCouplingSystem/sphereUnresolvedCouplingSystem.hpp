@@ -40,8 +40,6 @@ private:
 
 	uniquePtr<drag<DistributorType>> 	drag_ = nullptr;
 
-	//uniquePtr<velocityInterpolate<interpolate>> interpolate_;
-
 	bool 		requiresDistribution_ = false;
 
 	Timer 		porosityTimer_;

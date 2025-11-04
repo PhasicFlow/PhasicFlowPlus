@@ -41,11 +41,17 @@ pFlow::coupling::unresolvedCouplingSystem::unresolvedCouplingSystem
 }
 
 
+const Foam::dictionary& pFlow::coupling::unresolvedCouplingSystem::unresolvedDict()const
+{
+	return this->subDict("unresolved");
+}
+
 
 pFlow::uniquePtr<pFlow::coupling::unresolvedCouplingSystem> 
 	pFlow::coupling::unresolvedCouplingSystem::create
 	(
-		word shapeTypeName, 
+		word shapeTypeName,
+		word couplingSystemType
 		Foam::fvMesh& mesh,
 		int argc, 
 		char* argv[]
@@ -65,19 +71,17 @@ pFlow::uniquePtr<pFlow::coupling::unresolvedCouplingSystem>
         )
     );
 
-    Foam::word cellDistMethod;
+    Foam::word cellDistMethod = 
+		couplingDict.subDict("unresolved").getOrDefault<Foam::word>(
+			"cellDistribution", 
+			"self");
 
-    if(!couplingDict.subDict("unresolved").isDict("cellDistribution"))
-    {
-    	cellDistMethod = "self";
-    }
-    else
-    {
-    	cellDistMethod = lookupDict<Foam::word>(couplingDict.subDict("unresolved").subDict("cellDistribution"), "type");
-    }
+    
+	
 
-    word couplingType = angleBracketsNames(
+    word couplingType = angleBracketsNames2(
     	shapeTypeName +"UnresolvedCouplingSystem",
+		couplingSystemType,
     	cellDistMethod);
 
     if( wordvCtorSelector_.search(couplingType))
