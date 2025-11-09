@@ -22,7 +22,7 @@ In `settings/particlesDict`, two dictionaries — `positionParticles` and `setFi
 The `positionParticles` dictionary uses the `ordered` method to position particles in a box region. `orderedInfo` sets `numPoints` = 12,000, `distance` = 0.003 m, and `axisOrder` = (z x y).
 
 <div align="center">
-in **settings/particlesDict**
+in <b>settings/particlesDict</b>
 </div>
 
 ```C++
@@ -50,7 +50,7 @@ positionParticles
 The `setFields` dictionary defines initial particle fields (velocity, rotational velocity, and shape name). Ensure the `shapeName` matches the name in `caseSetup/shapes` (here, `sph1`).
 
 <div align="center">
-in **settings/particlesDict**
+in <b>settings/particlesDict</b>
 </div>
 
 ```C++
@@ -79,7 +79,7 @@ particlesPhasicFlow
 The `surfaces` dictionary defines walls. This case uses a built-in cuboid wall. Provide the center point and edge lengths to define the cuboid.
 
 <div align="center">
-in **settings/geometryDict**
+in <b>settings/geometryDict</b>
 </div>
 
 ```C++
@@ -107,7 +107,7 @@ geometryPhasicFlow
 In `caseSetup/interaction` define material properties and interaction parameters. `materials` lists material names and `densities` their densities. The `model` dictionary specifies contact force and rolling friction models and related parameters.
 
 <div align="center">
-in **caseSetup/interaction**
+in <b>caseSetup/interaction</b>
 </div>
 
 ```C++
@@ -149,7 +149,7 @@ model
 In `caseSetup/shapes`, define particle names, diameters, and materials:
 
 <div align="center">
-in **caseSetup/shapes**
+in <b>caseSetup/shapes</b>
 </div>
 
 ```C++
@@ -163,7 +163,7 @@ materials (sphereMat);
 `settings/domainDict` defines a rectangular bounding box. Particles exiting the box are deleted.
 
 <div align="center">
-in **settings/domainDict**
+in <b>settings/domainDict</b>
 </div>
 
 ```C++
@@ -213,7 +213,7 @@ boundaries
 Additional parameters live in `settings/settingsDict`: timesteps, start/end times, save intervals, gravity, and integration method.
 
 <div align="center">
-in **settings/settingsDict**
+in <b>settings/settingsDict</b>
 </div>
 
 ```C++
@@ -253,7 +253,7 @@ sphereGranFlow
 For coupling, edit `couplingProperties` under `constant`. This example uses the DiFelice drag closure and `adaptiveGaussian` for mapping particle properties to fluid cells. Because the jet region has small cells, `adaptiveGaussian` is a suitable choice even when the cell-to-particle-size ratio is about 1.
 
 <div align="center">
-in **settings/settingsDict**
+in <b>settings/couplingProperties</b>
 </div>
 
 ```C++
