@@ -86,7 +86,7 @@ $$\Delta \tau = \frac{\tau_{total}}{nSteps} \tag{3}$$
 
 **Integration:**
 
-The diffusion equation is integrated numerically up to pseudo-time $\tau = 1 \text{ s}$ using a finite volume scheme with `nSteps` iterations. This ensures consistent and reproducible smoothing independent of the grid size or computational parameters.
+The diffusion equation is integrated numerically up to pseudo-time $$\tau = 1 \text{ s}$$ using a finite volume scheme with `nSteps` iterations. This ensures consistent and reproducible smoothing independent of the grid size or computational parameters.
 
 **Characteristics:**
 - The recommended value for standard deviation is around 3 - 6 times particle diameter, depending on the cell-to-particle size ratio. 
@@ -162,7 +162,7 @@ GaussianInfo
 ```
 
 **Parameters:**
-- `standardDeviation` - Standard deviation $\sigma$ of the Gaussian kernel (real, required)
+- `standardDeviation` - Standard deviation $$\sigma$$ of the Gaussian kernel (real, required)
 - `maxLayers` - Maximum number of cell layers to consider for neighbor search (integer, default: 2)
 
 ### 3.4 Gaussian Integral Method
@@ -520,13 +520,13 @@ where $$V_p$$ is the particle volume.
 
 All drag models accept:
 - `model` - Selection of drag closure (e.g., `DiFelice`, `ErgunWenYu`, `Beetstra`, `Rong`, `Cello`)
-- `residualRe` - Minimum Reynolds number threshold to prevent numerical issues at very low $Re$
+- `residualRe` - Minimum Reynolds number threshold to prevent numerical issues at very low $$Re$$
 
 ### 6.3 DiFelice Correlation
 
 **Model Name:** `DiFelice`
 
-Di Felice (1994) provides a correlation for the dimensionless drag function $\hat{f}^d$ accounting for void fraction effects.
+Di Felice (1994) provides a correlation for the dimensionless drag function $$\hat{f}^d$$ accounting for void fraction effects.
 
 **Formulation:**
 
@@ -544,7 +544,7 @@ The drag coefficient $$\beta$$ is obtained from Eq. 16d using this dimensionless
 **Characteristics:**
 - Widely used and well-validated
 - Good for low to intermediate Reynolds numbers (should be of primary choice for general applications)
-- Accounts for local porosity effects through $\alpha^{-\xi}$
+- Accounts for local porosity effects through $$\alpha^{-\xi}$$
 
 **Reference:** Di Felice, R. (1994) "The voidage function for fluid–particle interaction systems." International Journal of Multiphase Flow, 20, 153–159.
 
@@ -552,7 +552,7 @@ The drag coefficient $$\beta$$ is obtained from Eq. 16d using this dimensionless
 
 **Model Name:** `ErgunWenYu`
 
-Combines Ergun equation for dense flows with Wen-Yu correlation for dilute flows to provide the dimensionless drag function $\hat{f}^d$.
+Combines Ergun equation for dense flows with Wen-Yu correlation for dilute flows to provide the dimensionless drag function $$\hat{f}^d$$.
 
 **Formulation:**
 
@@ -575,7 +575,7 @@ where $$\hat{f}^d$$ is the **dimensionless drag function** for the respective fl
 
 **Characteristics:**
 - Handles both dense and dilute regimes
-- Transitions smoothly at $\alpha = 0.8$
+- Transitions smoothly at $$\alpha = 0.8$$
 - Particularly suitable for packed bed simulations as well as fluidized beds
 
 **References:**
@@ -587,7 +587,7 @@ where $$\hat{f}^d$$ is the **dimensionless drag function** for the respective fl
 
 **Model Name:** `Beetstra`
 
-Drag correlation providing the dimensionless drag function $\hat{f}^d$ for intermediate Reynolds number flows past mono-disperse arrays of spheres.
+Drag correlation providing the dimensionless drag function $$\hat{f}^d$$ for intermediate Reynolds number flows past mono-disperse arrays of spheres.
 
 **Formulation:**
 
@@ -606,7 +606,7 @@ where $$\hat{f}^d$$ is the **dimensionless drag function** from this complex cor
 
 **Model Name:** `Rong`
 
-Drag correlation based on lattice-Boltzmann simulations providing the dimensionless drag function $\hat{f}^d$ for uniform sphere packing.
+Drag correlation based on lattice-Boltzmann simulations providing the dimensionless drag function $$\hat{f}^d$$ for uniform sphere packing.
 
 **Formulation:**
 
