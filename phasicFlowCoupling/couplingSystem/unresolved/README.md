@@ -63,7 +63,7 @@ Uses Laplacian diffusion equation to smoothen particle data over multiple cells.
 
 The diffusion equation smooths a scalar field $\phi$ as:
 
-$$\frac{\partial \phi}{\partial \tau} = D \nabla^2 \phi \quad (1)$$
+$$\frac{\partial \phi}{\partial \tau} = D \nabla^2 \phi \ \ \ \text{Eq. (1)}$$
 
 where:
 - $D$ is the diffusion coefficient calculated as: $D = \sigma^2 / (4 \tau_{total})$ (see Eq. 2)
