@@ -18,28 +18,25 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
+#include "porosityCellDistribution.hpp"
 
 
-template<typename DistributorType>
-pFlow::coupling::porosityCellDistribution<DistributorType>::porosityCellDistribution
+pFlow::coupling::porosityCellDistribution::porosityCellDistribution
 (
 	const unresolvedCouplingSystem& CS,
 	const couplingMesh& 			cMesh,
 	const Plus::realProcCMField& 	parDiam
 )
 :
-	porosity(CS, cMesh, parDiam),
-	cellDistributor_(
-		static_cast<const UnresolvedCouplingSystem<DistributorType>&>(CS).cellDistribution())
+	porosity(CS, cMesh, parDiam)
 {
 	
 }
 
-template<typename DistributorType>
-bool pFlow::coupling::porosityCellDistribution<DistributorType>::internalFieldUpdate()
+bool pFlow::coupling::porosityCellDistribution::internalFieldUpdate()
 {	
     
-    auto solidVolTmp = calculateSolidVol(cellDistributor_);
+    auto solidVolTmp = calculateSolidVol(distribution());
 
     volScalarField& alphaField = *this;
     const auto& V = this->mesh().V();
@@ -51,16 +48,12 @@ bool pFlow::coupling::porosityCellDistribution<DistributorType>::internalFieldUp
         alphaField[celli] = 1 - solidVol[celli]/V[celli];
     }
 
-    cellDistributor_.smoothenField(alphaField);
+    distribution().smoothenField(alphaField);
 
     forAll(alphaField, celli)
     {
         alphaField[celli] = Foam::max(alphaField[celli], alphaMin);
     }
-
-    /*Foam::fieldRef(alphafield) = Foam::max(
-        1 - solidVolTmp/this->mesh().V(), 
-        static_cast<Foam::scalar>(this->alphaMin()) );*/
 
 	return true;
 }

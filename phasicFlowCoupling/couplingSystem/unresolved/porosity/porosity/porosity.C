@@ -45,10 +45,32 @@ pFlow::coupling::porosity::porosity
     	cMesh.mesh()
 	),
 	alphaMin_(lookupDict<Foam::scalar>(CS.unresolvedDict().subDict("porosity"), "alphaMin")),
-	cMesh_(cMesh),
-	particleDiameter_(parDiam)
+	uCS_(CS),
+	particleDiameter_(parDiam),
+	distribution_(CS.distribution())
 {
 
+}
+
+const Foam::fvMesh &pFlow::coupling::porosity::mesh() const
+{
+    return uCS_.cMesh().mesh();
+}
+
+
+const pFlow::coupling::couplingMesh &pFlow::coupling::porosity::cMesh() const
+{
+    return uCS_.cMesh();
+}
+
+const pFlow::Plus::procCMField<Foam::label> &pFlow::coupling::porosity::parCellIndex() const
+{
+	return uCS_.parCellIndex();
+}
+
+pFlow::int32 pFlow::coupling::porosity::numInMesh() const
+{
+    return cMesh().numInMesh();
 }
 
 void pFlow::coupling::porosity::calculatePorosity()
@@ -67,14 +89,14 @@ pFlow::coupling::porosity::create
 )
 {
 
-	auto method = lookupDict<Foam::word>(CS.unresolvedDict().subDict("porosity"), "method");
-	
-	if(method == "cellDistribution")
+	Foam::word method = 
+		CS.unresolvedDict().subDict("porosity").getOrDefault<Foam::word>("method", "distribution");
+
+	if(method == "distribution")
 	{
-		// 
-		auto cdType = lookupDict<Foam::word>(CS.unresolvedDict().subDict("cellDistribution"), "type");
-		method = pFlow::angleBracketsNames("porosityCellDistribution", cdType);
+		method = "porosity<distribution>";
 	}
+		
 
 	if( dictionaryvCtorSelector_.search(method))
 	{

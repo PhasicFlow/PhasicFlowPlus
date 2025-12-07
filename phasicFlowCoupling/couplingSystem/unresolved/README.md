@@ -63,7 +63,7 @@ Uses Laplacian diffusion equation to smoothen particle data over multiple cells.
 
 The diffusion equation smooths a scalar field $\phi$ as:
 
-$$\frac{\partial \phi}{\partial \tau} = D \nabla^2 \phi \ \ \ \text{Eq. (1)}$$
+$$\frac{\partial \phi}{\partial \tau} = D \nabla^2 \phi \quad (1)$$
 
 where:
 - $D$ is the diffusion coefficient calculated as: $D = \sigma^2 / (4 \tau_{total})$ (see Eq. 2)
@@ -86,7 +86,7 @@ $$\Delta \tau = \frac{\tau_{total}}{nSteps} \quad (3)$$
 
 **Integration:**
 
-The diffusion equation is integrated numerically up to pseudo-time $\tau = 1 \text{ s}$ using a finite volume scheme with `nSteps` iterations. This ensures consistent and reproducible smoothing independent of the grid size or computational parameters.
+The diffusion equation is integrated numerically up to pseudo-time $\tau = 1 \text{ s}$ using a finite volume scheme with `nSteps` iterations. This ensures consistent and reproducible smoothing in the simulation.
 
 **Characteristics:**
 - The recommended value for standard deviation is around 3 - 6 times particle diameter, depending on the cell-to-particle size ratio. 
@@ -575,7 +575,6 @@ where $\hat{f}^d$ is the **dimensionless drag function** for the respective flow
 
 **Characteristics:**
 - Handles both dense and dilute regimes
-- Transitions smoothly at $\alpha = 0.8$
 - Particularly suitable for packed bed simulations as well as fluidized beds
 
 **References:**
@@ -678,10 +677,10 @@ where $\boldsymbol{\omega}_p$ is the particle angular velocity (rotational veloc
 The following Reynolds numbers and dimensionless parameters are used across all lift models:
 
 - $Re_p = \frac{|\mathbf{U}_{rel}| d_p}{\nu}$ - Particle Reynolds number
-- $Re_\omega = \frac{|\boldsymbol{\omega}_p| d_p^2}{\nu}$ - Particle rotation Reynolds number  
-- $Re_\Omega = \frac{|\nabla \times \mathbf{U}_f| d_p^2}{\nu}$ - Fluid vorticity Reynolds number
-- $Sr = \frac{Re_\Omega}{Re_p}$ - Shear rate parameter
-- $Rr = \frac{Re_\omega}{Re_p}$ - Rotation rate parameter
+- $Re_\Omega = \frac{|\boldsymbol{\omega}_p| d_p^2}{\nu}$ - Particle rotation Reynolds number  
+- $Re_\omega = \frac{|\nabla \times \mathbf{U}_f| d_p^2}{\nu}$ - Fluid vorticity Reynolds number
+- $Sr = \frac{Re_\omega}{Re_p}$ - Shear rate parameter
+- $Rr = \frac{Re_\Omega}{Re_p}$ - Rotation rate parameter
 - $\epsilon = \frac{\sqrt{Re_\omega}}{Re_p}$ - Dimensionless rotation parameter
 
 where $d_p$ is the particle diameter and $\nu$ is the kinematic viscosity of the fluid.
@@ -779,13 +778,67 @@ $$C_{L,shear} = -0.064 \exp(0.525 Sr) \left( 0.49 + 0.51 \tanh \left[ 5\log_{10}
 
 ### 7.5 Surface Rotation Torque Models
 
-Models for torque on particles due to surface rotation effects.
+Models for torque on particles due to surface rotation effects. The torque arises from the interaction between the fluid's vorticity (shear-induced effects) and the particle's rotational motion.
 
-**Available Options:**
-- **`none`** - Not included (default)
-- **`lowReynolds`** - Based on Happel and Brenner model for low Reynolds numbers
-- **`Loth2008`** - Based on Loth (2008) model
-- **`Shi2019`** - Based on Shi model
+The general torque formula used in all models is:
+
+$$\mathbf{T} = -\pi \rho \nu d_p^3 (f_{spin} \boldsymbol{\omega}_p - 0.5 f_{shear} \boldsymbol{\omega}_f) \quad (28)$$
+
+where:
+- $\mathbf{T}$ is the torque on the particle
+- $\rho$ is the fluid density
+- $\nu$ is the fluid kinematic viscosity
+- $d_p$ is the particle diameter
+- $\boldsymbol{\omega}_p$ is the particle angular velocity (rotational velocity)
+- $\boldsymbol{\omega}_f =  \nabla \times \mathbf{U}$ is the fluid vorticity vector
+- $f_{spin}$ is a correction factor accounting for the particle spin Reynolds number effect
+- $f_{shear}$ is a correction factor accounting for the fluid shear effects
+
+**Available Models:**
+
+#### `none`
+No surface rotation torque is applied. This is the default option.
+
+#### `lowReynolds`
+Based on the Happel and Brenner model (1973) for low Reynolds numbers. This model uses constant correction factors:
+
+$$f_{spin} = 1.0 \quad (29a)$$
+$$f_{shear} = 1.0 \quad (29b)$$
+
+This model is applicable for very low Reynolds number flows where viscous effects dominate.
+
+**Reference:** Happel, J., and Brenner, H., Low Reynolds Number Hydrodynamics, Noordhoff International, Leyden, The Netherlands, 1973
+
+#### `Loth2008`
+Based on the empirical correlations from Loth (2008). This model uses Reynolds-number-dependent correction factors:
+
+$$f_{spin} = 1.0 + \frac{5}{64\pi} Re_\Omega^{0.6} \quad (30a)$$
+
+$$f_{shear} = f_{spin} \left(1 - 0.0075 Re_\omega\right)\left(1 - 0.062\sqrt{Re_p} - 0.001 Re_p\right) \quad (30b)$$
+
+where:
+- $Re_\Omega = \frac{|\boldsymbol{\omega}_p| d_p^2}{\nu}$ - Particle spin Reynolds number
+- $Re_\omega = \frac{|\boldsymbol{\omega}_f| d_p^2}{\nu}$ - Fluid vorticity Reynolds number
+- $Re_p = \frac{|\mathbf{u}_{rel}| d_p}{\nu}$ - Particle Reynolds number
+
+The `Loth2008` model requires the following parameter in the dictionary:
+- `residualRe` - Minimum Reynolds number threshold to avoid numerical issues (default: 1e-6)
+
+**Reference:** Loth, E., 2008. Lift of a spherical particle subject to vorticity and/or spin. AIAA Journal, 46(4), 801–809.
+
+#### `Shi2019`
+Based on the more recent correlations from Shi and Rzehak (2019). This model provides improved accuracy across a wider range of Reynolds numbers:
+
+$$f_{spin} = 1.0 + \frac{5}{64\pi} Re_\Omega^{0.6} \quad (31a)$$
+
+$$f_{shear} = f_{spin} \left[\left(1 + 0.4 \left(\exp(-0.0135 Re_\omega) - 1\right)\right)\left(1 - 0.0702 Re_p^{0.455}\right)\right] \quad (31b)$$
+
+The `Shi2019` model requires the following parameter in the dictionary:
+- `residualRe` - Minimum Reynolds number threshold to avoid numerical issues.
+
+The Shi2019 model is recommended for applications with broader Reynolds number ranges and provides better agreement with experimental data across different flow regimes.
+
+**Reference:** Pengyu Shi and Roland Rzehak, 2019. Lift forces on solid spherical particles in unbounded flows. Chemical Engineering Science, 208, 115145
 
 
 

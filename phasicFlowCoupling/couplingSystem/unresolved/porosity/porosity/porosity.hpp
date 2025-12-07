@@ -30,7 +30,7 @@ Licence:
 // from phasicFlow-coupling
 #include "couplingMesh.hpp"
 #include "procCMFields.hpp"
-#include "schedule.hpp"
+#include "distributionBase.hpp"
 
 namespace pFlow::coupling
 {
@@ -52,51 +52,54 @@ private:
 	/// Minimum fluid porosity allowed in each cell
 	Foam::scalar					alphaMin_;
 
-	/// Reference to couplingMesh
-	const couplingMesh& 			cMesh_;
+	/// Reference to coupeling system
+	const unresolvedCouplingSystem& uCS_;
 
 	/// Reference to diameter of particles in this processor 
 	const Plus::realProcCMField&  	particleDiameter_;
 
+	/// Reference to distribution 
+	const distributionBase&			distribution_;
+
 protected:
 
-	void setAlphaMin(Foam::scalar newAlphaMin)
-	{
-		alphaMin_ = Foam::max(Foam::min(newAlphaMin, 1.0), 0.001);
-	}	
+    void setAlphaMin(Foam::scalar newAlphaMin)
+    {
+        alphaMin_ = Foam::max(Foam::min(newAlphaMin, 1.0), 0.001);
+    }
 
-	template<typename DistributorType>
-	Foam::tmp<Foam::volScalarField::Internal> calculateSolidVol
-	(
-		const DistributorType& distributor
-	)
-	{
-		auto solidVolTmp = Foam::volScalarField::Internal::New
-		(
-			"solidVol",
-			mesh(),
-		 	Foam::dimensioned("solidVol", Foam::dimVol, Foam::scalar(0))
-		);
+    inline
+    Foam::tmp<Foam::volScalarField::Internal> calculateSolidVol
+    (
+        const distributionBase& distributor
+    )
+    {
+        auto solidVolTmp = Foam::volScalarField::Internal::New
+        (
+            "solidVol",
+            mesh(),
+            Foam::dimensioned("solidVol", Foam::dimVol, Foam::scalar(0))
+        );
 
-		auto& solidVol = solidVolTmp.ref();
-		const Foam::label numPar = centerMass().size();
-		const auto& parCellInd = parCellIndex();
+        auto& solidVol = solidVolTmp.ref();
+        const Foam::label numPar = centerMass().size();
+        const auto& parCellInd = parCellIndex();
 
-		#pragma omp parallel for schedule (dynamic)
-		for(Foam::label i=0; i<numPar; i++)
-		{
-			Foam::scalar pVol = pFlow::Pi/6 *
-					Foam::pow(particleDiameter_[i], static_cast<real>(3.0));
+        #pragma omp parallel for schedule (dynamic)
+        for(Foam::label i=0; i<numPar; i++)
+        {
+            Foam::scalar pVol = pFlow::Pi/6 *
+                    Foam::pow(particleDiameter_[i], static_cast<real>(3.0));
 
-			const Foam::label cellId = parCellInd[i];
-			if( cellId >= 0 )
-			{
-				distributor.distributeValue_OMP(i, cellId, solidVol, pVol);				
-			}
-		}
+            const Foam::label cellId = parCellInd[i];
+            if( cellId >= 0 )
+            {
+                distributor.distributeValue_OMP(i, cellId, solidVol, pVol);				
+            }
+        }
 
-		return solidVolTmp;
-	}
+        return solidVolTmp;
+    }
 
 public:
 
@@ -147,23 +150,14 @@ public:
 		{
 			return *this;
 		}
-
-		inline 
-		const Foam::fvMesh& mesh()const
+		 
+		const Foam::fvMesh& mesh()const;
+		
+		const couplingMesh& cMesh()const;
+		
+		const unresolvedCouplingSystem& uCS()const
 		{
-			return cMesh_.mesh();
-		}
-
-		inline 
-		auto& cMesh()
-		{
-			return cMesh_;
-		}
-
-		inline 
-		const auto& cMesh()const
-		{
-			return cMesh_;
+			return uCS_;
 		}
 
 		/// Return alphaMin
@@ -173,26 +167,30 @@ public:
 			return alphaMin_;
 		}
 
-		/// Return cell index of particles 
-		inline 
-		const auto& parCellIndex()const
-		{
-			return cMesh_.parCellIndex();
-		}
+		/// Return cell index of particles  
+		const Plus::procCMField<Foam::label>& parCellIndex()const;
+		
 
 		/// Retrun center mass position of particles 
 		inline
-		const auto& centerMass()const
+		const Plus::centerMassField& centerMass()const
 		{
 			return particleDiameter_.centerMass();
 		}
 
 		/// Retrun diameter of particles
 		inline 
-		const auto& particleDiameter()const
+		const Plus::realProcCMField& particleDiameter()const
 		{
 			return particleDiameter_;
 		}
+
+        /// access to distribution
+        inline
+        const distributionBase& distribution()const
+        {
+            return distribution_;
+        }
 
 		/// Calculate porosity based on particles positions 
 		void calculatePorosity();
@@ -202,10 +200,8 @@ public:
 		bool internalFieldUpdate() = 0;
 
 		/// Return number of center mass points found in this mesh (processor)
-		int32 numInMesh()const
-		{
-			return cMesh_.numInMesh();
-		}
+		int32 numInMesh()const;
+		
 
 		virtual 
 		bool requireCellDistribution()const

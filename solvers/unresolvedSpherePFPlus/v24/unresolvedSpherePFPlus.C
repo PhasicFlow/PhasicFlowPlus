@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
                 /////coupling.updateMeshBoxes();
                 coupling.getDataFromDEM(t, dt);
                 coupling.calculatePorosity();
-                coupling.calculateFluidInteraction();
+                coupling.calculateMomentumCoupling();
                 coupling.sendDataToDEM(t, dt);
                 coupling.iterate(t, runTime.writeTime(), runTime.timeName());    
                 coupling.cfdTimers().start();

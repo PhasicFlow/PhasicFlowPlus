@@ -25,7 +25,7 @@ Licence:
 
 // from phasicFlow-coupling
 #include "porosity.hpp"
-#include "UnresolvedCouplingSystem.hpp"
+#include "unresolvedCouplingSystem.hpp"
 
 namespace pFlow::coupling
 {
@@ -38,19 +38,14 @@ namespace pFlow::coupling
  * is located in that cell.
  * 
  */
-template<typename DistributorType>
 class porosityCellDistribution
 : 
 	public porosity
 {
-private:
-	
-	const DistributorType& 	cellDistributor_;
-	
 public:
 
 	/// Type info
-	TypeInfoTemplate11("porosityCellDistribution", DistributorType);
+	TypeInfo("porosity<distribution>");
 
 	/// Construc from dictionary 
 	porosityCellDistribution(
@@ -73,13 +68,11 @@ public:
 
 	bool requireCellDistribution()const override
 	{
-		return cellDistributor_.requireCellDistribution();
+		return distribution().requireCellDistribution();
 	}
 	
 }; 
 
 } // pFlow::coupling
-
-#include "porosityCellDistribution.C"
 
 #endif
