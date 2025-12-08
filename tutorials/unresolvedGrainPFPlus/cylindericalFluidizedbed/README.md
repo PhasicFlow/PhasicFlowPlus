@@ -117,4 +117,13 @@ surfaces
 }
 ```
 
-The most important setup file for CFD-DEM simulation is `constant/couplingProperties`. To learn more about this file and how to set it up, you are refered to other tutorials, in which this has been completely explained.
+The most important setup file for CFD-DEM simulation is `constant/couplingProperties`. It contains parameters for coupling between CFD and DEM with two main sub-dictionaries: `unresolved` and `particleMapping`. 
+
+The `unresolved` dictionary contains parameters for unresolved coupling including:
+- `distributionMethod`: The method for distributing particle properties across cells (e.g., `GaussianIntegral`, `adaptiveGaussian`, `diffusion`)
+- `porosity`: Method for calculating fluid volume fraction (e.g., `distribution`, `subDivision29`)
+- `momentumInteraction`: Settings for momentum coupling including drag, lift, and velocity evaluation methods
+
+The `particleMapping` dictionary contains parameters for particle mapping onto the CFD mesh and MPI parallelization.
+
+For detailed information about all coupling parameters, refer to the main coupling system documentation in `phasicFlowCoupling/couplingSystem/unresolved/README.md`.

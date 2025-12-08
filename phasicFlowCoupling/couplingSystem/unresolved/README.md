@@ -140,7 +140,7 @@ where $\sigma$ is controlled by the `standardDeviation` parameter.
 
 The averaged property at the each cell center is calculated based on particles within a circle of radius $r = 3\sigma$ and center at the cell center using the Gaussian distribution:
 
-$$\bar{q} = \sum_{p \in \text{circle}} q_p w_p \quad (5a)$$
+$$\bar{q} = \sum_{p \in \text{circle}} q_p w_p \quad (6)$$
 
 where $w_p$ is defined in Eq. (4) and normalized such that $\sum_p w_p = 1$ within the search circle. The search radius $r = 3\sigma$ ensures that only particles with significant Gaussian weight contribution are included in the averaging, reducing computational cost while maintaining accuracy.
 
@@ -203,20 +203,20 @@ Uses Gaussian distribution with adaptive standard deviation that varies based on
 
 The characteristic cell size is calculated as:
 
-$$d_{cell} = V_{cell}^{1/3} \quad (6)$$
+$$d_{cell} = V_{cell}^{1/3} \quad (7)$$
 
 The standard deviation is adaptively calculated as:
 
-$$\sigma = d_{cell} \cdot f_s \cdot a \cdot \left(\frac{d_{cell}}{d_p}\right)^{e} \quad (7)$$
+$$\sigma = d_{cell} \cdot f_s \cdot a \cdot \left(\frac{d_{cell}}{d_p}\right)^{e} \quad (8)$$
 
 where:
-- $d_{cell}$ is the characteristic cell size (Eq. 6)
+- $d_{cell}$ is the characteristic cell size (Eq. 7)
 - $f_s$ is a smoothing factor (default: 1.0, optional in configuration)
 - $a = 0.6142275$ (empirical constant)
 - $e = -0.6195039$ (empirical exponent)
 - $d_p$ is the particle diameter
 
-After calculating the adaptive standard deviation, the method applies Eq. (4) and Eq. (5a) with the adjusted $\sigma$ value to compute the distribution weights and averaged properties.
+After calculating the adaptive standard deviation, the method applies Eq. (4) and Eq. (6) with the adjusted $\sigma$ value to compute the distribution weights and averaged properties.
 
 **Characteristics:**
 - The method is accurate for cell-to-particle size ratios down to 1. It can be used in almost every unresolved simulation.
@@ -295,11 +295,11 @@ For each particle with diameter $d_p$:
 
 **Particle volume:**
 
-$$V_p = \frac{\pi}{6} d_p^3 \quad (8a)$$
+$$V_p = \frac{\pi}{6} d_p^3 \quad (9)$$
 
 **Fluid volume fraction in cell:**
 
-$$\alpha = 1 - \frac{V_{solid,cell}}{V_{cell}} \quad (8b)$$
+$$\alpha = 1 - \frac{V_{solid,cell}}{V_{cell}} \quad (10)$$
 
 where $V_{solid,cell}$ is the total solid volume in the cell (distributed from particles using the selected distribution method), and $V_{cell}$ is the cell volume.
 
@@ -307,23 +307,23 @@ where $V_{solid,cell}$ is the total solid volume in the cell (distributed from p
 
 The solid volume in each cell is calculated by summing the weighted contributions from all particles:
 
-$$V_{solid,cell} = \sum_{p} w_{p,cell} \cdot V_p \quad (8c)$$
+$$V_{solid,cell} = \sum_{p} w_{p,cell} \cdot V_p \quad (11)$$
 
 where:
 - $w_{p,cell}$ is the distribution weight for particle $p$ in cell (determined by the selected distribution method, e.g., PCM, Diffusion, Gaussian, etc.)
-- $V_p$ is the particle volume (Eq. 8a)
+- $V_p$ is the particle volume (Eq. 9)
 - The sum is over all particles that contribute to the cell
 
 The distribution weights ensure that:
 - **PCM**: All particle volume goes to the cell containing the particle center ($w_{p,cell} = 1$ for target cell, 0 elsewhere)
 - **Diffusion**: Volume is spread using Laplacian diffusion weights (Eq. 2-3)
-- **Gaussian**: Volume is distributed using Gaussian kernel weights (Eq. 4-5a)
+- **Gaussian**: Volume is distributed using Gaussian kernel weights (Eq. 4-6)
 - **GaussianIntegral**: Volume is distributed using volume-weighted Gaussian integration
-- **AdaptiveGaussian**: Volume is distributed using adaptively adjusted Gaussian weights (Eq. 7)
+- **AdaptiveGaussian**: Volume is distributed using adaptively adjusted Gaussian weights (Eq. 8)
 
 The minimum porosity `alphaMin` is enforced to prevent numerical issues:
 
-$$\alpha_{final} = \max(\alpha_{calculated}, \alpha_{min}) \quad (9)$$
+$$\alpha_{final} = \max(\alpha_{calculated}, \alpha_{min}) \quad (12)$$
 
 #### 4.1.2 Sub-Division 29
 
@@ -345,7 +345,7 @@ Momentum coupling transfers forces between particles and fluid and calculates in
 
 The momentum source term applied to the fluid phase is expressed in the form:
 
-$$S = S_p \mathbf{U} + S_u \quad (10)$$
+$$S = S_p \mathbf{U} + S_u \quad (13)$$
 
 where:
 - $S_p$ is the implicit coefficient (related to drag and other velocity-dependent forces)
@@ -358,13 +358,13 @@ $$F_D = \frac{V_p \beta}{1-\alpha}(\mathbf{U}-v_p)$$
 
 The momentum source in each cell is calculated by summing the weighted contributions from all particles:
 
-$$S_p = \frac{1}{V_c} \sum_{p} w_{p,c} \frac{V_p \beta}{1-\alpha} \quad (11)$$
+$$S_p = \frac{1}{V_c} \sum_{p} w_{p,c} \frac{V_p \beta}{1-\alpha} \quad (14)$$
 
-$$S_u = - \frac{1}{V_c} \sum_{p} w_{p,c} \frac{V_p \beta}{1-\alpha} v_p \quad (12)$$
+$$S_u = - \frac{1}{V_c} \sum_{p} w_{p,c} \frac{V_p \beta}{1-\alpha} v_p \quad (15)$$
 
 In the calculations of other forces, they are added to the explicit part of the momentum source term:
 
-$$S_u = \frac{1}{V_c} \sum_{p} w_{p,c} \left( - \frac{V_p \beta}{1-\alpha} v_p + \mathbf{F}_{virtual,p} + \mathbf{F}_{lift,p} \right) \quad (13)$$
+$$S_u = \frac{1}{V_c} \sum_{p} w_{p,c} \left( - \frac{V_p \beta}{1-\alpha} v_p + \mathbf{F}_{virtual,p} + \mathbf{F}_{lift,p} \right) \quad (16)$$
 
 where:
 - $w_{p,c}$ is the distribution weight for particle $p$ in cell $c$ (from the selected distribution method, Eq. 4)
@@ -400,7 +400,7 @@ Determines how fluid velocity at particle center is evaluated.
 
 The fluid velocity at particle position is computed using inverse distance weighting from the particle cell and its neighboring cells:
 
-$$\overline{\mathbf{U}}_p = \frac{\sum_{c} \frac{1}{r_{pc}} \mathbf{U}_c}{\sum_{c} \frac{1}{r_{pc}}} \quad (14a)$$
+$$\overline{\mathbf{U}}_p = \frac{\sum_{c} \frac{1}{r_{pc}} \mathbf{U}_c}{\sum_{c} \frac{1}{r_{pc}}} \quad (17)$$
 
 where:
 - $r_{pc}$ is the distance between particle $p$ and cell center $c$
@@ -412,7 +412,7 @@ where:
 
 The fluid velocity at the particle center is obtained by applying the inverse distribution operation (weighted averaging) using the distribution weights:
 
-$$\overline{\mathbf{U}}_p = \sum_{c} w_{p,c} \mathbf{U}_c \quad (14b)$$
+$$\overline{\mathbf{U}}_p = \sum_{c} w_{p,c} \mathbf{U}_c \quad (18)$$
 
 where:
 - $w_{p,c}$ is the distribution weight for particle $p$ in cell $c$ (from the selected distribution method, Eq. 4)
@@ -433,7 +433,7 @@ Determines how particle velocity is evaluated in coupling calculations.
 
 The particle velocity is used directly without averaging:
 
-$$\overline{\mathbf{v}}_c = \mathbf{v}_p \quad (15a)$$
+$$\overline{\mathbf{v}}_c = \mathbf{v}_p \quad (19)$$
 
 where:
 - $\mathbf{v}_p$ is the exact velocity of particle $p$
@@ -443,11 +443,11 @@ where:
 
 The velocity is first distributed and accumulated in cells, then normalized by the solid volume fraction in the cell:
 
-$$\overline{\mathbf{v}}_c = \frac{\sum_p V_p w_{p,c} \mathbf{v}_p}{(1-\alpha_c) V_c} \quad (15b)$$
+$$\overline{\mathbf{v}}_c = \frac{\sum_p V_p w_{p,c} \mathbf{v}_p}{(1-\alpha_c) V_c} \quad (20)$$
 
 Then this cell-averaged value is used for all particles in that cell:
 
-$$\overline{\mathbf{v}}_{p} = \overline{\mathbf{v}}_c \quad \text{for all particles } p \text{ in cell } c \quad (15c)$$
+$$\overline{\mathbf{v}}_{p} = \overline{\mathbf{v}}_c \quad \text{for all particles } p \text{ in cell } c \quad (21)$$
 
 where:
 - $V_p$ is the particle volume
@@ -470,23 +470,23 @@ Two key parameters are required for all drag force calculations:
 
 The relative velocity between fluid and particle is obtained from the averaged velocities determined in Section 5:
 
-$$\mathbf{U}_{rel} = \overline{\mathbf{U}}_f - \overline{\mathbf{v}}_p \quad (16a)$$
+$$\mathbf{U}_{rel} = \overline{\mathbf{U}}_f - \overline{\mathbf{v}}_p \quad (22)$$
 
 where:
-- $\overline{\mathbf{U}}_f$ is the fluid velocity evaluated at the particle position (using interpolate or distribution method, Eq. 14a or 14b)
-- $\overline{\mathbf{v}}_p$ is the particle velocity (either particle method giving $\mathbf{v}_p$ directly, or distribution method giving $\overline{\mathbf{v}}_c$, Eq. 15a or 15c)
+- $\overline{\mathbf{U}}_f$ is the fluid velocity evaluated at the particle position (using interpolate or distribution method, Eq. 17 or 18)
+- $\overline{\mathbf{v}}_p$ is the particle velocity (either particle method giving $\mathbf{v}_p$ directly, or distribution method giving $\overline{\mathbf{v}}_c$, Eq. 19 or 21)
 
 **Reynolds Number:**
 
 The particle Reynolds number is calculated from the relative velocity magnitude, particle diameter, and fluid kinematic viscosity:
 
-$$Re = \alpha \frac{\rho_f |\mathbf{U}_{rel}| d_p}{\mu_f} \quad (16b)$$
+$$Re = \alpha \frac{\rho_f |\mathbf{U}_{rel}| d_p}{\mu_f} \quad (23)$$
 
 where:
 - $\alpha$ is the local porosity (fluid volume fraction) in the cell containing the particle
 - $\rho_f$ is the fluid density
 - $|\mathbf{U}_{rel}|$ is the magnitude of the relative velocity
-- $d_p$ is the particle diameter (from Eq. 8a)
+- $d_p$ is the particle diameter (from Eq. 9)
 - $\mu_f$ is the fluid dynamic viscosity
 
 The porosity factor $\alpha$ accounts for the concentration effects on drag in the unresolved Eulerian-Lagrangian coupling framework. A minimum threshold value `residualRe` is applied in implementations to prevent numerical issues at very low Reynolds numbers: $Re \geq Re_{min}$.
@@ -495,15 +495,15 @@ The porosity factor $\alpha$ accounts for the concentration effects on drag in t
 
 The dimensionless drag function $\hat{f}^d$ computed by each drag model is related to the drag coefficient $\beta$ used in momentum coupling through:
 
-$$18\mu_f \alpha (1-\alpha) \hat{f}^d(\alpha, Re) = \beta d_p^2 \quad (16c)$$
+$$18\mu_f \alpha (1-\alpha) \hat{f}^d(\alpha, Re) = \beta d_p^2 \quad (24)$$
 
 Solving for the drag coefficient:
 
-$$\beta = \frac{18\mu_f \alpha (1-\alpha)}{d_p^2} \hat{f}^d(\alpha, Re) \quad (16d)$$
+$$\beta = \frac{18\mu_f \alpha (1-\alpha)}{d_p^2} \hat{f}^d(\alpha, Re) \quad (25)$$
 
 where:
 - $\hat{f}^d(\alpha, Re)$ is the dimensionless drag function from the drag model correlation
-- $\beta$ is the drag coefficient appearing in momentum source terms (Eq. 11-13)
+- $\beta$ is the drag coefficient appearing in momentum source terms (Eq. 14-16)
 - $\mu_f$ is the fluid dynamic viscosity
 - $\alpha$ is the fluid volume fraction (porosity)
 - $(1-\alpha)$ is the solid volume fraction
@@ -511,8 +511,7 @@ where:
 
 The drag force on each particle is then:
 
-
-$$F_D = \frac{V_p \beta}{1-\alpha}(\mathbf{U}-v_p) \quad (16e)$$
+$$F_D = \frac{V_p \beta}{1-\alpha}(\mathbf{U}-v_p) \quad (26)$$
 
 where $V_p$ is the particle volume.
 
@@ -530,16 +529,16 @@ Di Felice (1994) provides a correlation for the dimensionless drag function $\ha
 
 **Formulation:**
 
-$$\hat{f}^d = \frac{C_d}{24} Re \cdot \alpha^{-\xi} \quad (17)$$
+$$\hat{f}^d = \frac{C_d}{24} Re \cdot \alpha^{-\xi} \quad (27)$$
 
 where:
 - $\hat{f}^d$ is the **dimensionless drag function** computed from this correlation
 - $C_d = \left(0.63 + \frac{4.8}{\sqrt{Re}}\right)^2$ is the shape drag coefficient
-- $Re$ is the particle Reynolds number (Eq. 16b)
+- $Re$ is the particle Reynolds number (Eq. 23)
 - $\alpha$ is the porosity (fluid volume fraction)
 - $\xi = 3.7 - 0.65 \exp\left(-0.5(1.5 - \log_{10}Re)^2\right)$ is the voidage exponent
 
-The drag coefficient $\beta$ is obtained from Eq. 16d using this dimensionless drag value.
+The drag coefficient $\beta$ is obtained from Eq. 25 using this dimensionless drag value.
 
 **Characteristics:**
 - Widely used and well-validated
@@ -558,7 +557,7 @@ Combines Ergun equation for dense flows with Wen-Yu correlation for dilute flows
 
 For dilute flows ($\alpha \geq 0.8$):
 
-$$\hat{f}^d = \frac{C_d}{24} Re \alpha^{-3.65} \quad (18)$$
+$$\hat{f}^d = \frac{C_d}{24} Re \alpha^{-3.65} \quad (28)$$
 
 where:
 $$C_d = \begin{cases}
@@ -568,7 +567,7 @@ $$C_d = \begin{cases}
 
 For dense flows ($\alpha < 0.8$):
 
-$$\hat{f}^d = \frac{150(1-\alpha)}{18 \alpha^2} + \frac{1.75 Re}{18 \alpha^2} \quad (19)$$
+$$\hat{f}^d = \frac{150(1-\alpha)}{18 \alpha^2} + \frac{1.75 Re}{18 \alpha^2} \quad (29)$$
 
 where $\hat{f}^d$ is the **dimensionless drag function** for the respective flow regime.
 
@@ -590,7 +589,7 @@ Drag correlation providing the dimensionless drag function $\hat{f}^d$ for inter
 
 **Formulation:**
 
-$$\hat{f}^d = \frac{10(1-\alpha)}{\alpha^2} + \alpha^2(1+1.5\sqrt{1-\alpha}) + \frac{0.413}{24\alpha^2} \cdot \frac{\left(\frac{1}{\alpha} + 3\alpha(1-\alpha) + 8.4 Re^{-0.343}\right)}{1 + 10^{3(1-\alpha)} Re^{-0.5 + 2(1-\alpha)}} \cdot Re \quad (20)$$
+$$\hat{f}^d = \frac{10(1-\alpha)}{\alpha^2} + \alpha^2(1+1.5\sqrt{1-\alpha}) + \frac{0.413}{24\alpha^2} \cdot \frac{\left(\frac{1}{\alpha} + 3\alpha(1-\alpha) + 8.4 Re^{-0.343}\right)}{1 + 10^{3(1-\alpha)} Re^{-0.5 + 2(1-\alpha)}} \cdot Re \quad (30)$$
 
 where $\hat{f}^d$ is the **dimensionless drag function** from this complex correlation.
 
@@ -609,7 +608,7 @@ Drag correlation based on lattice-Boltzmann simulations providing the dimensionl
 
 **Formulation:**
 
-$$\hat{f}^d = \frac{C_d}{24} Re \cdot \alpha^{-\xi} \quad (21)$$
+$$\hat{f}^d = \frac{C_d}{24} Re \cdot \alpha^{-\xi} \quad (31)$$
 
 where:
 - $\hat{f}^d$ is the **dimensionless drag function** from lattice-Boltzmann data
@@ -630,7 +629,7 @@ Lift forces arise from relative motion and rotation effects and can be significa
 
 **General Form:**
 
-$$\mathbf{F}_L = \frac{\pi d^2}{8} \rho_f |\mathbf{U}_{rel}|^2 (C_{L,shear} \mathbf{e}_{shear} + C_{L,spin} \mathbf{e}_{spin}) \quad (22)$$
+$$\mathbf{F}_L = \frac{\pi d^2}{8} \rho_f |\mathbf{U}_{rel}|^2 (C_{L\omega} \mathbf{e}_{shear} + C_{L\Omega} \mathbf{e}_{spin}) \quad (32)$$
 
 ### 7.1 Lift Force Parameters
 
@@ -640,19 +639,19 @@ The general lift force form involves several key parameters that must be compute
 
 The relative velocity between the particle and the fluid is computed as:
 
-$$\mathbf{U}_{rel} = \mathbf{v}_p - \mathbf{U}_f \quad (22a)$$
+$$\mathbf{U}_{rel} = \mathbf{v}_p - \mathbf{U}_f \quad (33)$$
 
 where:
 - $\mathbf{v}_p$ is the particle velocity
 - $\mathbf{U}_f$ is the fluid velocity at the particle location
 
-Note: This differs from Eq. 16a (used in drag calculations) by a sign; here the direction is particle velocity minus fluid velocity, which determines the reference frame for lift calculations.
+Note: This differs from Eq. 22 (used in drag calculations) by a sign; here the direction is particle velocity minus fluid velocity, which determines the reference frame for lift calculations.
 
 **Fluid Vorticity:**
 
 The fluid vorticity is computed as the curl of the velocity field:
 
-$$\boldsymbol{\omega}_f = \nabla \times \mathbf{U}_f \quad (22b)$$
+$$\boldsymbol{\omega}_f = \nabla \times \mathbf{U}_f \quad (34)$$
 
 This represents the local rotation (vorticity) of the fluid, which is a key parameter for understanding shear-induced lift.
 
@@ -660,7 +659,7 @@ This represents the local rotation (vorticity) of the fluid, which is a key para
 
 The unit vector in the direction of shear-induced lift is determined by the cross product of the fluid vorticity and the relative velocity vector:
 
-$$\mathbf{e}_{shear} = \frac{\boldsymbol{\omega}_f \times \mathbf{U}_{rel}}{|\boldsymbol{\omega}_f \times \mathbf{U}_{rel}|} \quad (22c)$$
+$$\mathbf{e}_{shear} = \frac{\boldsymbol{\omega}_f \times \mathbf{U}_{rel}}{|\boldsymbol{\omega}_f \times \mathbf{U}_{rel}|} \quad (35)$$
 
 This direction represents the Magnus effect due to the ambient fluid rotation. It is perpendicular to both the vorticity vector and the relative velocity vector.
 
@@ -668,7 +667,7 @@ This direction represents the Magnus effect due to the ambient fluid rotation. I
 
 The unit vector in the direction of spin-induced (Magnus) lift is determined by the cross product of the particle angular velocity and the relative velocity vector:
 
-$$\mathbf{e}_{spin} = \frac{\boldsymbol{\omega}_p \times \mathbf{U}_{rel}}{|\boldsymbol{\omega}_p \times \mathbf{U}_{rel}|} \quad (22d)$$
+$$\mathbf{e}_{spin} = \frac{\boldsymbol{\omega}_p \times \mathbf{U}_{rel}}{|\boldsymbol{\omega}_p \times \mathbf{U}_{rel}|} \quad (36)$$
 
 where $\boldsymbol{\omega}_p$ is the particle angular velocity (rotational velocity). This direction represents the Magnus effect due to particle rotation in the relative flow field.
 
@@ -699,13 +698,13 @@ Low Reynolds number lift model based on Saffman (1965).
 
 Shear lift coefficient:
 
-$$C_{L,shear} = \frac{18}{\pi^2}\sqrt{\frac{Sr}{Re_p}} J - \frac{11}{8} Sr \exp(-0.5 Re_p) \quad (23)$$
+$$C_{L\omega} = \frac{18}{\pi^2}\sqrt{\frac{Sr}{Re_p}} J - \frac{11}{8} Sr \ \exp(-0.5 Re_p) \quad (37)$$
 
 where $J = 2.255$.
 
 Spin lift coefficient:
 
-$$C_{L,spin} = Rr \quad (24)$$
+$$C_{L\Omega} = Rr \quad (38)$$
 
 **Reference:** Saffman, P.G.T., 1965. "The lift on a small sphere in a slow shear flow." J. Fluid Mech. 22, 385–400.
 
@@ -717,23 +716,24 @@ Wide-range lift model accounting for both shear-induced and spin-induced effects
 
 **Spin-induced Lift Coefficient:**
 
-$$C_{L\Omega} = Rr \left( 1 - \{0.675 + 0.15(1 + \tanh[0.28(Rr-2)])\} \tanh(0.18 \sqrt{Re_p}) \right) \quad (25)$$
+$$C_{L\Omega} = Rr \left( 1 - \{0.675 + 0.15(1 + \tanh[0.28(Rr-2)])\} \tanh(0.18 \sqrt{Re_p}) \right) \quad (39)$$
 
 **Shear-induced Lift Coefficient:**
 
 For $Re_p \leq 50$:
 
-$$C_{L\omega} = \frac{18}{\pi^2} \sqrt{\frac{Sr}{Re_p}} J(\epsilon) \quad (26)$$
+$$C_{L\omega} = \frac{18}{\pi^2} \sqrt{\frac{Sr}{Re_p}} J(\epsilon) \quad (40)$$
 
 where:
+
 $$J(\epsilon) = \begin{cases}
 -0.04\epsilon + 2.05\epsilon^2 - 32.2\epsilon^3 + 106.8\epsilon^4 & \text{if } \epsilon \leq 0.23 \\
 \frac{2.225}{(1 + 0.02304/\epsilon^2)^{12.77}} & \text{if } \epsilon > 0.23
-\end{cases} \quad (27)$$
+\end{cases} \quad (41)$$
 
 For $Re_p > 50$:
 
-$$C_{L\omega} = -Sr^{1/3}\left(0.0525 + 0.0575 \tanh(5 \log_{10}(Re_p/120))\right) \quad (28)$$
+$$C_{L\omega} = -Sr^{1/3}\left(0.0525 + 0.0575 \tanh(5 \log_{10}(Re_p/120))\right) \quad (42)$$
 
 **Characteristics:**
 - Covers wide range of Reynolds numbers
@@ -750,23 +750,23 @@ Advanced lift force model based on Shi and Rzehak (2019) for wide-range Reynolds
 
 **Spin Lift Coefficient:**
 
-$$C_{L,spin} = Rr \left( 1 - 0.62 \tanh(0.3 \sqrt{Re_p}) - 0.24 \frac{\tanh(0.01 Re_p)}{\tanh(0.8 \sqrt{Rr})} \arctan[0.47(Rr-1)] \right) \quad (29)$$
+$$C_{L\Omega} = Rr \left( 1 - 0.62 \tanh(0.3 \sqrt{Re_p}) - 0.24 \frac{\tanh(0.01 Re_p)}{\tanh(0.8 \sqrt{Rr})} \arctan[0.47(Rr-1)] \right) \quad (43)$$
 
 **Fluid Shear Lift Coefficient (for $Re_p \leq 50$):**
 
 With $\epsilon = \sqrt{Re_\omega} / Re_p$:
 
 If $\epsilon \leq 0.23$:
-$$J = -0.04\epsilon + 2.05\epsilon^2 - 32.2\epsilon^3 + 106.8\epsilon^4 \quad (30)$$
+$$J = -0.04\epsilon + 2.05\epsilon^2 - 32.2\epsilon^3 + 106.8\epsilon^4 \quad (44)$$
 
 If $\epsilon > 0.23$:
-$$J = \frac{2.225}{(1 + 0.02304/\epsilon^2)^{12.77}} \quad (31)$$
+$$J = \frac{2.225}{(1 + 0.02304/\epsilon^2)^{12.77}} \quad (45)$$
 
-$$C_{L,shear} = \frac{18}{\pi^2} \sqrt{\frac{Sr}{Re_p}} J(\epsilon) - \frac{11}{8} Sr \exp(-0.5 Re_p) \quad (32)$$
+$$C_{L\omega} = \frac{18}{\pi^2} \sqrt{\frac{Sr}{Re_p}} J(\epsilon) - \frac{11}{8} Sr \exp(-0.5 Re_p) \quad (46)$$
 
 **Fluid Shear Lift Coefficient (for $Re_p > 50$):**
 
-$$C_{L,shear} = -0.064 \exp(0.525 Sr) \left( 0.49 + 0.51 \tanh \left[ 5\log_{10}\left(\frac{Re_p Sr^{0.08}}{120}\right) \right] \right) \quad (33)$$
+$$C_{L\omega} = -0.064 \exp(0.525 Sr) \left( 0.49 + 0.51 \tanh \left[ 5\log_{10}\left(\frac{Re_p Sr^{0.08}}{120}\right) \right] \right) \quad (47)$$
 
 **Characteristics:**
 - Latest lift model with advanced flow regime handling
@@ -782,12 +782,11 @@ Models for torque on particles due to surface rotation effects. The torque arise
 
 The general torque formula used in all models is:
 
-$$\mathbf{T} = -\pi \rho \nu d_p^3 (f_{spin} \boldsymbol{\omega}_p - 0.5 f_{shear} \boldsymbol{\omega}_f) \quad (28)$$
+$$\mathbf{T} = -\pi \mu d_p^3 (f_{spin} \boldsymbol{\omega}_p - 0.5 f_{shear} \boldsymbol{\omega}_f) \quad (48)$$
 
 where:
 - $\mathbf{T}$ is the torque on the particle
-- $\rho$ is the fluid density
-- $\nu$ is the fluid kinematic viscosity
+- $\mu$ is the fluid dynamic viscosity
 - $d_p$ is the particle diameter
 - $\boldsymbol{\omega}_p$ is the particle angular velocity (rotational velocity)
 - $\boldsymbol{\omega}_f =  \nabla \times \mathbf{U}$ is the fluid vorticity vector
@@ -802,8 +801,8 @@ No surface rotation torque is applied. This is the default option.
 #### `lowReynolds`
 Based on the Happel and Brenner model (1973) for low Reynolds numbers. This model uses constant correction factors:
 
-$$f_{spin} = 1.0 \quad (29a)$$
-$$f_{shear} = 1.0 \quad (29b)$$
+$$f_{spin} = 1.0 \quad (49)$$
+$$f_{shear} = 1.0 \quad (50)$$
 
 This model is applicable for very low Reynolds number flows where viscous effects dominate.
 
@@ -812,9 +811,9 @@ This model is applicable for very low Reynolds number flows where viscous effect
 #### `Loth2008`
 Based on the empirical correlations from Loth (2008). This model uses Reynolds-number-dependent correction factors:
 
-$$f_{spin} = 1.0 + \frac{5}{64\pi} Re_\Omega^{0.6} \quad (30a)$$
+$$f_{spin} = 1.0 + \frac{5}{64\pi} Re_\Omega^{0.6} \quad (51)$$
 
-$$f_{shear} = f_{spin} \left(1 - 0.0075 Re_\omega\right)\left(1 - 0.062\sqrt{Re_p} - 0.001 Re_p\right) \quad (30b)$$
+$$f_{shear} = f_{spin} \left(1 - 0.0075 Re_\omega\right)\left(1 - 0.062\sqrt{Re_p} - 0.001 Re_p\right) \quad (52)$$
 
 where:
 - $Re_\Omega = \frac{|\boldsymbol{\omega}_p| d_p^2}{\nu}$ - Particle spin Reynolds number
@@ -829,9 +828,9 @@ The `Loth2008` model requires the following parameter in the dictionary:
 #### `Shi2019`
 Based on the more recent correlations from Shi and Rzehak (2019). This model provides improved accuracy across a wider range of Reynolds numbers:
 
-$$f_{spin} = 1.0 + \frac{5}{64\pi} Re_\Omega^{0.6} \quad (31a)$$
+$$f_{spin} = 1.0 + \frac{5}{64\pi} Re_\Omega^{0.6} \quad (53)$$
 
-$$f_{shear} = f_{spin} \left[\left(1 + 0.4 \left(\exp(-0.0135 Re_\omega) - 1\right)\right)\left(1 - 0.0702 Re_p^{0.455}\right)\right] \quad (31b)$$
+$$f_{shear} = f_{spin} \left[\left(1 + 0.4 \left(\exp(-0.0135 Re_\omega) - 1\right)\right)\left(1 - 0.0702 Re_p^{0.455}\right)\right] \quad (54)$$
 
 The `Shi2019` model requires the following parameter in the dictionary:
 - `residualRe` - Minimum Reynolds number threshold to avoid numerical issues.
@@ -970,7 +969,7 @@ unresolved
 | $\alpha_{min}$ | Minimum allowed porosity | - |
 | $\beta$ | Interphase momentum transfer/fluid friction coefficient | kg/(m³·s) |
 | $\Delta \tau$ | Time step in pseudo-time integration | s |
-| $\epsilon$ | Dimensionless rotation parameter = $\sqrt{Re_\omega}/Re_p$ | - |
+| $\epsilon$ | Dimensionless shear parameter = $\sqrt{Re_\omega}/Re_p$ | - |
 | $\xi$ | Voidage exponent in DiFelice correlation | - |
 | $\mu_f$ | Dynamic viscosity of fluid | Pa·s |
 | $\nu$ | Kinematic viscosity of fluid = $\mu_f/\rho_f$ | m²/s |
@@ -988,10 +987,8 @@ unresolved
 |--------|-----------|-------|
 | $a$ | Empirical constant in adaptive Gaussian method | - |
 | $C_d$ | Drag coefficient (shape-dependent) | - |
-| $C_{L,shear}$ | Shear-induced lift coefficient | - |
-| $C_{L,spin}$ | Spin-induced (Magnus) lift coefficient | - |
-| $C_{L\Omega}$ | Spin-induced lift coefficient (Loth2008 notation) | - |
-| $C_{L\omega}$ | Shear-induced lift coefficient (Loth2008 notation) | - |
+| $C_{L\omega}$ | Shear-induced lift coefficient | - |
+| $C_{L\Omega}$ | Spin-induced (Magnus) lift coefficient | - |
 | $d_c$ | Characteristic cell size = $V_{cell}^{1/3}$ | m |
 | $d_p$ | Particle diameter | m |
 | $D$ | Diffusion coefficient | m²/s |
@@ -1101,11 +1098,13 @@ unresolved
 
 ## 10. References
 
-1. Di Felice, R. (1994). The voidage function for fluid–particle interaction systems. International Journal of Multiphase Flow, 20(2), 153-159.
-2. Gidaspow, D. (1994). Multiphase Flow and Fluidization: Continuum and Kinetic Theory Descriptions. Academic Press.
-3. Beetstra, R., van der Hoef, M. A., & Kuipers, J. A. M. (2007). Drag force of intermediate Reynolds number flow past mono- and bidisperse arrays of spheres. AIChE Journal, 53(3), 489-501.
-4. Loth, E. (2008). Lift of a spherical particle subject to vorticity and/or spin. AIAA Journal, 46(4), 801-809.
-5. Rong, L. W., Dong, K. J., & Yu, A. B. (2013). Lattice-Boltzmann simulation of fluid flow through packed beds of uniform spheres. Chemical Engineering Science, 99, 44-58.
-6. Shi, P., & Rzehak, R. (2019). Lift forces on solid spherical particles in unbounded flows. Chemical Engineering Science, 208, 115145.
-7. Saffman, P. G. T. (1965). The lift on a small sphere in a slow shear flow. Journal of Fluid Mechanics, 22(2), 385-400.
-8. Kianimoqadam, A., & Lapp, J. (2026). Gaussian integral method for void fraction. Particuology, 108, 125-142. [https://doi.org/10.1016/j.partic.2025.10.014](https://doi.org/10.1016/j.partic.2025.10.014)
+1. Ergun, S. (1952). Fluid flow through packed columns. Chemical Engineering Progress, 48, 89-94.
+2. Wen, C. Y., & Yu, Y. H. (1966). Mechanics of fluidization. Chemical Engineering Progress Symposium Series, 62, 100-111.
+3. Saffman, P. G. T. (1965). The lift on a small sphere in a slow shear flow. Journal of Fluid Mechanics, 22(2), 385-400.
+4. Di Felice, R. (1994). The voidage function for fluid–particle interaction systems. International Journal of Multiphase Flow, 20(2), 153-159.
+5. Gidaspow, D. (1994). Multiphase Flow and Fluidization: Continuum and Kinetic Theory Descriptions. Academic Press.
+6. Beetstra, R., van der Hoef, M. A., & Kuipers, J. A. M. (2007). Drag force of intermediate Reynolds number flow past mono- and bidisperse arrays of spheres. AIChE Journal, 53(3), 489-501.
+7. Loth, E. (2008). Lift of a spherical particle subject to vorticity and/or spin. AIAA Journal, 46(4), 801-809.
+8. Rong, L. W., Dong, K. J., & Yu, A. B. (2013). Lattice-Boltzmann simulation of fluid flow through packed beds of uniform spheres. Chemical Engineering Science, 99, 44-58.
+9. Shi, P., & Rzehak, R. (2019). Lift forces on solid spherical particles in unbounded flows. Chemical Engineering Science, 208, 115145.
+10. Kianimoqadam, A., & Lapp, J. (2026). Gaussian integral method for void fraction. Particuology, 108, 125-142. [https://doi.org/10.1016/j.partic.2025.10.014](https://doi.org/10.1016/j.partic.2025.10.014)

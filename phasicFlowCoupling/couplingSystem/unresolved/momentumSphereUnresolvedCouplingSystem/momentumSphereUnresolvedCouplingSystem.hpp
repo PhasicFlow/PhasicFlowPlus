@@ -47,7 +47,7 @@ Licence:
  *
  * ### Lift Force
  * Shear-induced and spin-induced lift effects:
- * - $\mathbf{F}_L = \frac{\pi d_p^2}{8} \rho_f |\mathbf{U}_{rel}|^2 (C_{L,shear} \mathbf{e}_{shear} + C_{L,spin} \mathbf{e}_{spin})$
+ * - $\mathbf{F}_L = \frac{\pi d_p^2}{8} \rho_f |\mathbf{U}_{rel}|^2 (C_{L\omega} \mathbf{e}_{shear} + C_{L\Omega} \mathbf{e}_{spin})$
  *
  * ### Virtual Mass Force
  * Represents inertia of displaced fluid (added mass effect)

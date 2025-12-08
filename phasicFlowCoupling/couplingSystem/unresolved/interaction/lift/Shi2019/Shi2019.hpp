@@ -26,7 +26,7 @@ Licence:
  * spin lift across wide Reynolds numbers.
  *
  * **Spin Lift:**
- * @f[ C_{L,spin} = Rr \left( 1 - 0.62 \tanh(0.3 \sqrt{Re_p}) - 0.24
+ * @f[ C_{L\Omega} = Rr \left( 1 - 0.62 \tanh(0.3 \sqrt{Re_p}) - 0.24
  *     \frac{\tanh(0.01 Re_p)}{\tanh(0.8 \sqrt{Rr})} \arctan[0.47(Rr-1)]
  *     \right) @f]
  *

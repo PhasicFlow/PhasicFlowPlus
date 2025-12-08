@@ -23,9 +23,9 @@ Licence:
  * @brief Low Reynolds number lift model (Re_p < 1).
  *
  * Classic Saffman (1965) model for shear flow lift.
- * @f[ C_{L,shear} = \frac{18}{\pi^2}\sqrt{\frac{Sr}{Re_p}} J -
+ * @f[ C_{L\omega} = \frac{18}{\pi^2}\sqrt{\frac{Sr}{Re_p}} J -
  *     \frac{11}{8} Sr \exp(-0.5 Re_p) @f]
- * @f[ C_{L,spin} = Rr @f]
+ * @f[ C_{L\Omega} = Rr @f]
  *
  * @reference Saffman, P.G.T., 1965. J. Fluid Mech. 22, 385–400
  */
