@@ -533,7 +533,7 @@ $$\hat{f}^d = \frac{C_d}{24} Re \cdot \alpha^{-\xi} \quad (27)$$
 
 where:
 - $\hat{f}^d$ is the **dimensionless drag function** computed from this correlation
-- $C_d = \left(0.63 + \frac{4.8}{\sqrt{Re}}\right)^2$ is the shape drag coefficient
+- $C_d = \left(0.63 + \frac{4.8}{Re^{0.5}}\right)^2$ is the shape drag coefficient
 - $Re$ is the particle Reynolds number (Eq. 23)
 - $\alpha$ is the porosity (fluid volume fraction)
 - $\xi = 3.7 - 0.65 \exp\left(-0.5(1.5 - \log_{10}Re)^2\right)$ is the voidage exponent
@@ -589,7 +589,7 @@ Drag correlation providing the dimensionless drag function $\hat{f}^d$ for inter
 
 **Formulation:**
 
-$$\hat{f}^d = \frac{10(1-\alpha)}{\alpha^2} + \alpha^2(1+1.5\sqrt{1-\alpha}) + \frac{0.413}{24\alpha^2} \cdot \frac{\left(\frac{1}{\alpha} + 3\alpha(1-\alpha) + 8.4 Re^{-0.343}\right)}{1 + 10^{3(1-\alpha)} Re^{-0.5 + 2(1-\alpha)}} \cdot Re \quad (30)$$
+$$\hat{f}^d = \frac{10(1-\alpha)}{\alpha^2} + \alpha^2(1+1.5(1-\alpha)^{0.5}) + \frac{0.413}{24\alpha^2} \cdot \frac{\left(\frac{1}{\alpha} + 3\alpha(1-\alpha) + 8.4 Re^{-0.343}\right)}{1 + 10^{3(1-\alpha)} Re^{-0.5 + 2(1-\alpha)}} \cdot Re \quad (30)$$
 
 where $\hat{f}^d$ is the **dimensionless drag function** from this complex correlation.
 
@@ -612,7 +612,7 @@ $$\hat{f}^d = \frac{C_d}{24} Re \cdot \alpha^{-\xi} \quad (31)$$
 
 where:
 - $\hat{f}^d$ is the **dimensionless drag function** from lattice-Boltzmann data
-- $C_d = (0.63 + 4.8/\sqrt{Re})^2$ is the shape drag coefficient
+- $C_d = (0.63 + 4.8/Re^{0.5})^2$ is the shape drag coefficient
 - $\xi = 2.65(1+\alpha) - (5.3-3.5\alpha)\alpha^2\exp\left(-0.5(1.5-\log_{10}(Re))^2\right)$ is the porosity-dependent exponent
 
 The drag coefficient $\beta$ is obtained from Eq. 16d using this dimensionless drag value.
@@ -680,7 +680,7 @@ The following Reynolds numbers and dimensionless parameters are used across all 
 - $Re_\omega = \frac{|\nabla \times \mathbf{U}_f| d_p^2}{\nu}$ - Fluid vorticity Reynolds number
 - $Sr = \frac{Re_\omega}{Re_p}$ - Shear rate parameter
 - $Rr = \frac{Re_\Omega}{Re_p}$ - Rotation rate parameter
-- $\epsilon = \frac{\sqrt{Re_\omega}}{Re_p}$ - Dimensionless rotation parameter
+- $\epsilon = \frac{(Re_\omega)^{0.5}}{Re_p}$ - Dimensionless rotation parameter
 
 where $d_p$ is the particle diameter and $\nu$ is the kinematic viscosity of the fluid.
 
@@ -698,7 +698,7 @@ Low Reynolds number lift model based on Saffman (1965).
 
 Shear lift coefficient:
 
-$$C_{L\omega} = \frac{18}{\pi^2}\sqrt{\frac{Sr}{Re_p}} J - \frac{11}{8} Sr \ \exp(-0.5 Re_p) \quad (37)$$
+$$C_{L\omega} = \frac{18}{\pi^2}\left(\frac{Sr}{Re_p}\right)^{0.5} J - \frac{11}{8} Sr \ \exp(-0.5 Re_p) \quad (37)$$
 
 where $J = 2.255$.
 
@@ -716,24 +716,30 @@ Wide-range lift model accounting for both shear-induced and spin-induced effects
 
 **Spin-induced Lift Coefficient:**
 
-$$C_{L\Omega} = Rr \left( 1 - \{0.675 + 0.15(1 + \tanh[0.28(Rr-2)])\} \tanh(0.18 \sqrt{Re_p}) \right) \quad (39)$$
+$$C_{L\Omega} = Rr \left( 1 - \{0.675 + 0.15(1 + \tanh[0.28(Rr-2)])\} \tanh(0.18 (Re_p)^{0.5}) \right) \quad (39)$$
 
 **Shear-induced Lift Coefficient:**
 
 For $Re_p \leq 50$:
+.
 
-$$C_{L\omega} = \frac{18}{\pi^2} \sqrt{\frac{Sr}{Re_p}} J(\epsilon) \quad (40)$$
+$$C_{L\omega} = \frac{18}{\pi^2} \left(\frac{Sr}{Re_p}\right)^{0.5} J(\epsilon) \quad (40)$$
+
 
 where:
+.
 
 $$J(\epsilon) = \begin{cases}
 -0.04\epsilon + 2.05\epsilon^2 - 32.2\epsilon^3 + 106.8\epsilon^4 & \text{if } \epsilon \leq 0.23 \\
 \frac{2.225}{(1 + 0.02304/\epsilon^2)^{12.77}} & \text{if } \epsilon > 0.23
 \end{cases} \quad (41)$$
 
+
 For $Re_p > 50$:
+.
 
 $$C_{L\omega} = -Sr^{1/3}\left(0.0525 + 0.0575 \tanh(5 \log_{10}(Re_p/120))\right) \quad (42)$$
+
 
 **Characteristics:**
 - Covers wide range of Reynolds numbers
@@ -750,19 +756,23 @@ Advanced lift force model based on Shi and Rzehak (2019) for wide-range Reynolds
 
 **Spin Lift Coefficient:**
 
-$$C_{L\Omega} = Rr \left( 1 - 0.62 \tanh(0.3 \sqrt{Re_p}) - 0.24 \frac{\tanh(0.01 Re_p)}{\tanh(0.8 \sqrt{Rr})} \arctan[0.47(Rr-1)] \right) \quad (43)$$
+$$C_{L\Omega} = Rr \left( 1 - 0.62 \tanh(0.3 (Re_p)^{0.5}) - 0.24 \frac{\tanh(0.01 Re_p)}{\tanh(0.8 (Rr)^{0.5})} \arctan[0.47(Rr-1)] \right) \quad (43)$$
 
 **Fluid Shear Lift Coefficient (for $Re_p \leq 50$):**
 
-With $\epsilon = \sqrt{Re_\omega} / Re_p$:
+With $\epsilon = (Re_\omega)^{0.5} / Re_p$:
 
 If $\epsilon \leq 0.23$:
+
+
 $$J = -0.04\epsilon + 2.05\epsilon^2 - 32.2\epsilon^3 + 106.8\epsilon^4 \quad (44)$$
 
 If $\epsilon > 0.23$:
+
+
 $$J = \frac{2.225}{(1 + 0.02304/\epsilon^2)^{12.77}} \quad (45)$$
 
-$$C_{L\omega} = \frac{18}{\pi^2} \sqrt{\frac{Sr}{Re_p}} J(\epsilon) - \frac{11}{8} Sr \exp(-0.5 Re_p) \quad (46)$$
+$$C_{L\omega} = \frac{18}{\pi^2} \left(\frac{Sr}{Re_p}\right)^{0.5} J(\epsilon) - \frac{11}{8} Sr \exp(-0.5 Re_p) \quad (46)$$
 
 **Fluid Shear Lift Coefficient (for $Re_p > 50$):**
 
@@ -813,7 +823,7 @@ Based on the empirical correlations from Loth (2008). This model uses Reynolds-n
 
 $$f_{spin} = 1.0 + \frac{5}{64\pi} Re_\Omega^{0.6} \quad (51)$$
 
-$$f_{shear} = f_{spin} \left(1 - 0.0075 Re_\omega\right)\left(1 - 0.062\sqrt{Re_p} - 0.001 Re_p\right) \quad (52)$$
+$$f_{shear} = f_{spin} \left(1 - 0.0075 Re_\omega\right)\left(1 - 0.062(Re_p)^{0.5} - 0.001 Re_p\right) \quad (52)$$
 
 where:
 - $Re_\Omega = \frac{|\boldsymbol{\omega}_p| d_p^2}{\nu}$ - Particle spin Reynolds number
@@ -969,7 +979,7 @@ unresolved
 | $\alpha_{min}$ | Minimum allowed porosity | - |
 | $\beta$ | Interphase momentum transfer/fluid friction coefficient | kg/(m³·s) |
 | $\Delta \tau$ | Time step in pseudo-time integration | s |
-| $\epsilon$ | Dimensionless shear parameter = $\sqrt{Re_\omega}/Re_p$ | - |
+| $\epsilon$ | Dimensionless shear parameter = $(Re_\omega)^{0.5}/Re_p$ | - |
 | $\xi$ | Voidage exponent in DiFelice correlation | - |
 | $\mu_f$ | Dynamic viscosity of fluid | Pa·s |
 | $\nu$ | Kinematic viscosity of fluid = $\mu_f/\rho_f$ | m²/s |
