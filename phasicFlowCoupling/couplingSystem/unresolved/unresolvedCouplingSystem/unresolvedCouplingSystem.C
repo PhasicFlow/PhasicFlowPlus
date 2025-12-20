@@ -22,86 +22,66 @@ Licence:
 
 pFlow::coupling::unresolvedCouplingSystem::unresolvedCouplingSystem
 (
-	word shapeTypeName, 
-	Foam::fvMesh& mesh,
-	int argc, 
-	char* argv[]
+    word demSystemName,
+    word couplingSystemType, 
+    Foam::fvMesh& mesh,
+    int argc, 
+    char* argv[]
 )
 :
-	couplingSystem(shapeTypeName, mesh, argc, argv)
+    couplingSystem(demSystemName, mesh, argc, argv, true)
 {
-	// it searchs for cellDistribution dictionary, if not found, 
-	// set the defualt cell distribtuion method 
-	if( !unresolvedDict().isDict("cellDistribution") )
-	{ 
-		auto defDict = Foam::dictionary("cellDistribution");
-		defDict.add("type", "self");
-		this->subDict("unresolved").add("cellDistribution",defDict);
-	}
+    distribution_ = distributionBase::create
+    (
+        unresolvedDict(),
+        cMesh(),
+        parMapping().centerMass()
+    );
 }
 
 
+const Foam::dictionary& pFlow::coupling::unresolvedCouplingSystem::unresolvedDict()const
+{
+    return this->subDict("unresolved");
+}
+
 
 pFlow::uniquePtr<pFlow::coupling::unresolvedCouplingSystem> 
-	pFlow::coupling::unresolvedCouplingSystem::create
-	(
-		word shapeTypeName, 
-		Foam::fvMesh& mesh,
-		int argc, 
-		char* argv[]
-	)
-{
-	
-	Foam::IOdictionary couplingDict
+    pFlow::coupling::unresolvedCouplingSystem::create
     (
-        IOobject
-        (
-            "couplingProperties",
-            mesh.time().constant(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
-        )
-    );
-
-    Foam::word cellDistMethod;
-
-    if(!couplingDict.subDict("unresolved").isDict("cellDistribution"))
-    {
-    	cellDistMethod = "self";
-    }
-    else
-    {
-    	cellDistMethod = lookupDict<Foam::word>(couplingDict.subDict("unresolved").subDict("cellDistribution"), "type");
-    }
+        word shapeTypeName,
+        word couplingSystemType,
+        Foam::fvMesh& mesh,
+        int argc, 
+        char* argv[]
+    )
+{
 
     word couplingType = angleBracketsNames(
     	shapeTypeName +"UnresolvedCouplingSystem",
-    	cellDistMethod);
+		couplingSystemType);
 
     if( wordvCtorSelector_.search(couplingType))
-	{
-		REPORT(0) << "Creating unresolved coupling system "
-				  << Green_Text(couplingType) 
-				  << " ..." << END_REPORT;	
-		return wordvCtorSelector_[couplingType] (shapeTypeName, mesh, argc, argv);
-	}
-	else
-	{
-		if(Plus::processor::isMaster())
-		{
-			printKeys
-			( 
-				fatalErrorInFunction << "Ctor Selector "<< couplingType << " dose not exist"
-				" for drag method in "<< couplingDict.name()
-				<<"\nAvaiable ones are: \n"
-				,
-				wordvCtorSelector_
-			)<<endl;
-		}
-		Plus::processor::abort(0);
-	}
+    {
+        REPORT(0) << "Creating unresolved coupling system "
+                    << Green_Text(couplingType) 
+                    << " ..." << END_REPORT;	
+        return wordvCtorSelector_[couplingType] (shapeTypeName, couplingSystemType, mesh, argc, argv);
+    }
+    else
+    {
+        if(Plus::processor::isMaster())
+        {
+            printKeys
+            ( 
+                fatalErrorInFunction << "Ctor Selector "<< couplingType << " dose not exist. \n\n"
+                <<"\nAvaiable ones are: \n"
+                ,
+                wordvCtorSelector_
+            )<<endl;
+        }
+        Plus::processor::abort(0);
+    }
 
 	return nullptr;
 

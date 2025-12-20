@@ -111,77 +111,67 @@ topRegion
     }
 }
 ```
-The most important setup file for CFD-DEM simulation is `constant/couplingProperties`. It contains the parameters for coupling between CFD and DEM, such as drag force closure model, porosity model and etc. It contains two main sub-dictionaries: `unresolved` and `particleMapping`. The `unresolved` dictionary contains the parameters for unresolved coupling, while the `particleMapping` dictionary contains the parameters for particle onto the CFD mesh and MPI parallelization of simulation. To learn more about parameter settings of the file `constant/couplingProperties`, you are refered to [this tutorial on fluidized bed using unresolvedSpherePFPlus](https://github.com/PhasicFlow/PhasicFlowPlus/tree/main/tutorials/unresolvedSpherePFPlus/fluidizedbed).
+The most important setup file for CFD-DEM simulation is `constant/couplingProperties`. It contains parameters for coupling between CFD and DEM, with two main sub-dictionaries: `unresolved` and `particleMapping`. 
 
-
-In `unresolved` sub-dictionary the method for mapping properties between particles and cells is defined in `cellDistribution` part. This part defines the method of distributing particle properties (like volume, drag force) across the cells. Here, diffusion-based smoothing is used with these parameters:
-
-  - `diffusion`: Uses diffusion smoothing to distribute particle properties across cells.
-  - `standardDeviation` : This parameter controls the strength of the diffusion process and must be 3 to 6 time particle diameter
-  - `nSteps` : That defines the number of smoothing (diffusion) steps to apply.
+In this tutorial, `distributionMethod` is set to `diffusion` with `standardDeviation=0.0075` (about 3× particle diameter) and `nSteps=10` for smoothing particle properties across cells. The drag model is `DiFelice`, and momentum exchange is distributed across cells using the diffusion method.
 
 ```C++
 // constant/couplingProperties file 
 unresolved
 {
-
-    cellDistribution
+    // Distribution method for mapping particle data across fluid cells
+    distributionMethod      diffusion;
+    
+    // Distribution method settings 
+    diffusionInfo
     {
-        // type of cell distribution method (if required) 
-        //    self: no distribution (cell itself)
-        //    Gaussian: distribute values on sorounding cells based on a neighbor length
-        //    adaptiveGaussian: similar to Gaussian, but it adapts the distribution 
-        //    GaussianIntegral: Uses Gaussian integral for determining particle distribution 
-        //    diffusion: uses diffusion smoothing to distribute particle properties across cells
-        type                diffusion; 
-        standardDeviation   0.0075; 
-        nSteps      10;
+        nSteps              10;
+        standardDeviation   0.0075;
+        
+        log                 0;
     }
 
+    // Porosity calculation method 
     porosity
     {
-    	  // Options are PIC, subDivision29Mod, subDivision9, cellDistribution
-        method      cellDistribution;
-
-        // minimum alpha allowed 
+        method      distribution;
         alphaMin    0.2;
     }
 
-    drag
+    // Momentum coupling settings
+    momentumInteraction
     {
-        // Drag force closure, other options are ErgunWenYu, Rong
-        type                DiFelice; 
+        momentumExchange distribution; 
+        fluidVelocity    cell;
+        solidVelocity    particle;
 
-        // Method for calculating the fluid velocity which is used in drag force calculations
-        //   cell: uses fluid velocity of the cell that contains the particle center 
-        //   particle: uses interpolated fluid velocity on the particle center based on 
-        //             cell values around particle
-        fluidVelocity       cell;
+        drag
+        {
+            model       DiFelice; 
+            residualRe  1.0e-6;
+        }
 
-        // Method for calculating the solid velocity which is used in drag calculations 
-        //   cell: solid velocity is averaged on the cell using cellDistribution method 
-        //         and this average value is used as particle velocity in calculations 
-        //   particle: the actual particle velocity is used in calculations 
-        solidVelocity       particle;  
+        lift
+        {   
+            model                   none;
+            surfaceRotationTorque   none; 
+            residualRe              1.0e-6;
+        }
 
-        // Whether to distribute calculated particle drag force onto cells
-        //   off: add the calculated drag force on the cell itself
-        //   on: distributes the calculated drag force on cells (using cellDistribution method)
-        cellDistribution    on; 
-
-        // residual Reynolds number 
-        residualRe          10e-6;
+        virtualMass
+        {
+            // Not implemented yet
+        }
     }
 
 }
 
 particleMapping
 {
-    // based on the maximum particle diameter in the simulation.
     domainExpansionRatio    1;
-
     domainUpdateInterval    0.0001;
-
     decompositionMode       facePlanes;
 }
 ```
+
+For detailed information about coupling parameters, refer to the main coupling system documentation.

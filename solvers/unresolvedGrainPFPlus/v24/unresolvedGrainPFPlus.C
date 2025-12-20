@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
                 // DEM data from previous time step 
                 coupling.getDataFromDEM(t, dt);
                 coupling.calculatePorosity();
-                coupling.calculateFluidInteraction();
+                coupling.calculateMomentumCoupling();
                 coupling.sendDataToDEM(t, dt);
                 coupling.iterate(t, runTime.writeTime(), runTime.timeName());    
             }

@@ -115,4 +115,47 @@ surfaces
 }
 ```
  
-The most important setup file for CFD-DEM simulation is `constant/couplingProperties`. To learn more about this file and how to set it up, you are refered to other tutorials, in which this has been completely explained. 
+The most important setup file for CFD-DEM simulation is `constant/couplingProperties`. It contains the parameters for coupling between CFD and DEM, such as drag force closure model, porosity model and etc. It contains two main sub-dictionaries: `unresolved` and `particleMapping`. The `unresolved` dictionary contains the parameters for unresolved coupling, while the `particleMapping` dictionary contains the parameters for particle mapping onto the CFD mesh and MPI parallelization of simulation.
+
+`unresolved` sub-dictionary contains these main parts:
+
+- `distributionMethod`: This parameter defines the method of distributing particle properties (like volume, drag force) across the cells. The options are:
+
+  - `PCM`: Particle Centroid Method - no distribution, direct assignment to cell containing particle center.
+  - `Gaussian`: Distributes property over surrounding cells based on a Gaussian distribution using a specified `standardDeviation` value (distribution width).
+  - `GaussianIntegral`: Similar to `Gaussian`, but uses the integral of the Gaussian function for distribution.
+  - `adaptiveGaussian`: Similar to Gaussian method, but adapts the distribution based on local cell size and particle size. This is the most flexible and accurate method for distributing particle properties across cells.
+  - `diffusion`: Uses Laplacian diffusion smoothing to distribute particle properties across cells.
+  - `subDivision29`: Divides particle sphere into 29 equal volumetric segments for high-accuracy porosity calculations.
+  - `subDivision9`: Divides particle sphere into 9 equal volumetric segments, offering good balance between accuracy and computational cost.
+
+- `porosity`: This part defines the method for calculating porosity. The options are:
+  - `distribution`: Uses the selected `distributionMethod` to distribute particle volume over cells and calculate porosity.
+  - `subDivision29`: Uses the 29-subdivision method for high-accuracy porosity calculations.
+  - `subDivision9`: Uses the 9-subdivision method for porosity calculations.
+
+- `momentumInteraction`: This section contains all momentum coupling related settings:
+
+  - `momentumExchange`: Controls how momentum exchange terms are distributed to fluid cells. Options are:
+    - `cell`: No smoothing, assigned to cell containing particle.
+    - `distribution`: Uses `distributionMethod` for smoothing momentum terms across cells.
+
+  - `fluidVelocity`: Defines how fluid velocity at particle location is evaluated:
+    - `cell`: Uses fluid velocity of the cell containing the particle center.
+    - `interpolate`: Interpolates fluid velocity from neighboring cells to particle center.
+    - `distribution`: Uses `distributionMethod` for volume-averaged velocity evaluation.
+
+  - `solidVelocity`: Defines how particle velocity is evaluated in coupling calculations:
+    - `particle`: Uses exact particle velocity directly.
+    - `distribution`: Uses `distributionMethod` to obtain volume-averaged velocity in cell; this average is used for all particles in that cell.
+
+  - `drag`: Defines drag force model and parameters:
+    - `model`: Drag closure options are `DiFelice`, `ErgunWenYu`, `Beetstra`, `Rong`, `Cello`.
+    - `residualRe`: Minimum Reynolds number threshold to prevent numerical issues.
+
+  - `lift`: Defines lift force model and surface rotation torque:
+    - `model`: Lift force options are `none` (default), `Saffmann`, `Loth2008`, `Shi2019`.
+    - `surfaceRotationTorque`: Torque model options are `none`, `lowReynolds`, `Loth2008`, `Shi2019`.
+    - `residualRe`: Minimum Reynolds number threshold.
+
+For detailed mathematical formulations and more information about the coupling properties, please refer to the main coupling system documentation in `phasicFlowCoupling/couplingSystem/unresolved/README.md`. 

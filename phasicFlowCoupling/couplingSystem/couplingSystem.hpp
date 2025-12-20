@@ -50,9 +50,9 @@ private:
 
 	Plus::procDEMSystem 		procDEMSystem_;
 
-	Timers 						couplingTimers_;
+	mutable Timers 				couplingTimers_;
 
-	Timers 						cfdTimers_;
+	mutable Timers 				cfdTimers_;
 
 	Timer 						getDataTimer_;
 
@@ -231,8 +231,20 @@ public:
 		return cfdTimers_;
 	}
 
+	inline 
+	Timers& cfdTimers()const
+	{
+		return cfdTimers_;
+	}
+
 	inline
 	Timers& couplingTimers()
+	{
+		return couplingTimers_;
+	}
+
+	inline 
+	Timers& couplingTimers()const  
 	{
 		return couplingTimers_;
 	}

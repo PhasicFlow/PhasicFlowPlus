@@ -16,51 +16,94 @@ FoamFile
 
 unresolved
 {
-
-    cellDistribution
+    // Distribution method for mapping particle data (porosity, velocity,
+    // force, etc.) over fluid cells
+    // 
+    // Available methods: 
+    //     - PCM: Particle Centroid Method (no smoothing)
+    //     - diffusion: Laplacian diffusion for smoothing
+    //     - Gaussian: Gaussian distribution with specified std dev
+    //     - GaussianIntegral: Gaussian integral for distributing data
+    //     - adaptiveGaussian: Gaussian with adaptive std deviation
+    //     - subDivision29: Divided-volume method (29-sub-volume version)
+    //     - subDivision9: Divided-volume method (9-sub-volume version)
+    distributionMethod      GaussianIntegral;
+    
+    // Distribution method required settings (optional)
+    GaussianIntegralInfo
     {
-        // type of cell distribution method (if required) 
-        //    self: no distribution (cell itself)
-        //    Gaussian: distribute values on sorounding cells based on a neighbor length
-        //    adaptiveGaussian: similar to Gaussian, but it adapts the distribution 
-        //    GaussianIntegral: Uses Gaussian integral for determining particle distribution
-        //    diffusion: uses diffusion smoothing for property distribution over cells.  
-        type                GaussianIntegral; 
+        maxLayers           1;          // optional default: 1
     }
 
+    // Required settings for calculating porosity method 
     porosity
     {
-    	// Options are PCM, subDivision29Mod, subDivision9, cellDistribution
-        method      cellDistribution;
+        // method is optional
+        //    - default value is distribution
+        //    - Other options: subDivision29, subDivision9 
+        method      distribution; 
 
-        // minimum alpha allowed 
+        // alphaMin is minimum alpha allowed in porosity calculations
         alphaMin    0.2;
     }
 
-    drag
+    // Settings for momentum coupling  
+    momentumInteraction
     {
-        // Drag force closure, other options are ErgunWenYu, Rong
-        type                DiFelice; 
+        // How to perform smoothing on momentum exchange terms
+        // Available options are: 
+        //    - cell: No smoothing, assigned to containing cell
+        //    - distribution: Uses distributionMethod for smoothing
+        momentumExchange distribution; 
 
-        // Method for calculating the fluid velocity which is used in drag force calculations
-        //   cell: uses fluid velocity of the cell that contains the particle center 
-        //   particle: uses interpolated fluid velocity on the particle center based on 
-        //             cell values around particle
-        fluidVelocity       cell;
+        // How to evaluate fluid velocity at particle location
+        // Available options are: 
+        //    - cell: Uses cell value
+        //    - interpolate: Interpolates from neighboring cells
+        //    - distribution: Uses distributionMethod for averaging
+        fluidVelocity    cell;
 
-        // Method for calculating the solid velocity which is used in drag calculations 
-        //   cell: solid velocity is averaged on the cell using cellDistribution method 
-        //         and this average value is used as particle velocity in calculations 
-        //   particle: the actual particle velocity is used in calculations 
-        solidVelocity       particle;  
+        // How to evaluate particle velocity in calculations
+        // Available options are:
+        //    - particle: Uses exact particle velocity
+        //    - distribution: Uses distributionMethod to obtain average
+        //      velocity in the cell for all particles
+        solidVelocity    particle;
 
-        // Whether to distribute calculated particle drag force onto cells
-        //   off: add the calculated drag force on the cell itself
-        //   on: distributes the calculated drag force on cells (using cellDistribution method)
-        cellDistribution    on; 
+        drag
+        {
+            // Drag force closure
+            // Available options for spherical particles:
+            //   - DiFelice, ErgunWenYu, Rong, Cello, Beetstra
+            model       DiFelice; 
 
-        // residual Reynolds number 
-        residualRe          10e-6;
+            // Residual Reynolds number 
+            residualRe  1.0e-6;
+        }
+
+        lift
+        {   
+            // Lift force model options:
+            //   - none: Not included (default)
+            //   - Saffmann: Saffman (1965), low Re
+            //   - Loth2008: Loth (2008), intermediate Re
+            //   - Shi2019: Shi & Rzehak (2019), wide Re range
+            model                   none;
+
+            // Surface rotation torque model options:
+            //    - none: Not included (default)
+            //    - lowReynolds: Happel and Brenner model
+            //    - Loth2008: Based on Loth (2008) model
+            //    - Shi2019: Based on Shi model
+            surfaceRotationTorque   none; 
+
+            residualRe              1.0e-6;
+        }
+
+        virtualMass
+        {
+            // This part has not been implemented yet
+        }
     }
 
 }

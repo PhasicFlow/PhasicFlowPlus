@@ -148,6 +148,12 @@ public:
 	{
 		return centerMass_;
 	}
+
+	inline 
+	const word& name()const
+	{
+		return fieldName_;
+	}
 	
 };
 
