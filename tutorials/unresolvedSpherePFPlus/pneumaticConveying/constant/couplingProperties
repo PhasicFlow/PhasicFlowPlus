@@ -1,0 +1,121 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+	format      ascii;
+	class       dictionary;
+	location    "constant";
+	object      couplingProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+unresolved
+{
+    // Distribution method for mapping particle data (porosity, velocity,
+    // force, etc.) over fluid cells
+    // 
+    // Available methods: 
+    //     - PCM: Particle Centroid Method (no smoothing)
+    //     - diffusion: Laplacian diffusion for smoothing
+    //     - Gaussian: Gaussian distribution with specified std dev
+    //     - GaussianIntegral: Gaussian integral for distributing data
+    //     - adaptiveGaussian: Gaussian with adaptive std deviation
+    //     - subDivision29: Divided-volume method (29-sub-volume version)
+    //     - subDivision9: Divided-volume method (9-sub-volume version)
+    distributionMethod      GaussianIntegral;
+    
+    // Distribution method required settings (optional)
+    GaussianIntegralInfo
+    {
+        maxLayers           2;          // optional default: 1
+    }
+
+    // Required settings for calculating porosity method 
+    porosity
+    {
+        // method is optional
+        //    - default value is distribution
+        //    - Other options: subDivision29, subDivision9 
+        method      distribution; 
+
+        // alphaMin is minimum alpha allowed in porosity calculations
+        alphaMin    0.2;
+    }
+
+    // Settings for momentum coupling  
+    momentumInteraction
+    {
+        // How to perform smoothing on momentum exchange terms
+        // Available options are: 
+        //    - cell: No smoothing, assigned to containing cell
+        //    - distribution: Uses distributionMethod for smoothing
+        momentumExchange distribution; 
+
+        // How to evaluate fluid velocity at particle location
+        // Available options are: 
+        //    - cell: Uses cell value
+        //    - interpolate: Interpolates from neighboring cells
+        //    - distribution: Uses distributionMethod for averaging
+        fluidVelocity    distribution;
+
+        // How to evaluate particle velocity in calculations
+        // Available options are:
+        //    - particle: Uses exact particle velocity
+        //    - distribution: Uses distributionMethod to obtain average
+        //      velocity in the cell for all particles
+        solidVelocity    particle;
+
+        drag
+        {
+            // Drag force closure
+            // Available options for spherical particles:
+            //   - DiFelice, ErgunWenYu, Rong, Cello, Beetstra
+            model       DiFelice; 
+
+            // Residual Reynolds number 
+            residualRe  1.0e-6;
+        }
+
+        lift
+        {   
+            // Lift force model options:
+            //   - none: Not included (default)
+            //   - Saffmann: Saffman (1965), low Re
+            //   - Loth2008: Loth (2008), intermediate Re
+            //   - Shi2019: Shi & Rzehak (2019), wide Re range
+            model                   Shi2019;
+
+            // Surface rotation torque model options:
+            //    - none: Not included (default)
+            //    - lowReynolds: Happel and Brenner model
+            //    - Loth2008: Based on Loth (2008) model
+            //    - Shi2019: Based on Shi model
+            surfaceRotationTorque   Shi2019; 
+
+            residualRe              1.0e-6;
+        }
+
+        virtualMass
+        {
+            // This part has not been implemented yet
+        }
+    }
+
+}
+
+particleMapping
+{
+	// based on the maximum particle diameter in the simulation.
+    domainExpansionRatio    1;
+
+    domainUpdateInterval    0.001;
+
+    decompositionMode       facePlanes;
+}
+
+// ************************************************************************* //

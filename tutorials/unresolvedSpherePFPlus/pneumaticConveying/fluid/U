@@ -1,0 +1,64 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  splitCyclic                           |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volVectorField;
+    location    "0";
+    object      U;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+Uinf            15;
+
+dimensions      [ 0 1 -1 0 0 0 0 ];
+
+internalField   uniform (5 0  0); 
+
+
+boundaryField
+{
+    bottom
+    {
+        type            fixedValue;
+        value           uniform ( 0 0 0 );
+    }
+
+    top
+    {
+        type            fixedValue;
+        value           uniform ( 0 0 0 );
+    }
+
+    rear
+    {
+        type            noSlip;
+    }
+
+    front
+    {
+        type            noSlip;
+    }
+    
+    inlet
+    {
+        type            cyclic;
+        value           uniform ($Uinf 0  0);
+    }
+
+    outlet
+    {
+        type            cyclic;
+        value           uniform ($Uinf 0  0);
+    }
+    
+}
+
+
+// ************************************************************************* //
