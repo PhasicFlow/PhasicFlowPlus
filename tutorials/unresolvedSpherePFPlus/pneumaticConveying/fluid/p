@@ -1,0 +1,60 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  splitCyclic                           |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    location    "0";
+    object      p;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [ 0 2 -2 0 0 0 0 ];
+
+internalField   uniform 0; 
+
+boundaryField
+{
+    bottom
+    {
+        type            fixedFluxPressure;
+    }
+
+    top
+    {
+        type            fixedFluxPressure;
+    }
+
+    rear
+    {
+        type            fixedFluxPressure;
+    }
+
+    front
+    {
+        type            fixedFluxPressure;
+    }
+
+    outlet
+    {
+        type            uniformJump;
+        patchType       cyclic;
+        jumpTable       constant 1250; // ~ to 1500 Pa (density of fluid is 1.2 kg/m3) 
+        relax           0.5;
+        value           uniform 0;    
+    }
+
+    inlet
+    {
+        type            uniformJump;
+        patchType       cyclic;
+    }
+}
+
+// ************************************************************************* //
