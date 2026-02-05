@@ -18,16 +18,11 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-#include "grainDrag.hpp"
 
-#include "DiFelice.hpp"
-#include "Rong.hpp"
-#include "ErgunWenYu.hpp"
-#include "Beetstra.hpp"
 #include "noneDrag.hpp"
 
-template class pFlow::coupling::grainDrag<pFlow::coupling::DiFelice>;
-template class pFlow::coupling::grainDrag<pFlow::coupling::ErgunWenYu>;
-template class pFlow::coupling::grainDrag<pFlow::coupling::Rong>;
-template class pFlow::coupling::grainDrag<pFlow::coupling::Beetstra>;
-template class pFlow::coupling::grainDrag<pFlow::coupling::noneDrag>;
+
+pFlow::coupling::noneDrag::noneDrag(const Foam::dictionary&	dict)
+{
+
+}

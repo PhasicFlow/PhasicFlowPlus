@@ -50,6 +50,7 @@ couplingSystem/unresolved/interaction/drag/dragClosures/DiFelice.C
 couplingSystem/unresolved/interaction/drag/dragClosures/ErgunWenYu.C
 couplingSystem/unresolved/interaction/drag/dragClosures/Rong.C
 couplingSystem/unresolved/interaction/drag/dragClosures/Beetstra.C
+couplingSystem/unresolved/interaction/drag/dragClosures/noneDrag.C
 
 couplingSystem/unresolved/interaction/lift/lift/lift.C
 couplingSystem/unresolved/interaction/lift/none/none.C

@@ -24,9 +24,10 @@ Licence:
 #include "Rong.hpp"
 #include "ErgunWenYu.hpp"
 #include "Beetstra.hpp"
-              
+#include "noneDrag.hpp"              
 
 template class pFlow::coupling::sphereDrag<pFlow::coupling::DiFelice>;
 template class pFlow::coupling::sphereDrag<pFlow::coupling::ErgunWenYu>;
 template class pFlow::coupling::sphereDrag<pFlow::coupling::Rong>;
 template class pFlow::coupling::sphereDrag<pFlow::coupling::Beetstra>;
+template class pFlow::coupling::sphereDrag<pFlow::coupling::noneDrag>;

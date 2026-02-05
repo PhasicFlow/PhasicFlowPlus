@@ -5,7 +5,8 @@ tmp<fvVectorMatrix> tUEqn
 (
     fvm::ddt(coupling.alpha(), U)
   + fvm::div(phi, U)
-  - fvc::div(alphaNuEff * dev(fvc::grad(U)().T()))
+  //- fvc::div(alphaNuEff * dev(fvc::grad(U)().T()))
+  + turbulence->divDevReff(U)
   + fvm::Sp(coupling.Sp()/rho, U)
  ==
   - coupling.Su()/rho  

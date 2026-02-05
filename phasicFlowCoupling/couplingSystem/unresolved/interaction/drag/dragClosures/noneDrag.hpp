@@ -18,16 +18,51 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-#include "grainDrag.hpp"
 
-#include "DiFelice.hpp"
-#include "Rong.hpp"
-#include "ErgunWenYu.hpp"
-#include "Beetstra.hpp"
-#include "noneDrag.hpp"
+/**
+ * @class noneDrag
+ * @brief This is a drag force model to disable drag calculation in the coupling system.
+ * 
+ * 
+ * @see dimlessDrag()
+ */
+#ifndef __none_hpp__ 
+#define __none_hpp__
 
-template class pFlow::coupling::grainDrag<pFlow::coupling::DiFelice>;
-template class pFlow::coupling::grainDrag<pFlow::coupling::ErgunWenYu>;
-template class pFlow::coupling::grainDrag<pFlow::coupling::Rong>;
-template class pFlow::coupling::grainDrag<pFlow::coupling::Beetstra>;
-template class pFlow::coupling::grainDrag<pFlow::coupling::noneDrag>;
+// from OpenFOAM
+#include "OFCompatibleHeader.hpp"
+
+
+#include "typeInfo.hpp"
+
+namespace pFlow::coupling
+{
+
+class noneDrag
+{
+
+public:
+
+	// type info
+	TypeInfoNV("none");
+
+	noneDrag(const Foam::dictionary& dict);
+
+	inline
+	Foam::scalar dimlessDrag(Foam::scalar Re, Foam::scalar ep) const
+	{
+		return 0.0;
+	}
+	
+	inline 
+	Foam::scalar operator()(Foam::scalar Re, Foam::scalar ep)const
+	{
+		return dimlessDrag(Re, ep);
+	}
+	
+}; 
+
+} // pFlow::coupling
+
+
+#endif
