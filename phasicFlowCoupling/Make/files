@@ -11,6 +11,9 @@ MPIParallelization/procDEMSystemPlus.C
 couplingSystem/couplingMesh/particleMapping.C
 couplingSystem/couplingMesh/couplingMesh.C
 couplingSystem/couplingSystem.C
+
+couplingSystem/unresolved/turbulence/alphaTurbulentTransportModels.C
+
 couplingSystem/unresolved/unresolvedCouplingSystem/unresolvedCouplingSystem.C
 couplingSystem/unresolved/momentumSphereUnresolvedCouplingSystem/momentumSphereUnresolvedCouplingSystem.C
 couplingSystem/unresolved/momentumGrainUnresolvedCouplingSystem/momentumGrainUnresolvedCouplingSystem.C

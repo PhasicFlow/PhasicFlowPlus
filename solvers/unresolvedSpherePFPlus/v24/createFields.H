@@ -33,13 +33,13 @@ Info<< "Creating sphere coupling system for unresolved solver \n" << endl;
 auto couplingPtr = pFlow::coupling::unresolvedCouplingSystem::create("sphere", "momentum" ,mesh, argc, argv);
 auto& coupling = couplingPtr();
 
-Info<< "Reading/calculating face flux field phi\n" << endl;
-
-surfaceScalarField phi
+Info<< "Reading/calculating face volumetica flux field alphaRhoPhi\n" << endl;
+// rho is considered to be one
+surfaceScalarField alphaRhoPhi
 (
     IOobject
     (
-        "phi",
+        "alphaRhoPhi",
         runTime.timeName(),
         mesh,
         IOobject::READ_IF_PRESENT,
@@ -48,17 +48,38 @@ surfaceScalarField phi
     linearInterpolate(U * coupling.alpha()) & mesh.Sf()
 );
 
+surfaceScalarField phi
+(
+    IOobject
+    (
+        "phi",
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+    ),
+    linearInterpolate(U) & mesh.Sf()
+);
+
 label pRefCell = 0;
 scalar pRefValue = 0.0;
 setRefCell(p, pimple.dict(), pRefCell, pRefValue);
 mesh.setFluxRequired(p.name());
 
 
-singlePhaseTransportModel laminarTransport(U, phi);
+singlePhaseTransportModel laminarTransport(U, alphaRhoPhi);
 
-autoPtr<incompressible::turbulenceModel> turbulence
+
+autoPtr<incompressible::alphaTurbulenceModel> turbulence
 (
-    incompressible::turbulenceModel::New(U, phi, laminarTransport)
+    incompressible::alphaTurbulenceModel::New
+    (
+        coupling.alpha(),
+        U,
+        alphaRhoPhi,
+        phi,
+        laminarTransport
+    )
 );
 
 Info<< "Creating field rho\n" << endl;
@@ -81,7 +102,7 @@ autoPtr<surfaceVectorField> Uf;
 if (mesh.dynamic())
 {
     Info<< "Constructing face velocity Uf\n" << endl;
-
+    
     Uf = Foam::autoPtr<Foam::surfaceVectorField>::New
     (
         IOobject
