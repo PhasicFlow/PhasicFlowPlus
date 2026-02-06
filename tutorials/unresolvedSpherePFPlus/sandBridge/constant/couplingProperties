@@ -32,7 +32,7 @@ unresolved
     // Distribution method required settings 
     diffusionInfo
     {
-        nSteps              10;
+        nSteps              5;
         standardDeviation   0.0075;
         
         // Optional: set to 1 to see solver output on screen

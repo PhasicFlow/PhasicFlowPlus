@@ -12,7 +12,7 @@ fileFormat  ASCII;
 names 		(sphere1);
 
 // diameter of shapes 
-diameters 	(0.0023);
+diameters 	(0.002);
 
 // material names for shapes 
 materials	(sphereMat);
