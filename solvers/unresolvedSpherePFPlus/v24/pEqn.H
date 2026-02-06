@@ -5,7 +5,7 @@ surfaceScalarField phiHbyA
 (
     "phiHbyA",
     fvc::flux(HbyA * coupling.alpha())
-  + rAUf * fvc::interpolate(coupling.alpha())*fvc::ddtCorr(U, phi, Uf) // ----> attention by Uf
+  + rAUf * fvc::interpolate(coupling.alpha())*fvc::ddtCorr(U, alphaRhoPhi, Uf) // ----> attention by Uf
 );
 
 if (p.needReference())
@@ -51,7 +51,7 @@ while (pimple.correctNonOrthogonal())
 
     if (pimple.finalNonOrthogonalIter())
     {
-        phi = phiHbyA - pEqn.flux();
+        alphaRhoPhi = phiHbyA - pEqn.flux();
     }
 }
 
@@ -63,6 +63,9 @@ p.relax();
 //U = fvc::reconstruct(phi)/coupling.alpha();
 U = HbyA - coupling.alpha() * rAU*fvc::grad(p);
 U.correctBoundaryConditions();
+
+// updates phi 
+phi = linearInterpolate(U) & mesh.Sf();
 fvOptions.correct(U);
 
 // Correct Uf if the mesh is moving
@@ -70,11 +73,11 @@ if (mesh.dynamic())
 {
     Uf() = fvc::interpolate(U * coupling.alpha());
     surfaceVectorField n(mesh.Sf()/mesh.magSf());
-    Uf() += n*(phi/mesh.magSf() - (n & Uf()));
+    Uf() += n*(alphaRhoPhi/mesh.magSf() - (n & Uf()));
 }
 
 // Make the fluxes relative to the mesh motion
-if (phi.mesh().moving())
+if (alphaRhoPhi.mesh().moving())
 {
-    phi -= fvc::meshPhi(U * coupling.alpha());
+    alphaRhoPhi -= fvc::meshPhi(U * coupling.alpha());
 }

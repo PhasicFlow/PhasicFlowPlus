@@ -4,7 +4,7 @@ volScalarField alphaNuEff(coupling.alpha() * turbulence->nuEff());
 tmp<fvVectorMatrix> tUEqn
 (
     fvm::ddt(coupling.alpha(), U)
-  + fvm::div(phi, U)
+  + fvm::div(alphaRhoPhi, U)
   //- fvc::div(alphaNuEff * dev(fvc::grad(U)().T()))
   + turbulence->divDevReff(U)
   + fvm::Sp(coupling.Sp()/rho, U)

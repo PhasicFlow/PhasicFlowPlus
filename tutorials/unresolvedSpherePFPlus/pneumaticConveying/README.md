@@ -24,7 +24,7 @@ The conduit length is 1 m, with a square cross-section of $0.1\times0.1\ \mathrm
 
 Solid particles (density $800\ \mathrm{kg/m^3}$) are injected from a point source located 0.175 m downstream of the inlet. The insertion rate is 40,000 particles/s for 0.5 s (total of 20,000 particles). Two particle sizes are injected: 4 mm and 5 mm diameter spheres.
 
-The simulation lasts for 1.5 s. Particles are inserted from 0 s to 0.5 s, and the simulation continues afterwards without further insertion. A constant pressure drop (1500 Pa) is applied across the periodic tube from the start of the simulation.
+The simulation lasts for 2 s. Particles are inserted from 0 s to 0.5 s, and the simulation continues afterwards without further insertion. A constant pressure drop (1500 Pa) is applied across the periodic tube from the start of the simulation.
 
 ### A note on the pressure boundary condition
 
@@ -36,7 +36,7 @@ On the CFD side, the inlet and outlet patches are set to `cyclic`. With purely c
 
 Here we use the first option. With `uniformJump`, the pressure difference between the two periodic ends is held constant, and the mean gas velocity adjusts according to the total flow resistance of the gas–solid mixture in the conduit.
 
-As the particle concentration increases, the flow resistance increases and the mean gas velocity decreases. For the operating conditions of this case (pressure drop $\approx 1500\ \mathrm{Pa}$ and particle volume fraction $\approx 10\%$), the superficial gas velocity at steady operation is about 16.2 m/s.
+As the particle concentration increases, the flow resistance increases and the mean gas velocity decreases. For the operating conditions of this case (pressure drop $\approx 1500\ \mathrm{Pa}$ and particle volume fraction $\approx 10\%$), the superficial gas velocity at steady operation is about 15.8 m/s.
 
 ***
 
