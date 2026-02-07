@@ -63,10 +63,10 @@ p.relax();
 //U = fvc::reconstruct(phi)/coupling.alpha();
 U = HbyA - coupling.alpha() * rAU*fvc::grad(p);
 U.correctBoundaryConditions();
+fvOptions.correct(U);
 
 // updates phi 
 phi = linearInterpolate(U) & mesh.Sf();
-fvOptions.correct(U);
 
 // Correct Uf if the mesh is moving
 if (mesh.dynamic())
