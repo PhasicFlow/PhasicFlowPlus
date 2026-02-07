@@ -2,12 +2,12 @@
 // from the mapped surface velocity
 phi = mesh.Sf() & Uf();
 
-correctUphiBCs(U, phi);
+correctUphiBCs(U, alphaRhoPhi);
 
 CorrectPhi
 (
     U,
-    phi,
+    alphaRhoPhi,
     p,
     dimensionedScalar("rAUf", dimTime, 1),
     geometricZeroField(),
@@ -17,4 +17,4 @@ CorrectPhi
 #include "continuityErrs.H"
 
 // Make the flux relative to the mesh motion
-fvc::makeRelative(phi, U);
+fvc::makeRelative(alphaRhoPhi, U);

@@ -49,14 +49,16 @@ Description
 #include "fvCFD.H"
 #include "dynamicFvMesh.H"
 #include "singlePhaseTransportModel.H"
-#include "turbulentTransportModel.H"
+//#include "turbulentTransportModel.H"
 #include "pimpleControl.H"
 #include "localEulerDdtScheme.H"
 #include "CorrectPhi.H"
 #include "fvOptions.H"
 
 // phasicFlow
-#include "unresolvedCouplingSystem.hpp" 
+#include "unresolvedCouplingSystem.hpp"
+#include "alphaTurbulentTransportModel.hpp"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

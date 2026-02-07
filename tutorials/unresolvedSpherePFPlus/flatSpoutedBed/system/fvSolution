@@ -48,7 +48,7 @@ solvers
 }
 
 
-PISO
+PIMPLE
 {
     momentumPredictor  yes;
     nCorrectors     2;

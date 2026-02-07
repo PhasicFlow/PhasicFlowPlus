@@ -30,7 +30,7 @@ divSchemes
     default         none;;
     div(alphaRhoPhi,U)      Gauss linearUpwind grad(U);
     
-    turbulence      Gauss limitedLinear 1;
+    turbulence              Gauss limitedLinear 1;
     div(alphaRhoPhi,k)      $turbulence;
     div(alphaRhoPhi,omega)  $turbulence;
 
