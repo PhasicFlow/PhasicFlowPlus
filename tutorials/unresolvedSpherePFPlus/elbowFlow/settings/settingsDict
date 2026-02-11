@@ -1,0 +1,40 @@
+/* -------------------------------*- C++ -*--------------------------------- *\
+|  phasicFlow File                                                            |
+|  copyright: www.cemf.ir                                                     |
+\* ------------------------------------------------------------------------- */
+objectName      settingsDict;
+objectType      dictionary;
+fileFormat      ASCII;
+/*---------------------------------------------------------------------------*/
+run             elbowFlow;
+
+libs 		   ("libpFCouplingUtilities.so");
+
+dt              0.00001;       // time step for integration (s)
+
+startTime       0.0;           // start time for simulation
+
+endTime         5.0;           // end time for simulation
+
+saveInterval    0.01;          // time interval for saving the simulation
+
+timePrecision   6;             // maximum number of digits for time folder
+
+g               (0 -9.8 0);    // gravity vector (m/s^2)
+
+// save data objects that are not automatically saved on disk.
+// overrides the default behavior
+includeObjects  (diameter);
+
+// exclude unnecessary data from saving on disk
+excludeObjects  (contactForce contactTorque rVelocity);
+
+integrationMethod    AdamsBashforth4; // integration method
+
+integrationHistory   off;
+
+writeFormat          ascii;           // data writing format (ascii or binary)
+
+timersReport         Yes;             // report timers
+
+timersReportInterval 0.05;            // time interval for reporting timers
