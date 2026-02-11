@@ -1,0 +1,56 @@
+/* -------------------------------*- C++ -*--------------------------------- *\ 
+|  phasicFlow File                                                            | 
+|  copyright: www.cemf.ir                                                     | 
+\* ------------------------------------------------------------------------- */  
+objectName  particlesDict;
+objectType  dictionary;
+fileFormat  ASCII;
+/*---------------------------------------------------------------------------*/
+setFields
+{
+    /*
+        Default value for fields defined for particles
+        These fields should always be defined for simulations with 
+        spherical particles.
+    */
+    defaultValue 
+    {
+        velocity        realx3    (0 0 4);     // linear velocity (m/s)
+
+        acceleration    realx3    (0 0 0);     // linear acceleration (m/s^2)
+
+        rVelocity       realx3    (0 0 0);     // rotational velocity (rad/s)
+
+        shapeName       word      smallSphere;     // name of the particle shape 
+    }
+
+    selectors
+    {}
+}
+
+positionParticles     
+{
+    method    random;
+
+    randomInfo
+    {
+        distance        0.0035;
+        
+        numPoints       45000;
+        
+        maxIterations   20;
+
+    }
+
+    regionType cylinder;
+	
+	cylinderInfo
+	{
+		p1      (0.0 0.0 0.04);
+		
+        p2      (0.0 0.0 0.54);
+		
+        radius 	0.048;
+	}
+}
+
