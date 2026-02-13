@@ -120,6 +120,7 @@ void pFlow::coupling::Loth2008::calculateLiftForce
         );
         
         // Fluid shear lift coefficient
+        Foam::Info<<"Rep "<< Rep <<Foam::endl;
         Foam::scalar Cl_shear;
         if(Rep <= 50.0)
         {
@@ -145,9 +146,12 @@ void pFlow::coupling::Loth2008::calculateLiftForce
         
         Foam::vector dirVectorShear = curlU[cellI] ^ uRelVec;
         Foam::vector dirVectorSpin = wp ^ uRelVec;
-
+        
         dirVectorShear /= Foam::max(Foam::mag(dirVectorShear), Foam::SMALL);
         dirVectorSpin /= Foam::max(Foam::mag(dirVectorSpin), Foam::SMALL);
+
+        Foam::Info<< "dirVectorShear "<< dirVectorShear <<" Cl_shear "<<Cl_shear<<Foam::endl;
+        Foam::Info<< "dirVectorSpin " << dirVectorSpin << " Cl_spin "<<Cl_spin<<Foam::endl;
 
         Foam::vector lF = (Foam::constant::mathematical::pi/8.0*dp*dp*rho[cellI]) * uRel * uRel *
             ( 

@@ -24,8 +24,8 @@ EXE_INC = \
     -I$(LIB_SRC)/transportModels/immiscibleIncompressibleTwoPhaseMixture/lnInclude \
     -I$(LIB_SRC)/surfMesh/lnInclude \
     -I$(LIB_SRC)/fileFormats/lnInclude \
-    -I../../../phasicFlowCoupling/lnInclude \
-    -I../../../utilities/pFCouplingUtilities/lnInclude \
+    -I../../phasicFlowCoupling/lnInclude \
+    -I../../utilities/pFCouplingUtilities/lnInclude \
     -I$(pFlow_INCLUDE_DIR) \
     -I$(pFlow_INCLUDE_DIR)/phasicFlow \
     -I$(pFlow_INCLUDE_DIR)/DEMSystems \

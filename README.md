@@ -18,7 +18,7 @@ The following parts are being developed at the moment:
 
 ## How to build PhasicFlowPlus
 ### Version-1.0
-Version-1.0 is compatible with PhasicFlow-v-1.0 and OpenFOAM-v24. You need to [install phasicFlow-v-1.0](https://github.com/PhasicFlow/phasicFlow/wiki/How-to-build-PhasicFlow%E2%80%90v%E2%80%901.0) and then [install OpenFOAM-v24](https://www.cemf.ir/installing-openfoam-v2412-on-ubuntu-and-windows/) on your computer. After that, follow the following steps to install PhasicFlowPlus.
+Version-1.0 is compatible with PhasicFlow-v-1.0 and OpenFOAM-v24. You need to [install phasicFlow-v-1.0](https://github.com/PhasicFlow/phasicFlow/wiki/How-to-build-PhasicFlow%E2%80%90v%E2%80%901.0) and then [install OpenFOAM-v24 or OpenFOAM-v25](https://www.cemf.ir/installing-openfoam-v2412-on-ubuntu-and-windows/) on your computer. After that, follow the following steps to install PhasicFlowPlus.
 
 + **Step 1:** copy the source code into `~/PhasicFlow` folder:
 
@@ -45,6 +45,9 @@ First, you need to [install PhasicFlow-v0.1](https://github.com/PhasicFlow/phasi
 cd ~/PhasicFlow/PhasicFlowPlus/ 
 ./Allwmake
 ```
+
+## A note on OpenFOAM versions
+PhasicFlowPlus is designed to be compatible with OpenFOAM distributions from ESI group (like v2406, v2412, v2506, and etc). It is not compatible with OpenFOAM distributions from OpenFOAM Foundation (like v9, v10, and etc). This is mainly due to some differences in the API and code structure of the two distributions. Since this may cause some difficulties in maintaining the code and providing stable solvers, we just develope and maintain the code for OpenFOAM distributions from ESI group.
 
 ## Core Developers and Contributors
 

@@ -2,25 +2,21 @@
 cd ${0%/*} || exit 1    # Run from this directory
 
 
-# Compile OpenFOAM libraries and applications
-# Check OpenFOAM version
-echo "  -> detected OpenFOAM version: $WM_PROJECT_VERSION"
+
 
 # Compile OpenFOAM libraries and applications based on version
-if [ "$WM_PROJECT_VERSION" = "9" ]; then
-    echo "  -> building solvers for OpenFOAM 9"
-    wmake ./unresolvedSpherePFPlus/v9
-    wmake ./legacy/unresolvedSpherePFPisoFoam/v9
-    wmake ./legacy/unresolvedGrainPFPisoFoam/v9
-elif [ "$WM_PROJECT_VERSION" = "v2406" ] || [ "$WM_PROJECT_VERSION" = "v2412" ]; then
+if [ "$WM_PROJECT_VERSION" = "9" ] || [ "$WM_PROJECT_VERSION" = "10" ] || [ "$WM_PROJECT_VERSION" = "11" ] || [ "$WM_PROJECT_VERSION" = "12" ] || [ "$WM_PROJECT_VERSION" = "13" ]; then
+    echo "  -> Error: OpenFOAM version $WM_PROJECT_VERSION is not supported"
+    echo "  -> Supported versions are: v2406, v2412, v2506, v2512 and newer"
+    exit 1
+elif [ "$WM_PROJECT_VERSION" = "v2406" ] || [ "$WM_PROJECT_VERSION" = "v2412" ] || [ "$WM_PROJECT_VERSION" = "v2506" ] || [ "$WM_PROJECT_VERSION" = "v2512" ]; then
     echo "  -> building solvers for OpenFOAM $WM_PROJECT_VERSION"
-    wmake ./legacy/unresolvedSpherePFPisoFoam/v24
-    wmake ./unresolvedSpherePFPlus/v24
-    wmake ./unresolvedGrainPFPlus/v24
-    wmake ./resolvedSpherePFPlus/v24
-    wmake ./resolvedSphereVoFPFPlus/v24
+    wmake ./unresolvedSpherePFPlus
+    wmake ./unresolvedGrainPFPlus
+    wmake ./resolvedSpherePFPlus
+    wmake ./resolvedSphereVoFPFPlus
 else
-    echo "  -> Error: Unknown OpenFOAM version: $WM_PROJECT_VERSION"
+    echo "  -> Error: Unknown/unsupported OpenFOAM version: $WM_PROJECT_VERSION"
     echo "  -> Cannot proceed with build"
     exit 1
 fi
