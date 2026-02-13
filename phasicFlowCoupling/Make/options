@@ -49,20 +49,11 @@ BASE_LIBS = \
     -lturbulenceModels \
     -lincompressibleTurbulenceModels \
 
-OF90_LIBS = \
-	-ltriSurface \
-	-L$(FOAM_LIBBIN)/openmpi-system -lPstream 
 
-OF24_LIBS = \
+OF24_25_LIBS = \
 	-L$(FOAM_LIBBIN)/sys-openmpi -lPstream 
 
-ifeq ($(WM_PROJECT_VERSION),v2406)
-    LIB_LIBS = $(BASE_LIBS) $(OF24_LIBS)
-else ifeq ($(WM_PROJECT_VERSION),v2412)
-    LIB_LIBS = $(BASE_LIBS) $(OF24_LIBS)
-else
-    LIB_LIBS = $(BASE_LIBS) $(OF90_LIBS)
-endif
+LIB_LIBS = $(BASE_LIBS) $(OF24_25_LIBS)
 
 EXE_INC  += $(PFLAGS) $(PINC)
 LIB_LIBS += $(PLIBS)

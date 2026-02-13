@@ -127,6 +127,9 @@ void pFlow::coupling::Saffmann::calculateLiftForce
         dirVectorShear /= Foam::max(Foam::mag(dirVectorShear), Foam::SMALL);
         dirVectorSpin /= Foam::max(Foam::mag(dirVectorSpin), Foam::SMALL);
 
+        Foam::Info<< "dirVectorShear "<< dirVectorShear <<" Cl_shear "<<Cl_shear<<Foam::endl;
+        Foam::Info<< "dirVectorSpin " << dirVectorSpin << " Cl_spin "<<Cl_spin<<Foam::endl;
+
         Foam::vector lF = (Foam::constant::mathematical::pi/8.0*dp*dp*rho[cellI]) * uRel * uRel *
             ( 
                 Cl_shear *  Foam::vector(dirVectorShear) + // fluid shear contribution

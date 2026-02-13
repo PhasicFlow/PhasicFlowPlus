@@ -6,6 +6,10 @@ cd ${0%/*} || exit 1    # Run from this directory
 
 ./version
 
+# Compile OpenFOAM libraries and applications
+# Check OpenFOAM version
+echo "  -> detected OpenFOAM version: $WM_PROJECT_VERSION"
+
 # Compile libraries and applications
 echo "\nCompiling phasicFlowCoupling library"
 wmake ./phasicFlowCoupling 
