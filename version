@@ -27,9 +27,17 @@ case "$WM_PROJECT_VERSION" in
     VERSION_VALUE="2412"
     VERSION_STRING="v2412"
     ;;
+  v2506)
+    VERSION_VALUE="2506"
+    VERSION_STRING="v2506"
+    ;;
+  v2512)
+    VERSION_VALUE="2512"
+    VERSION_STRING="v2512"
+    ;;
   *)
     echo "Error: WM_PROJECT_VERSION has an unsupported value: $WM_PROJECT_VERSION"
-    echo "Supported values are: 9, 12, v2406, v2412"
+    echo "Supported values are: 9, 12, v2406, v2412, v2506, v2512"
     exit 1
     ;;
 esac

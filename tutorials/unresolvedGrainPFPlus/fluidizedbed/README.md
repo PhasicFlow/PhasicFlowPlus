@@ -61,9 +61,18 @@ Open `foam.foam` file in ParaView to view the CFD results. For DEM results, open
 
 To learn about how to set up a DEM simulation, please refer to the [tutorial page](https://github.com/PhasicFlow/phasicFlow/wiki/Tutorials) of PhasicFlow and other online documents along side this package. Also, you can refer to OpenFOAM tutorials to learn about how to set up a CFD simulation. The solver we are using here, essentially is a combination of DEM and CFD component, with some additional parameters that are essential for unresolved coupling. Here, we only describe the simulation setup files that are specific to the coupling part.
 
-The most important setup file for CFD-DEM simulation is `constant/couplingProperties`. It contains the parameters for coupling between CFD and DEM, such as drag force closure model, porosity model and etc. It contains two main sub-dictionaries: `unresolved` and `particleMapping`. The `unresolved` dictionary contains the parameters for unresolved coupling, while the `particleMapping` dictionary contains the parameters for particle onto the CFD mesh and MPI parallelization of simulation. To learn more about parameter settings of the file `constant/couplingProperties`, you are refered to [this tutorial on fluidized bed using unresolvedSpherePFPlus](https://github.com/PhasicFlow/PhasicFlowPlus/tree/main/tutorials/unresolvedSpherePFPlus/fluidizedbed).
+The most important setup file for CFD-DEM simulation is `constant/couplingProperties`. It contains parameters for coupling between CFD and DEM with two main sub-dictionaries: `unresolved` and `particleMapping`. 
 
-Another important case setup file for course graining is `caseSetup/shapes`. The original spheres were 0.0012 microns, while we wanted to do simulation with course-graining factor 2. So, diameter of grains is 0.0024 m. So, as we see, grain diameter and sphere diameter is set accordingly in this file.
+The `unresolved` dictionary contains parameters for unresolved coupling including:
+- `distributionMethod`: The method for distributing particle properties across cells (e.g., `adaptiveGaussian`, `GaussianIntegral`, `diffusion`)
+- `porosity`: Method for calculating fluid volume fraction (e.g., `distribution`, `subDivision29`)
+- `momentumInteraction`: Settings for momentum coupling including drag, lift, and velocity evaluation methods
+
+The `particleMapping` dictionary contains parameters for particle mapping onto the CFD mesh and MPI parallelization.
+
+For detailed information about all coupling parameters, refer to the main coupling system documentation in `phasicFlowCoupling/couplingSystem/unresolved/README.md`.
+
+Another important case setup file for course graining is `caseSetup/shapes`. The original spheres were 0.0012 m, and with coarse-graining factor 2, the grain diameter is 0.0024 m. These are set accordingly in this file:
 
 ```C++
 // file: caseSetup/shapes

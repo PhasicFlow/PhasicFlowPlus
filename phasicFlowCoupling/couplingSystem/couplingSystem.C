@@ -88,8 +88,14 @@ pFlow::coupling::couplingSystem::couplingSystem(
 		"velocity", 
 		particleMapping_.centerMass()
 	),
-	particleRVelocity_(
+	particleRVelocity_
+	(
 		"rVelocity", 
+		particleMapping_.centerMass()
+	),
+	particleAcceleration_
+	(
+		"acceleration", 
 		particleMapping_.centerMass()
 	),
 	fluidForce_(
@@ -198,9 +204,36 @@ bool pFlow::coupling::couplingSystem::collectFluidTorque()
 bool pFlow::coupling::couplingSystem::distributeParticleFields()
 {
 	
+	const auto masterSahpeDiameters = procDEMSystem_.shapeDiametersAllMaster();
+	size_t numShpaes = masterSahpeDiameters.size();
+
+	
+	if(auto [thisNumShapes, success] = particleMapping_.distributeMasterToAll(numShpaes); success)
+	{
+		shapeDiameters_.resize(thisNumShapes);
+		if(!masterSahpeDiameters.empty())
+		{
+			shapeDiameters_ = masterSahpeDiameters;
+		}
+	}
+	else
+	{
+		fatalErrorInFunction<<
+        "cannot distribute number of shapes to processors"<<endl;
+        Plus::processor::abort(0);
+        return false;
+	}
+	
+	if( !particleMapping_.distributeMasterToAllVector(shapeDiameters_))
+	{
+		fatalErrorInFunction<<
+        "cannot distribute shape diameters to processors"<<endl;
+        Plus::processor::abort(0);
+        return false;
+	}
+	
     auto allDiam = procDEMSystem_.particlesDiameterAllMaster();
     auto thisDiam = makeSpan(particleDiameter_);
-
     if(!particleMapping_.realScatteredComm().distribute(allDiam, thisDiam))
     {
         fatalErrorInFunction<<
@@ -230,6 +263,16 @@ bool pFlow::coupling::couplingSystem::distributeParticleFields()
             Plus::processor::abort(0);
             return false;
         }
+    }
+
+	auto allAcc = procDEMSystem_.particlesAccelerationAllMaster();
+    auto thisAcc = makeSpan(particleAcceleration_);
+    if(!particleMapping_.realx3ScatteredComm().distribute(allAcc, thisAcc))
+    {
+        fatalErrorInFunction<<
+        "cannot distribute particle acceleration among processors"<<endl;
+        Plus::processor::abort(0);
+        return false;
     }
 
     /*auto allID = procDEMSystem_.particleIdAllMaster();

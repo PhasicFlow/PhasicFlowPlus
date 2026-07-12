@@ -5,17 +5,17 @@
 
 ## 0. Problem Definition
 
-In this tutorial, we will simulate a liquid-solid flow to determine when a bridge is formed in a conduit with narrow gap using the unresolved solver `unresolvedSpherePFPlus`. The geometry has dimensions of 0.077 × 0.091 × 0.007 m³, and spherical particles with a diameter of 0.0023 m and a density of 2500 kg/m³ are simulated. In this simulation, both particles and fluid flow simultaneously. Water is uniformly injected from the upper part of the geometry with a superficial velocity of 0.02 m/s. The simulation runs for a total of 7 seconds.
+In this tutorial, we will simulate a liquid-solid flow to determine when a bridge is formed in a conduit with narrow gap using the unresolved solver `unresolvedSpherePFPlus`. The geometry has dimensions of 0.077 × 0.091 × 0.007 m³, and spherical particles with a diameter of 0.002 m and a density of 2500 kg/m³ are simulated. In this simulation, both particles and fluid flow simultaneously. Water is uniformly injected from the upper part of the geometry with a superficial velocity of 0.02 m/s. The simulation runs for a total of 7 seconds.
 
 
 
 <div align="center">
 <b>
-<img src="./sandBridge.gif" alt="sandBridge" style="width: 720px;"/>
+<img src="./sandBridge.gif" alt="sandBridge"/>
 </b>
 <b>
 
-A visualization of a fluid-particle flow with the fluid and particle field colored based on velocity.
+A visualization of a fluid-particle flow.
 </b></div>
 
 ***
@@ -62,10 +62,10 @@ Open the `foam.foam` file in ParaView to view the CFD results. For DEM results, 
 
 To learn about how to set up a DEM simulation, please refer to the [tutorial page](https://github.com/PhasicFlow/phasicFlow/wiki/Tutorials) of PhasicFlow and other online documents along side this package. Also, you can refer to OpenFOAM tutorials to learn about how to set up a CFD simulation. The solver we are using here, essentially is a combination of DEM and CFD component, with some additional parameters that are essential for unresolved coupling. Here, we only describe the simulation setup files that are specific to the coupling part.
 
-First part about particle insertion in `caseSetup` folder. This configuration enables particle insertion `(active yes)` in the defined box region called `topRegion`. Particles are inserted from simulation time 0 to 3.5 seconds at a rate of 1000 particles per second, with an insertion interval of 0.049 seconds. The insertion region is a thin box defined by the coordinates min (0.005 0.05 0.002) and max (0.075 0.052 0.005). Inserted particles are given an initial velocity of (0 -0.05 0), meaning they move downward. The particle type used for insertion is `sphere1`, as specified in the mixture section. This setup allows regular particle injection into a narrow area with controlled timing and velocity.
+First part about particle insertion in `caseSetup` folder. This configuration enables particle insertion `(active yes)` in the defined box region called `topRegion`. Particles are inserted from simulation time 0 to 4 seconds at a rate of 1200 particles per second, with an insertion interval of 0.01 seconds. The insertion region is a thin box defined by the coordinates min (0.005 0.087 0.002) and max (0.075 0.089 0.005). Inserted particles are given an initial velocity of (0 -0.05 0), meaning they move downward. The particle type used for insertion is `sphere1`, as specified in the mixture section. This setup allows regular particle injection into a narrow area with controlled timing and velocity.
 
 ```C++
-// This activates particle insertion. If set to no, the particle insertion must be done in paritcleDict
+// is insertion active?
 active  yes;
 
 /*
@@ -76,27 +76,27 @@ topRegion
     // Controls insertion based on simulation time
     timeControl  simulationTime;
 
-	// insertion rate (particles/s)
-	rate 	 1000;
+// type of insertion region
+    regionType box;
 
-	// Start time of Particles insertion (s)
-	startTime 	  0;
+    // insertion rate (particles/s)
+    rate     1200;
 
-	// End time of Particles insertion (s)	
-	endTime   	  7;
+    // Start time of Particles insertion (s)
+    startTime     0;
 
-	// Time Interval between each insertion (s)
-	insertionInterval       0.049;
-	
-    // type of insertion region and other option is avalible
-    regionType   box;
-	
-    // Coordinates of BoxRegion (m,m,m)
-	boxInfo 
-	{
-		min ( 0.005 0.05 0.002); //  (m,m,m)
-		max ( 0.075 0.052 0.005); // (m,m,m)
-	}
+    // End time of Particles insertion (s)  
+    endTime       4;
+
+    // Time Interval between each insertion (s)
+    insertionInterval       0.01;
+
+        // Coordinates of BoxRegion (m,m,m)
+    boxInfo 
+    {
+        min ( 0.005 0.087 0.002); //  (m,m,m)
+        max ( 0.075 0.089 0.005); // (m,m,m)
+    }
 
     setFields
     {
@@ -106,82 +106,117 @@ topRegion
    
     mixture
     {
-        // first layer of inserted particles and use for binary insertion
+        // first layer of inserted particles
         sphere1 1;
     }
 }
 ```
-The most important setup file for CFD-DEM simulation is `constant/couplingProperties`. It contains the parameters for coupling between CFD and DEM, such as drag force closure model, porosity model and etc. It contains two main sub-dictionaries: `unresolved` and `particleMapping`. The `unresolved` dictionary contains the parameters for unresolved coupling, while the `particleMapping` dictionary contains the parameters for particle onto the CFD mesh and MPI parallelization of simulation. To learn more about parameter settings of the file `constant/couplingProperties`, you are refered to [this tutorial on fluidized bed using unresolvedSpherePFPlus](https://github.com/PhasicFlow/PhasicFlowPlus/tree/main/tutorials/unresolvedSpherePFPlus/fluidizedbed).
 
+The most important setup file for CFD-DEM simulation is `constant/couplingProperties`. It contains parameters for coupling between CFD and DEM, with two main sub-dictionaries: `unresolved` and `particleMapping`.
 
-In `unresolved` sub-dictionary the method for mapping properties between particles and cells is defined in `cellDistribution` part. This part defines the method of distributing particle properties (like volume, drag force) across the cells. Here, diffusion-based smoothing is used with these parameters:
-
-  - `diffusion`: Uses diffusion smoothing to distribute particle properties across cells.
-  - `standardDeviation` : This parameter controls the strength of the diffusion process and must be 3 to 6 time particle diameter
-  - `nSteps` : That defines the number of smoothing (diffusion) steps to apply.
+In this tutorial, `distributionMethod` is set to `diffusion` with `standardDeviation` equal to 0.0075 (about 3× particle diameter) and `nSteps` is set to 5 for smoothing particle properties across cells. The drag model is `DiFelice`, and momentum exchange is distributed across cells using the diffusion method.
 
 ```C++
-// constant/couplingProperties file 
+// constant/couplingProperties
 unresolved
 {
-
-    cellDistribution
+    // Distribution method for mapping particle data (porosity, velocity,
+    // force, etc.) over fluid cells
+    // 
+    // Available methods: 
+    //     - PCM: Particle Centroid Method (no smoothing)
+    //     - diffusion: Laplacian diffusion for smoothing
+    //     - Gaussian: Gaussian distribution with specified std dev
+    //     - GaussianIntegral: Gaussian integral for distributing data
+    //     - adaptiveGaussian: Gaussian with adaptive std deviation
+    //     - subDivision29: Divided-volume method (29-sub-volume version)
+    //     - subDivision9: Divided-volume method (9-sub-volume version)
+    distributionMethod      diffusion;
+    
+    // Distribution method required settings 
+    diffusionInfo
     {
-        // type of cell distribution method (if required) 
-        //    self: no distribution (cell itself)
-        //    Gaussian: distribute values on sorounding cells based on a neighbor length
-        //    adaptiveGaussian: similar to Gaussian, but it adapts the distribution 
-        //    GaussianIntegral: Uses Gaussian integral for determining particle distribution 
-        //    diffusion: uses diffusion smoothing to distribute particle properties across cells
-        type                diffusion; 
-        standardDeviation   0.0075; 
-        nSteps      10;
+        nSteps              5;
+        standardDeviation   0.0075;
+        
+        // Optional: set to 1 to see solver output on screen
+        log                 0;
     }
 
+    // Required settings for calculating porosity method 
     porosity
     {
-    	  // Options are PIC, subDivision29Mod, subDivision9, cellDistribution
-        method      cellDistribution;
+        // method is optional
+        //    - default value is distribution
+        //    - Other options: subDivision29, subDivision9 
+        method      distribution; 
 
-        // minimum alpha allowed 
+        // alphaMin is minimum alpha allowed in porosity calculations
         alphaMin    0.2;
     }
 
-    drag
+    // Settings for momentum coupling  
+    momentumInteraction
     {
-        // Drag force closure, other options are ErgunWenYu, Rong
-        type                DiFelice; 
+        // How to perform smoothing on momentum exchange terms
+        // Available options are: 
+        //    - cell: No smoothing, assigned to containing cell
+        //    - distribution: Uses distributionMethod for smoothing
+        momentumExchange distribution; 
 
-        // Method for calculating the fluid velocity which is used in drag force calculations
-        //   cell: uses fluid velocity of the cell that contains the particle center 
-        //   particle: uses interpolated fluid velocity on the particle center based on 
-        //             cell values around particle
-        fluidVelocity       cell;
+        // How to evaluate fluid velocity at particle location
+        // Available options are: 
+        //    - cell: Uses cell value
+        //    - interpolate: Interpolates from neighboring cells
+        //    - distribution: Uses distributionMethod for averaging
+        fluidVelocity    cell;
 
-        // Method for calculating the solid velocity which is used in drag calculations 
-        //   cell: solid velocity is averaged on the cell using cellDistribution method 
-        //         and this average value is used as particle velocity in calculations 
-        //   particle: the actual particle velocity is used in calculations 
-        solidVelocity       particle;  
+        // How to evaluate particle velocity in calculations
+        // Available options are:
+        //    - particle: Uses exact particle velocity
+        //    - distribution: Uses distributionMethod to obtain average
+        //      velocity in the cell for all particles
+        solidVelocity    particle;
 
-        // Whether to distribute calculated particle drag force onto cells
-        //   off: add the calculated drag force on the cell itself
-        //   on: distributes the calculated drag force on cells (using cellDistribution method)
-        cellDistribution    on; 
+        drag
+        {
+            // Drag force closure
+            // Available options for spherical particles:
+            //   - DiFelice, ErgunWenYu, Rong, Cello, Beetstra
+            model       DiFelice; 
 
-        // residual Reynolds number 
-        residualRe          10e-6;
+            // Residual Reynolds number 
+            residualRe  1.0e-6;
+        }
+
+        lift
+        {   
+            // Lift force model options:
+            //   - none: Not included (default)
+            //   - Saffmann: Saffman (1965), low Re
+            //   - Loth2008: Loth (2008), intermediate Re
+            //   - Shi2019: Shi & Rzehak (2019), wide Re range
+            model                   none;
+
+            // Surface rotation torque model options:
+            //    - none: Not included (default)
+            //    - lowReynolds: Happel and Brenner model
+            //    - Loth2008: Based on Loth (2008) model
+            //    - Shi2019: Based on Shi model
+            surfaceRotationTorque   none; 
+
+            residualRe              1.0e-6;
+        }
+
+        virtualMass
+        {
+            // This part has not been implemented yet
+        }
     }
 
 }
 
-particleMapping
-{
-    // based on the maximum particle diameter in the simulation.
-    domainExpansionRatio    1;
-
-    domainUpdateInterval    0.0001;
-
-    decompositionMode       facePlanes;
-}
+// some lines are missing here
 ```
+
+For detailed information about coupling parameters, refer to the main [coupling system documentation](./../../../phasicFlowCoupling/couplingSystem/unresolved/README.md).

@@ -56,4 +56,6 @@ contactSearch
     sizeRatio      1.1;
 
     cellExtent     0.55;
+
+    adjustableBox  No;
 }

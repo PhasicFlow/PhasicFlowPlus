@@ -1,0 +1,29 @@
+#!/bin/sh
+set -e  # Exit immediately if a command exits with a non-zero status
+cd ${0%/*} || exit 1    # Run from this directory
+
+# Source tutorial run functions
+# First run OpenFoam Aplication
+
+# create mesh
+fluent3DMeshToFoam elbow.msh
+
+# create particles (DEM)
+particlesPhasicFlow
+
+# create geometry (DEM)
+geometryPhasicFlow
+
+# copy fluid fields to 0 folder
+cp -rv ./Fluid/* 0
+
+# solver 
+unresolvedSpherePFPlus
+
+pFlowToVTK --binary --fields velocity diameter id
+
+touch foam.foam
+
+echo "Start paraview with the command: paraview foam.foam & to visualize the results"
+
+#------------------------------------------------------------------------------

@@ -1,0 +1,111 @@
+unresolved
+{
+    // Distribution method for mapping particle data (porosity, velocity,
+    // force, etc.) over fluid cells
+    // 
+    // Available methods: 
+    //     - PCM: Particle Centroid Method (no smoothing)
+    //     - diffusion: Laplacian diffusion for smoothing
+    //     - Gaussian: Gaussian distribution with specified std dev
+    //     - GaussianIntegral: Gaussian integral for distributing data
+    //     - AdaptiveGaussian: Gaussian with adaptive std deviation
+    //     - subDivision29: Divided-volume method (29-sub-volume version)
+    //     - subDivision9: Divided-volume method (9-sub-volume version)
+    distributionMethod      diffusion;
+    
+    // Distribution method required settings 
+    diffusionInfo
+    {
+        nSteps              5;
+        standardDeviation   0.0075;
+    }
+
+    // Required settings for calculating porosity method 
+    porosity
+    {
+        // method is optional
+        //    - default value is distribution
+        //    - Other options: subDivision29, subDivision9 
+        method      distribution; 
+
+        // alphaMin is minimum alpha allowed in porosity calculations
+        alphaMin    0.2;
+    }
+
+    // Settings for momentum coupling  
+    momentumInteraction
+    {
+        // How to perform smoothing on momentum exchange terms
+        // Available options are: 
+        //    - cell: No smoothing, assigned to containing cell
+        //    - distribution: Uses distributionMethod for smoothing
+        momentumExchange distribution; 
+
+        // How to evaluate fluid velocity at particle location
+        // Available options are: 
+        //    - cell: Uses cell value
+        //    - interpolate: Interpolates from neighboring cells
+        //    - distribution: Uses distributionMethod for averaging
+        fluidVelocity    distribution;
+
+        // How to evaluate particle velocity in calculations
+        // Available options are:
+        //    - particle: Uses exact particle velocity
+        //    - distribution: Uses distributionMethod to obtain average
+        //      velocity in the cell for all particles
+        solidVelocity    distribution;
+
+        drag
+        {
+            // Drag force closure
+            // Available options for spherical particles:
+            //   No size distribution treatment:
+            //     - DiFelice, ErgunWenYu, Rong, Cello, Beetstra
+            //   For systems with size distribution:
+            //     - CelloPolydisperse, BeetstraPolydisperse, adhoc
+            model       DiFelice; 
+
+            // Residual Reynolds number 
+            residualRe  1.00e-6;
+        }
+
+        lift
+        {   
+            // Lift force model options:
+            //   - none: Not included (default)
+            //   - Saffmann: Saffman (1965), low Re
+            //   - Loth2008: Loth (2008), intermediate Re
+            //   - Shi2019: Shi & Rzehak (2019), wide Re range
+            // References:
+            //   Saffman, P.G.T., 1965. J. Fluid Mech. 22, 385-400
+            //   Loth, E., 2008. AIAA J. 46, 801-809
+            //   Shi, P. & Rzehak, R., 2019. Chem. Eng. Sci. 208,
+            //     115145
+            model                   Loth2008;
+
+            // Surface rotation torque model options:
+            //    - none: Not included (default)
+            //    - lowReynolds: Happel and Brenner model
+            //    - Loth2008: Based on Loth (2008) model
+            //    - Shi2019: Based on Shi model
+            surfaceRotationTorque   lowReynolds; 
+
+            residualRe              1.0e-6;
+            
+        }
+
+        virtualMass
+        {
+            // This part has not been implemented yet
+        }
+    }
+
+    heatTransfer
+    {
+
+    }
+
+    massTransfer
+    {}
+    
+}

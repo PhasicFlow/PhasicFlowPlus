@@ -275,6 +275,18 @@ inline auto Bcast(T& sendData, int root, Comm comm)
 
 }
 
+template<typename T>
+inline auto Bcast(span<T> sendData, int root, Comm comm)
+{
+	return MPI_Bcast(
+		sendData.data(),
+		sFactor<T>()*sendData.size(),
+		Type<T>(),
+		root, 
+		comm
+	);
+}
+
 inline auto Wait(Request* request, Status* status)
 {
 	return MPI_Wait(request, status);

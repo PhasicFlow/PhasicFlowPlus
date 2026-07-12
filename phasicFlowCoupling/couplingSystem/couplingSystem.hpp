@@ -50,9 +50,9 @@ private:
 
 	Plus::procDEMSystem 		procDEMSystem_;
 
-	Timers 						couplingTimers_;
+	mutable Timers 				couplingTimers_;
 
-	Timers 						cfdTimers_;
+	mutable Timers 				cfdTimers_;
 
 	Timer 						getDataTimer_;
 
@@ -66,9 +66,13 @@ private:
 
 	Plus::realx3ProcCMField 	particleRVelocity_;
 
+	Plus::realx3ProcCMField 	particleAcceleration_;
+
 	Plus::realx3ProcCMField 	fluidForce_;
 
 	Plus::realx3ProcCMField   	fluidTorque_;
+
+	std::vector<real> 			shapeDiameters_;
 
 	bool requireRVel_;
 
@@ -183,6 +187,12 @@ public:
 		return centerMass().size();
 	}
 
+	inline
+	const auto& shapeDiameters()const
+	{
+		return shapeDiameters_;
+	}
+
 	inline 
 	auto& particleDiameter()
 	{
@@ -231,8 +241,20 @@ public:
 		return cfdTimers_;
 	}
 
+	inline 
+	Timers& cfdTimers()const
+	{
+		return cfdTimers_;
+	}
+
 	inline
 	Timers& couplingTimers()
+	{
+		return couplingTimers_;
+	}
+
+	inline 
+	Timers& couplingTimers()const  
 	{
 		return couplingTimers_;
 	}

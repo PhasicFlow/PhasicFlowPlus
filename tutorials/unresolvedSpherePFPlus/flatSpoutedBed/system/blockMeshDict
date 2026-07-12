@@ -1,0 +1,155 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  9
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+convertToMeters 1.0;
+
+vertices
+(
+  
+    (0     0     0)   // 0 - inlet left
+    (0.07  0     0)   // 1 - inlet left/ middle
+    (0.075 0     0)   // 2 - inlet middle/ right
+    (0.145 0     0)   // 3 - inlet right
+
+    
+    (0     0.75   0)   // 4
+    (0.07  0.75   0)   // 5
+    (0.075 0.75   0)   // 6
+    (0.145 0.75   0)   // 7
+
+    (0     0     0.02)   // 8
+    (0.07  0     0.02)   // 9
+    (0.075 0     0.02)   // 10
+    (0.145 0     0.02)   // 11
+
+    (0     0.75   0.02)   // 12
+    (0.07  0.75   0.02)   // 13
+    (0.075 0.75   0.02)   // 14
+    (0.145 0.75   0.02)   // 15
+);
+
+blocks
+(
+    hex (0 1 5 4 8 9 13 12)   (14  150 4) simpleGrading (0.3333 1.5 1)
+    hex (1 2 6 5 9 10 14 13)  (3   150 4) simpleGrading (1 1.5 1)
+    hex (2 3 7 6 10 11 15 14) (14  150 4) simpleGrading (3 1.5 1)
+);
+
+edges
+(
+);
+
+boundary
+(
+    inlet_left
+    {
+        type patch;
+        faces
+        (
+            (0 1 9 8)
+        );
+    }
+
+    inlet_middle
+    {
+        type patch;
+        faces
+        (
+            (1 2 10 9)
+        );
+    }
+
+    inlet_right
+    {
+        type patch;
+        faces
+        (
+            (2 3 11 10)
+        );
+    }
+
+    outlet
+    {
+        type patch;
+        faces
+        (
+            (4 5 13 12)
+            (5 6 14 13)
+            (6 7 15 14)
+        );
+    }
+
+   /* front
+    {
+        type wall;
+        faces
+        (
+            (0 1 5 4)
+            (1 2 6 5)
+            (2 3 7 6)
+        );
+    }
+
+    back
+    {
+        type wall;
+        faces
+        (
+            (8 9 13 12)
+            (9 10 14 13)
+            (10 11 15 14)
+        );
+    }
+
+    leftWall
+    {
+        type wall;
+        faces
+        (
+            (0 4 12 8)
+        );
+    }
+
+    rightWall
+    {
+        type wall;
+        faces
+        (
+            (3 7 15 11)
+        );
+    }*/
+
+    defaultFaces
+    {
+        type    wall;
+        faces   (
+                    (0 1 5 4)
+                    (1 2 6 5)
+                    (2 3 7 6)
+                    (8 9 13 12)
+                    (9 10 14 13)
+                    (10 11 15 14)
+                    (0 4 12 8)
+                    (3 7 15 11)
+                );
+    }
+);
+
+mergePatchPairs
+(
+);
+
+
+// ************************************************************************* //

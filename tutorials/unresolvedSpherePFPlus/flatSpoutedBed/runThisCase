@@ -1,0 +1,45 @@
+#!/bin/sh
+set -e  # Exit immediately if a command exits with a non-zero status
+cd ${0%/*} || exit 1    # Run from this directory
+
+# Source tutorial run functions
+# First run OpenFoam Aplication
+
+echo "\n<--------------------------------------------------------------------->"
+echo "1) Running blockmesh"
+echo "<--------------------------------------------------------------------->\n"
+blockMesh
+
+echo "\n<--------------------------------------------------------------------->"
+echo "2) Running Step 1 (DEM from 0 s to 1 s ) "
+echo "<--------------------------------------------------------------------->\n"
+
+echo " \n2.1) add Particle "
+particlesPhasicFlow
+echo " \n2.2) add Geometry "
+geometryPhasicFlow
+echo " \n2.3) Running DEM simulation"
+sphereGranFlow
+
+
+echo "\n<--------------------------------------------------------------------->"
+echo "3) Copy Orginal Data to time folder 1 (P , U , Alpha ) "
+echo "<--------------------------------------------------------------------->\n"
+cp ./FluidField/alpha ./1
+cp ./FluidField/p ./1
+cp ./FluidField/U ./1
+
+echo "\n<--------------------------------------------------------------------->"
+echo "4) Running Step 3 (1-10 CFD-DEM) "
+echo "<--------------------------------------------------------------------->\n"
+unresolvedSpherePFPlus
+
+echo "\n<--------------------------------------------------------------------->"
+echo "5) Converting to VTK Files "
+echo "<--------------------------------------------------------------------->\n"
+pFlowToVTK --binary
+touch foam.foam
+echo "Start paraview with the command: paraview foam.foam & to visualize the results"
+echo "\n<--------------------------------------------------------------------->"
+
+#------------------------------------------------------------------------------

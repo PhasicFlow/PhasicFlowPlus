@@ -1,3 +1,0 @@
-unresolvedSpherePFPisoFoam.C
-
-EXE = $(FOAM_USER_APPBIN)/unresolvedSpherePFPisoFoam

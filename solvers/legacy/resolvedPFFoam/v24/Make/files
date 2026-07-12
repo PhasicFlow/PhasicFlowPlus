@@ -1,3 +1,0 @@
-resolvedPFFoam.C
-
-EXE = $(FOAM_USER_APPBIN)/resolvedSpherePFFoam

@@ -59,6 +59,13 @@ public:
 		return CheckMPI(Bcast(recvVal, masterNo(),worldCommunicator()),false);
 	}
 
+	template<typename T>
+	bool distributeMasterToAllVector(const std::vector<T>& sendRecVec)
+	{
+		span<T> sendRecSpan(const_cast<T*>(sendRecVec.data()), sendRecVec.size());
+		return CheckMPI( Bcast(sendRecSpan, masterNo(),worldCommunicator()),false);
+	}
+
 	// send each values in vector (size is equal to number of processors) to each processor
 	template<typename T>
 	std::pair<T,bool> distributeMasterToAll(procVector<T>& vals)

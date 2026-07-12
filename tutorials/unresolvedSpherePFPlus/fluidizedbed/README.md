@@ -60,81 +60,142 @@ Open the `foam.foam` file in ParaView to view the CFD results. For DEM results, 
 
 To learn about how to set up a DEM simulation, please refer to the [tutorial page](https://github.com/PhasicFlow/phasicFlow/wiki/Tutorials) of PhasicFlow and other online documents along side this package. Also, you can refer to OpenFOAM tutorials to learn about how to set up a CFD simulation. The solver we are using here, essentially is a combination of DEM and CFD component, with some additional parameters that are essential for unresolved coupling. Here, we only describe the simulation setup files that are specific to the coupling part.
 
-The most important setup file for CFD-DEM simulation is `constant/couplingProperties`. It contains the parameters for coupling between CFD and DEM, such as drag force closure model, porosity model and etc. It contains two main sub-dictionaries: `unresolved` and `particleMapping`. The `unresolved` dictionary contains the parameters for unresolved coupling, while the `particleMapping` dictionary contains the parameters for particle onto the CFD mesh and MPI parallelization of simulation. The parameters in `particleMapping` sub-dictionary are left unchanged, since they are the best settings and we rarely want to change them, although they are here to enable users to manage some special cases.
+The most important setup file for CFD-DEM simulation is `constant/couplingProperties`. It contains the parameters for coupling between CFD and DEM, such as drag force closure model, porosity model and etc. It contains two main sub-dictionaries: `unresolved` and `particleMapping`. The `unresolved` dictionary contains the parameters for unresolved coupling, while the `particleMapping` dictionary contains the parameters for particle mapping onto the CFD mesh and MPI parallelization of simulation. The parameters in `particleMapping` sub-dictionary are left unchanged, since they are the best settings and we rarely want to change them, although they are here to enable users to manage some special cases.
 
-`unresolved` sub-dictionary contains these parts:
+`unresolved` sub-dictionary contains these main parts:
 
-- `cellDistribution`: This part defines the method of distributing particle properties (like volume, drag force) across the cells. The options are:
+- `distributionMethod`: This parameter defines the method of distributing particle properties (like volume, drag force) across the cells. The options are:
 
-  - `self`: distributes property over the cell on which the center of particles is located.
-  - `Gaussian`: distributes property over the surrounding cells based on a Gaussian distribution, using a specified `standardDeviation` value (distribution width).
-  - `GaussianIntegral`: similar to `Gaussian`, but it uses the integral of the Gaussian function for distribution.
-  - `adaptiveGaussian`: similar to Gaussian method, but it adapts the distribution based on the local cell size and particle size. This is the most flexible and accurate statistical method for distributing particle properties across the cells.
-  - `diffusion`: uses diffusion smoothing to distribute particle properties across cells.
+  - `PCM`: Particle Centroid Method - no distribution, direct assignment to cell containing particle center.
+  - `Gaussian`: Distributes property over surrounding cells based on a Gaussian distribution using a specified `standardDeviation` value (distribution width).
+  - `GaussianIntegral`: Similar to `Gaussian`, but uses the integral of the Gaussian function for distribution.
+  - `adaptiveGaussian`: Similar to Gaussian method, but adapts the distribution based on local cell size and particle size. This is the most flexible and accurate method for distributing particle properties across cells.
+  - `diffusion`: Uses Laplacian diffusion smoothing to distribute particle properties across cells.
+  - `subDivision29`: Divides particle sphere into 29 equal volumetric segments for high-accuracy porosity calculations.
+  - `subDivision9`: Divides particle sphere into 9 equal volumetric segments, offering good balance between accuracy and computational cost.
 
 - `porosity`: This part defines the method for calculating porosity. The options are:
-  - `PIC`: Particle-In-Cell method.
-  - `subDivision29`, `subDivision29Mod` and `subDivision9`: These methods are used for calculating porosity based on the subdivision of particles into equal volumes and mapping these sub-volumes onto the surrounding cells for calculating porosity.
-  - `cellDistribution`: This method uses the cell distribution function defined in the `cellDistribution` sub-dictionary to distribute particle volume over cells and finally calculate porosity.
+  - `distribution`: Uses the selected `distributionMethod` to distribute particle volume over cells and calculate porosity.
+  - `subDivision29`: Uses the 29-subdivision method for high-accuracy porosity calculations.
+  - `subDivision9`: Uses the 9-subdivision method for porosity calculations.
 
-- `drag`: This part defines the drag force closure model. The options are `DiFelice`, `ErgunWenYu`, and `Rong`.
-  - `fluidVelocity`: This parameter defines how the fluid velocity at the center point of the particle is calculated:
-    - `cell`: Uses the fluid velocity of the cell that contains the particle center.
-    - `particle`: uses interpolated fluid velocity on the particle center based on cell values around particle.
-  - `solidVelocity`: This parameter defines how solid phase velocity is treated for drag force calculations:
-    - `cell`: solid velocity is averaged on the cell using cellDistribution method and this average value is used as particle velocity in calculations.
-    - `particle`: the actual particle velocity is used in calculations.
-  - `cellDistribution`: This parameter defines whether the calculated drag force is distributed on cells or not. The options are `on` and `off`.
+- `momentumInteraction`: This section contains all momentum coupling related settings:
+
+  - `momentumExchange`: Controls how momentum exchange terms are distributed to fluid cells. Options are:
+    - `cell`: No smoothing, assigned to cell containing particle.
+    - `distribution`: Uses `distributionMethod` for smoothing momentum terms across cells.
+
+  - `fluidVelocity`: Defines how fluid velocity at particle location is evaluated:
+    - `cell`: Uses fluid velocity of the cell containing the particle center.
+    - `interpolate`: Interpolates fluid velocity from neighboring cells to particle center.
+    - `distribution`: Uses `distributionMethod` for volume-averaged velocity evaluation.
+
+  - `solidVelocity`: Defines how particle velocity is evaluated in coupling calculations:
+    - `particle`: Uses exact particle velocity directly.
+    - `distribution`: Uses `distributionMethod` to obtain volume-averaged velocity in cell; this average is used for all particles in that cell.
+
+  - `drag`: Defines drag force model and parameters:
+    - `model`: Drag closure options are `DiFelice`, `ErgunWenYu`, `Beetstra`, `Rong`, `Cello`.
+    - `residualRe`: Minimum Reynolds number threshold to prevent numerical issues.
+
+  - `lift`: Defines lift force model and surface rotation torque:
+    - `model`: Lift force options are `none` (default), `Saffmann`, `Loth2008`, `Shi2019`.
+    - `surfaceRotationTorque`: Torque model options are `none`, `lowReynolds`, `Loth2008`, `Shi2019`.
+    - `residualRe`: Minimum Reynolds number threshold.
 
 ```C++
 // constant/couplingProperties file 
 unresolved
 {
-
-    cellDistribution
+    // Distribution method for mapping particle data (porosity, velocity,
+    // force, etc.) over fluid cells
+    // 
+    // Available methods: 
+    //     - PCM: Particle Centroid Method (no smoothing)
+    //     - diffusion: Laplacian diffusion for smoothing
+    //     - Gaussian: Gaussian distribution with specified std dev
+    //     - GaussianIntegral: Gaussian integral for distributing data
+    //     - adaptiveGaussian: Gaussian with adaptive std deviation
+    //     - subDivision29: Divided-volume method (29-sub-volume version)
+    //     - subDivision9: Divided-volume method (9-sub-volume version)
+    distributionMethod      adaptiveGaussian;
+    
+    // Distribution method required settings 
+    adaptiveGaussianInfo
     {
-        // type of cell distribution method (if required) 
-        //    self: no distribution (cell itself)
-        //    Gaussian: distribute values on sorounding cells based on a neighbor length
-        //    adaptiveGaussian: similar to Gaussian, but it adapts the distribution 
-        //    GaussianIntegral: Uses Gaussian integral for determining particle distribution 
-        //    diffusion: uses diffusion smoothing to distribute particle properties across cells
-        type                adaptiveGaussian; 
+        maxLayers           1;          // optional default: 1
+        smoothingFactor     1.0;        // optional, default: 1.0
     }
 
+    // Required settings for calculating porosity method 
     porosity
     {
-    	  // Options are PIC, subDivision29Mod, subDivision9, cellDistribution
-        method      cellDistribution;
+        // method is optional
+        //    - default value is distribution
+        //    - Other options: subDivision29, subDivision9 
+        method      distribution; 
 
-        // minimum alpha allowed 
+        // alphaMin is minimum alpha allowed in porosity calculations
         alphaMin    0.2;
     }
 
-    drag
+    // Settings for momentum coupling  
+    momentumInteraction
     {
-        // Drag force closure, other options are ErgunWenYu, Rong
-        type                DiFelice; 
+        // How to perform smoothing on momentum exchange terms
+        // Available options are: 
+        //    - cell: No smoothing, assigned to containing cell
+        //    - distribution: Uses distributionMethod for smoothing
+        momentumExchange distribution; 
 
-        // Method for calculating the fluid velocity which is used in drag force calculations
-        //   cell: uses fluid velocity of the cell that contains the particle center 
-        //   particle: uses interpolated fluid velocity on the particle center based on 
-        //             cell values around particle
-        fluidVelocity       cell;
+        // How to evaluate fluid velocity at particle location
+        // Available options are: 
+        //    - cell: Uses cell value
+        //    - interpolate: Interpolates from neighboring cells
+        //    - distribution: Uses distributionMethod for averaging
+        fluidVelocity    distribution;
 
-        // Method for calculating the solid velocity which is used in drag calculations 
-        //   cell: solid velocity is averaged on the cell using cellDistribution method 
-        //         and this average value is used as particle velocity in calculations 
-        //   particle: the actual particle velocity is used in calculations 
-        solidVelocity       particle;  
+        // How to evaluate particle velocity in calculations
+        // Available options are:
+        //    - particle: Uses exact particle velocity
+        //    - distribution: Uses distributionMethod to obtain average
+        //      velocity in the cell for all particles
+        solidVelocity    particle;
 
-        // Whether to distribute calculated particle drag force onto cells
-        //   off: add the calculated drag force on the cell itself
-        //   on: distributes the calculated drag force on cells (using cellDistribution method)
-        cellDistribution    off; 
+        drag
+        {
+            // Drag force closure
+            // Available options for spherical particles:
+            //   - DiFelice, ErgunWenYu, Rong, Cello, Beetstra
+            model       DiFelice; 
 
-        // residual Reynolds number 
-        residualRe          10e-6;
+            // Residual Reynolds number 
+            residualRe  1.0e-6;
+        }
+
+        lift
+        {   
+            // Lift force model options:
+            //   - none: Not included (default)
+            //   - Saffmann: Saffman (1965), low Re
+            //   - Loth2008: Loth (2008), intermediate Re
+            //   - Shi2019: Shi & Rzehak (2019), wide Re range
+            model                   none;
+
+            // Surface rotation torque model options:
+            //    - none: Not included (default)
+            //    - lowReynolds: Happel and Brenner model
+            //    - Loth2008: Based on Loth (2008) model
+            //    - Shi2019: Based on Shi model
+            surfaceRotationTorque   none; 
+
+            residualRe              1.0e-6;
+        }
+
+        virtualMass
+        {
+            // This part has not been implemented yet
+        }
     }
 
 }

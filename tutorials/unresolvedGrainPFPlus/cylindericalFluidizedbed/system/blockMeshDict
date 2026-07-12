@@ -1,0 +1,158 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  9
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// adapted for ESI version of OpenFOAM  
+
+scale 1;
+
+// * * * User INPUTS  * * * * * * * * * *
+
+  // Gemoetry 
+  radius      0.05;
+  height      0.2;
+  cellSize    0.003;
+  innerArc    yes; // yes/no
+
+  // Patch information 
+  inletPatchName      inlet;
+  outletPatchName     outlet;
+  wallPatchName       cylinderWall;
+// * * * * * * * * * * * * * * * * * * * 
+
+//------------- General settings ---------------------------------------------
+frac            0.4;
+flatness        1.0;
+inFlatness      2.5;
+
+
+
+squareSize      #calc "$radius + $frac * $radius";
+squareSizeN     #calc "$radius - $frac * $radius";
+xPos            #calc "$radius +  $radius * 0.707106781187";
+xPosN           #calc "$radius -  $radius * 0.707106781187";
+//intpltnPoint    #calc ""
+nSqaure         #calc "floor( ($squareSize - $squareSizeN) / $cellSize )+1";
+nZ              #calc "floor( $height / $cellSize) + 1";
+nDiag           #calc "floor( ( $xPos - $squareSize)/0.707106781187 / $cellSize ) + 1";
+
+
+
+vertices
+(
+    ($squareSizeN  $squareSizeN 0) //0
+    ( $squareSize  $squareSizeN 0) //1
+    ( $squareSize   $squareSize 0) //2
+    ($squareSizeN   $squareSize 0) //3
+    ($squareSizeN  $squareSizeN $height) //4
+    ( $squareSize  $squareSizeN $height) //5
+    ( $squareSize   $squareSize $height) //6
+    ($squareSizeN   $squareSize $height) //7
+    ($xPosN $xPosN  0) //8
+    ( $xPos $xPosN  0) //9
+    ( $xPos  $xPos  0) //10
+    ($xPosN  $xPos  0) //11
+    ($xPosN $xPosN  $height) //12
+    ( $xPos $xPosN  $height) //13
+    ( $xPos  $xPos  $height) //14
+    ($xPosN  $xPos  $height) //15
+
+);
+
+blocks
+(
+    hex (0 1 2 3 4 5 6 7) ($nSqaure $nSqaure $nZ) simpleGrading (1 1 1)       // block0
+    hex (0 8 9 1 4 12 13 5) ($nDiag $nSqaure $nZ) simpleGrading (1 1 1)       // block1
+    hex (1 9 10 2 5 13 14 6) ($nDiag $nSqaure $nZ) simpleGrading (1 1 1)       // block2
+    hex (2 10 11 3 6 14 15 7) ($nDiag $nSqaure $nZ) simpleGrading (1 1 1)       // block3
+    hex (3 11 8 0 7 15 12 4) ($nDiag $nSqaure $nZ) simpleGrading (1 1 1)       // block4
+    
+);
+
+#ifeq $innerArc yes
+edges
+(
+
+    arc 0 1   origin $inFlatness ($radius $radius 0)
+    arc 1 2   origin $inFlatness ($radius $radius 0)
+    arc 2 3   origin $inFlatness ($radius $radius 0)
+    arc 3 0   origin $inFlatness ($radius $radius 0)
+    arc 4 5   origin $inFlatness ($radius $radius $height)
+    arc 5 6   origin $inFlatness ($radius $radius $height)
+    arc 6 7   origin $inFlatness ($radius $radius $height)
+    arc 7 4   origin $inFlatness ($radius $radius $height)
+    arc 9  8  origin $flatness ($radius $radius 0)
+    arc 12 13 origin $flatness ($radius $radius $height)
+    arc 10 9  origin $flatness ($radius $radius 0)
+    arc 13 14 origin $flatness ($radius $radius $height)
+    arc 11 10 origin $flatness ($radius $radius 0)
+    arc 14 15 origin $flatness ($radius $radius $height)
+    arc 11 8  origin $flatness ($radius $radius 0)
+    arc 15 12 origin $flatness ($radius $radius $height)
+);
+#else
+edges
+(
+    arc 9  8  origin $flatness ($radius $radius 0)
+    arc 12 13 origin $flatness ($radius $radius $height)
+    arc 10 9  origin $flatness ($radius $radius 0)
+    arc 13 14 origin $flatness ($radius $radius $height)
+    arc 11 10 origin $flatness ($radius $radius 0)
+    arc 14 15 origin $flatness ($radius $radius $height)
+    arc 11 8  origin $flatness ($radius $radius 0)
+    arc 15 12 origin $flatness ($radius $radius $height)
+);
+#endif
+
+
+defaultPatch
+{
+    name $wallPatchName;
+    type wall;
+}
+
+boundary
+(
+    $inletPatchName
+    {
+        type    patch;
+        faces   
+        (
+            (3 2 1 0)
+            (1 9 8 0)
+            (2 10 9 1)
+            (3 11 10 2)
+            (0 8 11 3)
+        );
+    }
+
+    $outletPatchName
+    {
+        type patch;
+        faces
+        (
+            (4 5 6 7)
+            (4 12 13 5)
+            (5 13 14 6)
+            (6 14 15 7)
+            (7 15 12 4)
+        );
+    }
+);
+
+mergePatchPairs
+(
+);
+
+// ************************************************************************* //

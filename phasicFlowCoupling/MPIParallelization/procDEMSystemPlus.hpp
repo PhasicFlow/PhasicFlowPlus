@@ -167,6 +167,18 @@ public:
 	}
 
 	inline
+	span<realx3> particlesAccelerationAllMaster()
+	{
+		if(demSystem_)
+		{
+			return demSystem_->acceleration();
+		}else
+		{
+			return span<realx3>();
+		}
+	}
+
+	inline
 	span<realx3> particlesFluidTorqueAllMaster()
 	{
 		if(demSystem_)
@@ -175,6 +187,19 @@ public:
 		}else
 		{
 			return span<realx3>();
+		}
+	}
+
+	inline
+	std::vector<real> shapeDiametersAllMaster()const
+	{
+		if(demSystem_)
+		{
+			return demSystem_->shapeDiameters();
+		}
+		else
+		{
+			return std::vector<real>{};
 		}
 	}
 

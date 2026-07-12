@@ -1,0 +1,42 @@
+/* -------------------------------*- C++ -*--------------------------------- *\
+|  phasicFlow File                                                            |
+|  copyright: www.cemf.ir                                                     |
+\* ------------------------------------------------------------------------- */
+
+objectName  geometryDict;
+objectType  dictionary;
+fileFormat  ASCII;
+
+/*---------------------------------------------------------------------------*/
+motionModel            stationary;
+
+surfaces
+{
+    topWall
+    {
+        type        foamPatchWall;  
+        patch       top;
+        material    wallMat;  
+    }
+
+    bottoWall
+    {
+        type        foamPatchWall;
+        patch       bottom;
+        material    wallMat; 
+    }
+
+    rearWall
+    {
+        type        foamPatchWall; 
+        patch       rear;
+        material    wallMat;
+    }
+
+    frontWall
+    {
+        type        foamPatchWall; 
+        patch       front;
+        material    wallMat;  
+    }
+}
