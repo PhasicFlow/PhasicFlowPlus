@@ -202,6 +202,45 @@ public:
     virtual 
     word couplingSystemType()const = 0;
 
+    /// Returns the velocity of the injected mass source.
+    virtual 
+    Foam::tmp<Foam::volVectorField> Us() const;
+
+    /// Returns explicit reaction heat source (Fallback: Zero)
+    virtual 
+    Foam::tmp<Foam::volScalarField> rxnHeatSu() const
+    {
+        return Foam::tmp<Foam::volScalarField>::New(
+            Foam::IOobject(
+                "dummyRxnHeat", 
+                this->cMesh().mesh().time().timeName(), 
+                this->cMesh().mesh(), 
+                Foam::IOobject::NO_READ, 
+                Foam::IOobject::NO_WRITE, 
+                false),
+            this->cMesh().mesh(),
+            Foam::dimensionedScalar(
+                "zero", 
+                Foam::dimEnergy/Foam::dimVolume/Foam::dimTime, 
+                0.0));
+    }
+
+    /// Returns species mass sources (Fallback: Empty List)
+    virtual 
+    const Foam::PtrList<Foam::volScalarField>& speciesSu() const
+    {
+        static Foam::PtrList<Foam::volScalarField> dummyList;
+        return dummyList;
+    }
+
+    /// Returns species implicit sink (Fallback: Empty List)
+    virtual 
+    const Foam::PtrList<Foam::volScalarField>& speciesSp() const
+    {
+        static Foam::PtrList<Foam::volScalarField> dummyList;
+        return dummyList;
+    }
+
     /// Pure virtual method indicating if the coupling requires cell-level distribution of coupling terms.
     /// @return True if distribution weights are needed; false if using cell centroid method.
     virtual 

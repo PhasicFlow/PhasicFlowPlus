@@ -12,6 +12,7 @@ elif [ "$WM_PROJECT_VERSION" = "v2406" ] || [ "$WM_PROJECT_VERSION" = "v2412" ] 
     wclean ./unresolvedSpherePFPlus
     wclean ./unresolvedGrainPFPlus
     wclean ./resolvedSpherePFPlus
+    wclean ./unresolvedHeatSpherePFPlus
     wclean ./resolvedSphereVoFPFPlus
 else
     echo "  -> Error: Unknown OpenFOAM version: $WM_PROJECT_VERSION"

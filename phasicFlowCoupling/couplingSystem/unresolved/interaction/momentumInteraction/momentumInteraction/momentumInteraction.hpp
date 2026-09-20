@@ -145,6 +145,24 @@ public:
         return virtualMass_->virtualMassForce();
     }
 
+    /// Returns the fluid velocity averaging object (used by thermal coupling
+    /// to reuse this step's already-computed averaging instead of
+    /// recomputing it)
+    inline
+    const fluidAveraging& fluidVelAveraging()const
+    {
+        return *fluidAveraging_;
+    }
+
+    /// Returns the solid velocity averaging object (used by thermal coupling
+    /// to reuse this step's already-computed averaging instead of
+    /// recomputing it)
+    inline
+    const solidAveraging& solidVelAveraging()const
+    {
+        return *solidAveraging_;
+    }
+
     /// Returns a const reference to the porosity field
     inline
     const porosity& Porosity()const

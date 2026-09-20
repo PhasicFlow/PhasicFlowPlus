@@ -17,6 +17,9 @@ couplingSystem/unresolved/turbulence/alphaTurbulentTransportModels.C
 couplingSystem/unresolved/unresolvedCouplingSystem/unresolvedCouplingSystem.C
 couplingSystem/unresolved/momentumSphereUnresolvedCouplingSystem/momentumSphereUnresolvedCouplingSystem.C
 couplingSystem/unresolved/momentumGrainUnresolvedCouplingSystem/momentumGrainUnresolvedCouplingSystem.C
+couplingSystem/unresolved/momentumSphereUnresolvedCouplingSystem/thermalMomentumSphereUnresolvedCouplingSystem.C
+
+
 
 couplingSystem/unresolved/distributions/distribution/distributionBase.C
 couplingSystem/unresolved/distributions/PCM/PCM.C
@@ -35,6 +38,7 @@ couplingSystem/unresolved/porosity/subDivision29/subDivision29Mod.C
 couplingSystem/unresolved/porosity/porosityCellDistribution/porosityCellDistribution.C
 
 couplingSystem/unresolved/interaction/momentumInteraction/momentumInteraction/momentumInteraction.C
+couplingSystem/unresolved/interaction/heatInteraction/heatInteraction.C
 
 couplingSystem/unresolved/interaction/solidAveraging/solidAveraging/solidAveraging.C
 couplingSystem/unresolved/interaction/solidAveraging/particle/particleSolidAveraging.C
@@ -44,6 +48,12 @@ couplingSystem/unresolved/interaction/fluidAveraging/fluidAveraging/fluidAveragi
 couplingSystem/unresolved/interaction/fluidAveraging/cell/cellFluidAveraging.C
 couplingSystem/unresolved/interaction/fluidAveraging/interpolate/interpolateFluidAveraging.C
 couplingSystem/unresolved/interaction/fluidAveraging/distribution/distributionFluidAveraging.C
+
+couplingSystem/unresolved/interaction/heatTransfer/heatTransfer/heatTransfer.C
+couplingSystem/unresolved/interaction/heatTransfer/sphereHeatTransfer/sphereHeatTransfers.C
+couplingSystem/unresolved/interaction/heatTransfer/heatTransferClosures/RanzMarshall.C
+couplingSystem/unresolved/interaction/heatTransfer/heatTransferClosures/noneHeatTransfer.C
+
 
 couplingSystem/unresolved/interaction/drag/drag/drag.C
 couplingSystem/unresolved/interaction/drag/sphereDrag/sphereDrags.C

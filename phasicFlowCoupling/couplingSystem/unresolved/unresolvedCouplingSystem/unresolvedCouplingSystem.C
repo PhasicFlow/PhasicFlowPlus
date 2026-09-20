@@ -86,3 +86,25 @@ pFlow::uniquePtr<pFlow::coupling::unresolvedCouplingSystem>
 	return nullptr;
 
 }
+
+Foam::tmp<Foam::volVectorField> 
+    pFlow::coupling::unresolvedCouplingSystem::Us() const
+{
+    // Default fallback implementation for the velocity of injected mass source.
+    // Returns a continuous zero vector field mapped over the fluid domain.
+    // Safely supports physical setups where mass injection holds zero initial 
+    // momentum or when spatial distribution is bypassed.
+    return Foam::tmp<Foam::volVectorField>::New(
+        Foam::IOobject(
+            "UsZero",
+            this->cMesh().mesh().time().timeName(),
+            this->cMesh().mesh(),
+            Foam::IOobject::NO_READ,
+            Foam::IOobject::NO_WRITE,
+            false),
+        this->cMesh().mesh(),
+        Foam::dimensionedVector(
+            "zero", 
+            Foam::dimVelocity, 
+            Foam::vector::zero));
+}
