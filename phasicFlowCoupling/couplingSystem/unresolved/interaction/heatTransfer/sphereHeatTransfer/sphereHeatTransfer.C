@@ -19,7 +19,6 @@ Licence:
 -----------------------------------------------------------------------------*/
 
 #include "sphereHeatTransfer.hpp"
-#include <cmath> 
 
 namespace pFlow
 {
@@ -96,46 +95,6 @@ void sphereHeatTransfer<NusseltClosureType>::calculateHeatTransfer(
         (radNumPrt.size() == numPar) && 
         (radSumTemp.size() == numPar) && 
         (emissivity.size() == numPar);
-
-    // ------------------------------------------------------------------------
-    // Unresolved Assumption Guard (Executed only once per simulation)
-    //
-    // Checks the LARGEST particle diameter across the ENTIRE domain (all
-    // processors), not just the first particle in this processor's local
-    // array. The "numPar > 0" guard is intentionally NOT used here: both
-    // the local-maximum loop and the collective reduction below must run
-    // identically on every processor on every call, regardless of how many
-    // particles happen to be mapped to this processor right now.
-    // ------------------------------------------------------------------------
-    if (!this->unresolvedWarningIssued_)
-    {
-        Foam::scalar globalMaxDiameter = 0.0;
-
-        for (size_t parIndx = 0; parIndx < numPar; parIndx++)
-        {
-            globalMaxDiameter = 
-                Foam::max(globalMaxDiameter, diameter[parIndx]);
-        }
-
-        // Collective, all-processor reduction: combine every processor's
-        // local maximum into a single domain-wide maximum diameter.
-        Foam::reduce(globalMaxDiameter, Foam::maxOp<Foam::scalar>());
-
-        const Foam::scalar minV        = Foam::gMin(Vcells);
-        const Foam::scalar minCellSize = Foam::pow(minV, 1.0/3.0);
-
-        if (globalMaxDiameter > minCellSize)
-        {
-            WarningInFunction
-                << "Largest particle diameter in the domain (" 
-                << globalMaxDiameter
-                << ") exceeds the minimum fluid cell size (" << minCellSize
-                << "). The unresolved CFD-DEM assumption (V_cell >> V_p) "
-                << "may be violated!" << Foam::endl;
-        }
-
-        this->unresolvedWarningIssued_ = true;
-    }
 
     // ------------------------------------------------------------------------
     // Thermodynamic Bounds

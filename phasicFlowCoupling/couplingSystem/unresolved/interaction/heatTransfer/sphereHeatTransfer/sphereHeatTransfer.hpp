@@ -63,6 +63,14 @@ class sphereHeatTransfer
 : 
     public heatTransfer
 {
+private:
+
+    //- private members
+
+        /// @brief The specific closure model (functor) for calculating the 
+        /// Nusselt number.
+        NusseltClosureType  nusseltClosure_;
+
 public:
 
     //- Type info
@@ -71,22 +79,6 @@ public:
         using SphereHeatTransferType = sphereHeatTransfer<NusseltClosureType>;
 
         TypeInfoTemplate11("sphereHeatTransfer", NusseltClosureType);
-
-private:
-
-    //- private members
-
-        // --- Closure models and state flags ---
-
-        /// @brief The specific closure model (functor) for calculating the 
-        /// Nusselt number.
-        NusseltClosureType  nusseltClosure_;
-
-        /// @brief Flag to ensure the unresolved assumption warning is printed 
-        /// only once.
-        bool                unresolvedWarningIssued_ = false;
-
-public:
 
     //- constructors
 

@@ -31,10 +31,6 @@ namespace pFlow
 namespace coupling
 {
 
-    // ===================================================================== //
-    // Explicit Template Instantiations
-    // ===================================================================== //
-
     /// @brief Instructs the compiler to generate the binary code for the 
     /// Ranz-Marshall heat transfer implementation.
     template class sphereHeatTransfer<RanzMarshall>;

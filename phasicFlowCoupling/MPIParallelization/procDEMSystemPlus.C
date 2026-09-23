@@ -19,15 +19,8 @@ Licence:
 -----------------------------------------------------------------------------*/
 
 #include "procDEMSystemPlus.hpp"
-#include "procVectorPlus.hpp"
 #include "procCommunicationPlus.hpp"
-
-// Standard C++ inclusions needed for reading the domainDict file below
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <sstream>
-#include <vector>
+#include "dictionary.hpp"
 
 pFlow::Plus::procDEMSystem::procDEMSystem
 (
@@ -44,77 +37,43 @@ pFlow::Plus::procDEMSystem::procDEMSystem
 		realx3 domainMin(0, 0, 0);
 		realx3 domainMax(1, 1, 1);
 
-		// Standard hierarchy of search paths for domain bounds
-		std::vector<std::string> possiblePaths = {
-			"settings/domainDict",
-			"caseSetup/domainDict",
-			"constant/domainDict",
-			"system/domainDict",
-			"domainDict"
+		// Standard hierarchy of search directories for domainDict
+		std::vector<word> possibleDirs = {
+			"settings",
+			"caseSetup",
+			"constant",
+			"system",
+			"."
 		};
 
-		std::ifstream dictFile;
-		std::string foundPath = "";
+		word foundDir = "";
 
-		for (const auto& path : possiblePaths)
+		for (const auto& dir : possibleDirs)
 		{
-			dictFile.open(path);
-			if (dictFile.is_open())
+			fileSystem candidate(dir, "domainDict");
+
+			if (candidate.exist())
 			{
-				foundPath = path;
+				dictionary domDict("domainDict", candidate);
+				const dictionary& globalBox = domDict.subDict("globalBox");
+
+				domainMin = globalBox.getVal<realx3>("min");
+				domainMax = globalBox.getVal<realx3>("max");
+
+				foundDir = dir;
 				break;
 			}
 		}
 
-		if (dictFile.is_open())
+		if (!foundDir.empty())
 		{
-			std::string line;
-			while (std::getline(dictFile, line))
-			{
-				if (line.find("min") != std::string::npos && 
-					line.find("(")   != std::string::npos)
-				{
-					size_t start = line.find("(");
-					size_t end   = line.find(")");
-
-					if (start != std::string::npos && end != std::string::npos)
-					{
-						std::istringstream iss(
-							line.substr(start + 1, end - start - 1));
-						real x, y, z;
-						if (iss >> x >> y >> z) 
-						{
-							domainMin = realx3(x, y, z);
-						}
-					}
-				}
-				else if (line.find("max") != std::string::npos && 
-						 line.find("(")   != std::string::npos)
-				{
-					size_t start = line.find("(");
-					size_t end   = line.find(")");
-
-					if (start != std::string::npos && end != std::string::npos)
-					{
-						std::istringstream iss(
-							line.substr(start + 1, end - start - 1));
-						real x, y, z;
-						if (iss >> x >> y >> z) 
-						{
-							domainMax = realx3(x, y, z);
-						}
-					}
-				}
-			}
-			dictFile.close();
-
-			std::cout << "\n[PhasicFlow Plus] Read domain boundaries from '" 
-					  << foundPath << "':\n"
-					  << "    Min: (" << domainMin.x() << " " 
-					  << domainMin.y() << " " << domainMin.z() << ")\n"
-					  << "    Max: (" << domainMax.x() << " " 
-					  << domainMax.y() << " " << domainMax.z() << ")\n" 
-					  << std::endl;
+			output << "\n[PhasicFlow Plus] Read domain boundaries from '" 
+				   << foundDir << "/domainDict':\n"
+				   << "    Min: (" << domainMin.x() << " " 
+				   << domainMin.y() << " " << domainMin.z() << ")\n"
+				   << "    Max: (" << domainMax.x() << " " 
+				   << domainMax.y() << " " << domainMax.z() << ")\n" 
+				   << endl;
 		}
 		else
 		{

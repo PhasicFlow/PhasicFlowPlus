@@ -37,22 +37,6 @@ class solidAveraging;
  */
 class heatTransfer
 {
-public:
-
-    //- Type info
-
-        TypeInfo("heatTransfer");
-
-        create_vCtor(
-            heatTransfer,
-            couplingSystem,
-            (
-                const unresolvedCouplingSystem& uCS, 
-                const porosity&                 prsty
-            ),
-            (uCS, prsty)
-        );
-
 private:
 
     //- private members
@@ -90,6 +74,20 @@ protected:
         }
 
 public:
+
+    //- Type info
+
+        TypeInfo("heatTransfer");
+
+        create_vCtor(
+            heatTransfer,
+            couplingSystem,
+            (
+                const unresolvedCouplingSystem& uCS, 
+                const porosity&                 prsty
+            ),
+            (uCS, prsty)
+        );
 
     //- constructors
 
@@ -170,12 +168,12 @@ public:
             const Plus::uint32ProcCMField&  radNumPrt,
             Plus::realProcCMField&          QpRad) = 0;
 
-        static const Foam::dictionary& getDict(
-            const unresolvedCouplingSystem& uCS);    
-        
         static uniquePtr<heatTransfer> create(
             const unresolvedCouplingSystem& uCS, 
             const porosity&                 prsty);
+
+        static const Foam::dictionary& getDict(
+            const unresolvedCouplingSystem& uCS);    
 
 }; 
 

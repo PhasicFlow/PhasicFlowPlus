@@ -139,10 +139,7 @@ protected:
 
 	//- protected methods
 
-		/// Const reference to the internally-owned porosity object, so a
-		/// derived coupling system (e.g.
-		/// thermalMomentumSphereUnresolvedCouplingSystem) can obtain a
-		/// valid const porosity& during its own member-initialiser list.
+		/// Const reference to the internally-owned porosity object.
 		inline
 		const porosity& porosityCoupling() const
 		{
@@ -150,9 +147,7 @@ protected:
 		}
 
 		/// Const reference to the internally-owned momentumInteraction
-		/// object, so a derived coupling system can reuse its fluid/solid
-		/// velocity averaging (fluidVelAveraging()/solidVelAveraging())
-		/// instead of recomputing them.
+		/// object.
 		inline
 		const momentumInteraction& momentumInteractionCoupling() const
 		{

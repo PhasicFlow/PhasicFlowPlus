@@ -1,0 +1,56 @@
+/* -------------------------------*- C++ -*--------------------------------- *\ 
+|  phasicFlow File                                                            | 
+|  copyright: www.cemf.ir                                                     | 
+\* ------------------------------------------------------------------------- */  
+objectName 	thermoPhysicalInteraction;
+objectType 	dictionary;
+fileFormat  ASCII;
+/*---------------------------------------------------------------------------*/
+
+// Thermal material properties, one value per material in interaction's
+// `materials` list (sphereMaterial wallMaterial), in the same order.
+
+heatCapacities        (1500  900);    // specific heat capacity [J/(kg.K)]
+
+heatConductivities    (0.2   200);    // thermal conductivity [W/(m.K)]
+
+emissivities          (0.9   0.2);    // surface emissivity [-]
+
+// --- Mechanisms ---
+//
+// This first thermal tutorial only demonstrates fluid-to-particle
+// convective heat transfer (Ranz-Marshall, via couplingProperties'
+// heatInteraction), so particle-particle mechanisms are off here to
+// keep that story uncluttered. All three are independent switches -
+// safe to turn on individually once the convective case is working.
+
+enableRadiation    No;   // particle-particle radiation
+
+enablePP           No;   // particle-particle contact conduction (Q_pp)
+
+enablePFP          No;   // particle-fluid-particle sub-grid conduction (Q_pfp)
+
+neighborListUpdateInterval 1;   // optional, default: 1
+
+// Required only when enablePP or enablePFP is Yes above. Must match
+// model.Yeff in the interaction file (the softened/simulated modulus
+// used for the DEM contact force), so the Hertzian contact-radius
+// correction can scale back to the real moduli (realYoungsModuli,
+// also in the interaction file).
+// simYoungsModulus    1.0e6;
+
+// Required only when enableRadiation is Yes above.
+// radCut              0.006;      // neighbourhood radius for radiation [m]
+// radUpdateInterval   1;          // optional, default: 1
+
+// Optional: ambient fluid kappa/alpha for the ParticleFluidParticle
+// (PFP) model during the standalone (DEM-only) settling phase, before
+// any CFD mesh exists to sample real values from. Both keys required
+// together if this block is present; omitted here since enablePFP is
+// off. Harmless to add later even with a coupled solver - it is only
+// ever used before the first real CFD exchange overwrites it.
+// fluidProperties
+// {
+//     kappa    0.026;
+//     alpha    1.0;
+// }

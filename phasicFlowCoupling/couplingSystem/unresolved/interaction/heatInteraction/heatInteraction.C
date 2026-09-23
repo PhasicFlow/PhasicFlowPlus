@@ -69,12 +69,24 @@ heatInteraction::heatInteraction(
         fluidAveraging_ = 
             fluidAveraging::create(fldAvr, uCS, "fluidVelocity_heat");
     }
+    else
+    {
+        Foam::Info << "    heatInteraction: fluidVelocity is "
+                   << "similarToMomentum - reusing momentum's averaging."
+                   << Foam::endl;
+    }
 
     auto sldVel = dict().get<Foam::word>("solidVelocity");
     if (sldVel != "similarToMomentum")
     {
         solidAveraging_ = 
             solidAveraging::create(sldVel, uCS, porosity_, "solidVelocity_heat");
+    }
+    else
+    {
+        Foam::Info << "    heatInteraction: solidVelocity is "
+                   << "similarToMomentum - reusing momentum's averaging."
+                   << Foam::endl;
     }
 
     // Instantiate the physical calculation model (delegation)
@@ -128,10 +140,7 @@ void heatInteraction::calculateCoupling(
 {
     heatInteractionTimer_.start();
 
-    // Heat's own averaging objects (when it has them) are separate from
-    // momentum's and haven't been touched yet this step, so they need
-    // calculating here before use - momentum's own calculate() calls
-    // (in momentumInteraction::calculateCoupling()) don't reach these.
+    // Populates heat's own averaging objects, when it has them.
     if (fluidAveraging_)
     {
         fluidAveraging_->calculate(U);

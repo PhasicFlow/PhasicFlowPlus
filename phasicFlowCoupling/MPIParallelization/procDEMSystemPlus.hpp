@@ -29,7 +29,6 @@ Licence:
 
 // from coupling-phasicFlow
 #include "procVectorPlus.hpp"
-#include <vector>
 #include <string>
 
 
@@ -274,18 +273,6 @@ public:
 	// --- thermal coupling extensions ---
 
 	inline
-	span<real> temperature()
-	{
-		if(demSystem_)
-		{
-			return demSystem_->temperature();
-		}else
-		{
-			return span<real>();
-		}
-	}
-
-	inline
 	span<real> emissivity()
 	{
 		if(demSystem_)
@@ -386,7 +373,8 @@ public:
 	}
 
 	// --- multi-species chemical reaction extensions ---
-
+	// Reaction coupling (not yet reviewed).
+	/*
 	inline
 	span<real> solidMassFractions()
 	{
@@ -498,6 +486,7 @@ public:
 	// getDataFromDEM(), and the other way via sendGasConcentrationsToDEM()
 	// below - there is no separate CFD-to-DEM reaction-data send this
 	// class needs to expose.
+	*/
 
 	// --- sync dispatchers: host -> dem device ---
 
@@ -553,6 +542,7 @@ public:
 		}
 	}
 
+	/*
 	inline
 	bool sendGasConcentrationsToDEM()
 	{
@@ -565,6 +555,7 @@ public:
 			return true;
 		}
 	}
+	*/
 
 	// --- timestep execution ---
 
@@ -611,11 +602,16 @@ public:
 		}
 	}
 
-	// Legacy backward-compatibility alias
 	inline
 	span<real> particlesTemperatureAllMaster()
 	{
-		return temperature();
+		if(demSystem_)
+		{
+			return demSystem_->temperature();
+		}else
+		{
+			return span<real>();
+		}
 	}
 
 };

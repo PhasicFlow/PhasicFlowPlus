@@ -77,14 +77,6 @@ heatTransfer::heatTransfer(
 
 //---------------------------- public methods ---------------------------------
 
-const Foam::dictionary& heatTransfer::getDict(
-    const unresolvedCouplingSystem& uCS)
-{
-    return uCS.unresolvedDict()
-              .subDict("heatInteraction")
-              .subDict("heatTransferModel");
-}
-
 const Foam::dictionary& heatTransfer::dict() const
 {
     return heatTransfer::getDict(porosity_.uCS());
@@ -131,10 +123,17 @@ uniquePtr<heatTransfer> heatTransfer::create(
     return nullptr;
 }
 
+const Foam::dictionary& heatTransfer::getDict(
+    const unresolvedCouplingSystem& uCS)
+{
+    return uCS.unresolvedDict()
+              .subDict("heatInteraction")
+              .subDict("heatTransferModel");
+}
+
 //+ + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
 
 } // coupling
 } // pFlow
-
 
 

@@ -53,11 +53,9 @@ private:
         /// @brief Convective + radiative heat interaction manager.
         heatInteraction             heatInteraction_;
 
-        /// @brief True when heatInteraction_ additionally requires
-        /// distribution weights, on top of whatever
-        /// momentumSphereUnresolvedCouplingSystem already requires (see
-        /// requireCellDistribution() below).
-        bool                        requiresDistribution_ = false;
+        /// True when heatInteraction_ needs distribution weights beyond
+        /// what the base class already provides.
+        bool                        requiresDistributionHeat_ = false;
 
         // --- MPI communication fields (ProcCMFields) ---
 
@@ -87,38 +85,24 @@ private:
         /// Local fluid volume fraction sampled at the particle [-].
         Plus::realProcCMField       fluidAlpha_;
 
-        // --- Cumulative diagnostic counters ---
-        //
-        // These accumulate for the ENTIRE run rather than being reset every
-        // timestep, so a chronic issue that stays just under the per-step
-        // reporting threshold (and would therefore never print a warning on
-        // its own) is still visible once its cumulative effect becomes
-        // significant. See collectFluidProperties() and
-        // sendFluidPropertiesToDEM() for where each is incremented.
+        // Diagnostic counters, accumulated over the whole run.
 
-        /// @brief Total particle-timesteps, across the whole run, for which
-        /// kappa had to be floored to a positive value after MPI collection.
-        mutable uint64              cumulativeBadKappaCount_ = 0;
+        /// Particle-timesteps with kappa floored to positive after
+        /// MPI collection.
+        uint64              cumulativeBadKappaCount_ = 0;
 
-        /// @brief Total particle-timesteps, across the whole run, for which
-        /// alpha had to be clamped into [0,1] after MPI collection.
-        mutable uint64              cumulativeBadAlphaCount_ = 0;
+        /// Particle-timesteps with alpha clamped into [0,1] after
+        /// MPI collection.
+        uint64              cumulativeBadAlphaCount_ = 0;
 
-        /// @brief Total particle-timesteps, across the whole run, for which a
-        /// particle's mapped fluid cell index was invalid when sampling
-        /// fluidKappa/fluidAlpha for the DEM side PFP model.
-        mutable uint64              cumulativeInvalidCellCount_ = 0;
+        /// Particle-timesteps with an invalid mapped fluid cell index.
+        uint64              cumulativeInvalidCellCount_ = 0;
 
-        /// @brief Milestone (in cumulative event count) at which the next
-        /// "still occurring" reminder for the bad kappa/alpha counters is
-        /// printed, so repeated occurrences are reported periodically rather
-        /// than either flooding the log every step or never appearing again
-        /// after the very first report.
-        mutable uint64              nextKappaAlphaReportMilestone_ = 1;
+        /// Next cumulative count at which a kappa/alpha reminder prints.
+        uint64              nextKappaAlphaReportMilestone_ = 1;
 
-        /// @brief Same milestone mechanism as above, for the invalid-cell
-        /// counter in sendFluidPropertiesToDEM().
-        mutable uint64              nextInvalidCellReportMilestone_ = 1;
+        /// Next cumulative count at which an invalid-cell reminder prints.
+        uint64              nextInvalidCellReportMilestone_ = 1;
 
     //- private methods
 
@@ -217,9 +201,6 @@ public:
                 heatInteraction_.heatSu());
         }
 
-        /// @brief Solid velocity field mapped to the Eulerian mesh.
-        Foam::tmp<Foam::volVectorField> Us() const override;
-
         // --- Identity ---
 
         inline
@@ -234,7 +215,7 @@ public:
             return 
                 momentumSphereUnresolvedCouplingSystem::
                     requireCellDistribution() ||
-                requiresDistribution_;
+                requiresDistributionHeat_;
         }
 
         // --- Data synchronisation ---

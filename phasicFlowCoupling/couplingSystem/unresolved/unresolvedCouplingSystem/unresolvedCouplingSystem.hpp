@@ -202,10 +202,6 @@ public:
     virtual 
     word couplingSystemType()const = 0;
 
-    /// Returns the velocity of the injected mass source.
-    virtual 
-    Foam::tmp<Foam::volVectorField> Us() const;
-
     /// Returns explicit reaction heat source (Fallback: Zero)
     virtual 
     Foam::tmp<Foam::volScalarField> rxnHeatSu() const
@@ -229,6 +225,7 @@ public:
     virtual 
     const Foam::PtrList<Foam::volScalarField>& speciesSu() const
     {
+        notImplementedFunction;
         static Foam::PtrList<Foam::volScalarField> dummyList;
         return dummyList;
     }
@@ -237,6 +234,7 @@ public:
     virtual 
     const Foam::PtrList<Foam::volScalarField>& speciesSp() const
     {
+        notImplementedFunction;
         static Foam::PtrList<Foam::volScalarField> dummyList;
         return dummyList;
     }

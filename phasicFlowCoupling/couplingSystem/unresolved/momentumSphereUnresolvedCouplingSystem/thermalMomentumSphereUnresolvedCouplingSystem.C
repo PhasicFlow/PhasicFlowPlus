@@ -251,6 +251,8 @@ void thermalMomentumSphereUnresolvedCouplingSystem::sendFluidPropertiesToDEM()
         }
     }
 
+    // MPI-collects the freshly-sampled local values above into the
+    // global buffer.
     collectFluidProperties();
 
     if (!pDEMSystem().sendFluidPropertiesToDEM())
@@ -271,7 +273,7 @@ bool thermalMomentumSphereUnresolvedCouplingSystem::distributeParticleFields()
 
     auto& comm = parMapping().realScatteredComm();
 
-    auto allTemp  = pDEMSystem().temperature();
+    auto allTemp  = pDEMSystem().particlesTemperatureAllMaster();
     auto thisTemp = makeSpan(particleTemperature_);
     if (!comm.distribute(allTemp, thisTemp)) 
     {
@@ -381,7 +383,7 @@ thermalMomentumSphereUnresolvedCouplingSystem(
         "fluidAlpha",     
         this->parMapping().centerMass())
 {
-    requiresDistribution_ = heatInteraction_.requireCellDistribution();
+    requiresDistributionHeat_ = heatInteraction_.requireCellDistribution();
 }
 
 //---------------------------- public methods ---------------------------------
@@ -401,19 +403,15 @@ void thermalMomentumSphereUnresolvedCouplingSystem::calculatePorosity()
     }
 }
 
-// calculateMomentumCoupling() is no longer overridden here - it is
-// inherited unchanged from momentumSphereUnresolvedCouplingSystem, which
-// now owns the same momentumInteraction_ this class used to duplicate.
+// calculateMomentumCoupling() is inherited unchanged from
+// momentumSphereUnresolvedCouplingSystem.
 
 void thermalMomentumSphereUnresolvedCouplingSystem::calculateHeatCoupling()
 {
-    const auto& U  = this->cMesh().mesh()
-                          .lookupObject<Foam::volVectorField>("U");
+    const auto& U  = this->cMesh().mesh().template lookupObject<Foam::volVectorField>("U");
     const auto& vp = this->particleVelocity();
 
-    // Momentum's already-computed averaging, used as a fallback when heat
-    // doesn't own its own (similarToMomentum) - see heatInteraction_'s own
-    // calculateCoupling() for which one actually gets used.
+    // Reuse velocity fields already sampled in calculateMomentumCoupling()
     const auto& fluidVel = momentumInteractionCoupling().fluidVelAveraging();
     const auto& parVel   = momentumInteractionCoupling().solidVelAveraging();
 
@@ -438,28 +436,13 @@ void thermalMomentumSphereUnresolvedCouplingSystem::calculateHeatCoupling()
         fluidHeatSourceRad_);
 }
 
-// calculateMassCoupling(), Sp() and Su() are no longer overridden here
-// either, for the same reason as calculateMomentumCoupling() above -
-// they are inherited unchanged from momentumSphereUnresolvedCouplingSystem.
+// calculateMassCoupling(), Sp() and Su() are inherited unchanged
+// from momentumSphereUnresolvedCouplingSystem.
 
 Foam::tmp<Foam::volScalarField>
 thermalMomentumSphereUnresolvedCouplingSystem::heatSource() const
 {
     return Foam::tmp<Foam::volScalarField>(heatInteraction_.Sh());
-}
-
-Foam::tmp<Foam::volVectorField>
-thermalMomentumSphereUnresolvedCouplingSystem::Us() const
-{
-    // Return the Eulerian solid-phase velocity field if registered
-    if (this->cMesh().mesh().foundObject<Foam::volVectorField>("Us"))
-    {
-        return Foam::tmp<Foam::volVectorField>(
-            this->cMesh().mesh().lookupObject<Foam::volVectorField>("Us"));
-    }
-
-    // Graceful fallback: zero velocity
-    return momentumSphereUnresolvedCouplingSystem::Us();
 }
 
 bool thermalMomentumSphereUnresolvedCouplingSystem::sendDataToDEM(
