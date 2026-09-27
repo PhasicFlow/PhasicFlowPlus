@@ -29,6 +29,7 @@ Licence:
 
 // from coupling-phasicFlow
 #include "procVectorPlus.hpp"
+#include <string>
 
 
 namespace pFlow
@@ -40,6 +41,13 @@ class Timer;
 namespace pFlow::Plus
 {
 
+/**
+ * @class procDEMSystem
+ * @brief Manages top-level DEM execution and parallel MPI memory routing.
+ *
+ * Serves as the principal interface between OpenFOAM processors and the
+ * underlying Kokkos GPU/CPU particle system data streams.
+ */
 class procDEMSystem
 {
 protected:
@@ -56,6 +64,10 @@ public:
 		int argc, 
 		char* argv[],
 		bool requireRVel = false);
+
+	virtual ~procDEMSystem() = default;
+
+	// --- global time & control ---
 
 	inline 
 	real startTime()const
@@ -92,6 +104,8 @@ public:
 			return true;
 		}
 	}
+
+	// --- mechanical field accessors ---
 
 	inline 
 	span<const int32> parIndexInDomain(int32 di)const
@@ -256,6 +270,226 @@ public:
 		return parIndex;
 	}
 
+	// --- thermal coupling extensions ---
+
+	inline
+	span<real> emissivity()
+	{
+		if(demSystem_)
+		{
+			return demSystem_->emissivity();
+		}else
+		{
+			return span<real>();
+		}
+	}
+
+	// True only when a thermal interaction exists AND radiation is
+	// enabled in the interaction dictionary. Lets callers skip
+	// radSumTemp()/radNumPrt() entirely when radiation is off, rather
+	// than distributing a zero-filled buffer nobody uses.
+	inline
+	bool hasRadiation()const
+	{
+		if(demSystem_)
+		{
+			return demSystem_->hasRadiation();
+		}else
+		{
+			return false;
+		}
+	}
+
+	inline
+	span<real> radSumTemp()
+	{
+		if(demSystem_)
+		{
+			return demSystem_->radSumTemp();
+		}else
+		{
+			return span<real>();
+		}
+	}
+
+	inline
+	span<uint32> radNumPrt()
+	{
+		if(demSystem_)
+		{
+			return demSystem_->radNumPrt();
+		}else
+		{
+			return span<uint32>();
+		}
+	}
+
+	inline
+	span<real> parFluidHeatSourceConv()
+	{
+		if(demSystem_)
+		{
+			return demSystem_->parFluidHeatSourceConv();
+		}else
+		{
+			return span<real>();
+		}
+	}
+
+	inline
+	span<real> parFluidHeatSourceRad()
+	{
+		if(demSystem_)
+		{
+			return demSystem_->parFluidHeatSourceRad();
+		}else
+		{
+			return span<real>();
+		}
+	}
+
+	inline
+	span<real> parFluidKappa()
+	{
+		if(demSystem_)
+		{
+			return demSystem_->parFluidKappa();
+		}else
+		{
+			return span<real>();
+		}
+	}
+
+	inline
+	span<real> parFluidAlpha()
+	{
+		if(demSystem_)
+		{
+			return demSystem_->parFluidAlpha();
+		}else
+		{
+			return span<real>();
+		}
+	}
+
+	// --- multi-species chemical reaction extensions ---
+	// Reaction coupling (not yet reviewed).
+	/*
+	inline
+	span<real> solidMassFractions()
+	{
+		if(demSystem_)
+		{
+			return demSystem_->solidMassFractions();
+		}else
+		{
+			return span<real>();
+		}
+	}
+
+	inline
+	span<real> gasMassSource()
+	{
+		if(demSystem_)
+		{
+			return demSystem_->gasMassSource();
+		}else
+		{
+			return span<real>();
+		}
+	}
+
+	inline
+	span<real> gasMassSourceSp()
+	{
+		if(demSystem_)
+		{
+			return demSystem_->gasMassSourceSp();
+		}else
+		{
+			return span<real>();
+		}
+	}
+
+	inline
+	span<real> gasConcentrations()
+	{
+		if(demSystem_)
+		{
+			return demSystem_->gasConcentrations();
+		}else
+		{
+			return span<real>();
+		}
+	}
+
+	// Per-particle solid-side reaction heat: (1-eta)*Q_rxn [W].
+	inline
+	span<real> reactionHeat()
+	{
+		if(demSystem_)
+		{
+			return demSystem_->reactionHeat();
+		}else
+		{
+			return span<real>();
+		}
+	}
+
+	// Per-particle fluid-side reaction heat: eta*Q_rxn [W].
+	// Zero-filled when eta = 0 (default for surface reactions).
+	inline
+	span<real> reactionHeatFluid()
+	{
+		if(demSystem_)
+		{
+			return demSystem_->reactionHeatFluid();
+		}else
+		{
+			return span<real>();
+		}
+	}
+
+	// Returns the DEM gas species names as a standard C++ vector. Clean
+	// C++ interface, no OpenFOAM dependencies, to keep standalone DEM
+	// capability. Used by buildSpeciesMapping().
+	inline
+	std::vector<std::string> gasSpeciesNames()const
+	{
+		if(demSystem_)
+		{
+			return demSystem_->gasSpeciesNames();
+		}else
+		{
+			return std::vector<std::string>();
+		}
+	}
+
+	// Gas species molar masses [kg/mol] from the DEM kinetics, in the
+	// same order as gasSpeciesNames(). Used by buildSpeciesMapping()'s
+	// cross-check at CFD startup to catch a stale/mismatched
+	// transportProperties/gasMw entry.
+	inline
+	std::vector<real> gasMolarMasses()const
+	{
+		if(demSystem_)
+		{
+			return demSystem_->gasMolarMasses();
+		}else
+		{
+			return std::vector<real>();
+		}
+	}
+
+	// sendReactionDataToDEM() has no wrapper here: reaction data flows
+	// one way from DEM to CFD via reactionDataHostUpdatedSync() inside
+	// getDataFromDEM(), and the other way via sendGasConcentrationsToDEM()
+	// below - there is no separate CFD-to-DEM reaction-data send this
+	// class needs to expose.
+	*/
+
+	// --- sync dispatchers: host -> dem device ---
+
 	inline 
 	bool sendFluidForceToDEM()
 	{
@@ -281,6 +515,49 @@ public:
 			return true;
 		}
 	}
+
+	inline
+	bool sendFluidHeatSourcesToDEM()
+	{
+		if(demSystem_)
+		{
+			return demSystem_->sendFluidHeatSourcesToDEM();
+		}
+		else
+		{
+			return true;
+		}
+	}
+
+	inline
+	bool sendFluidPropertiesToDEM()
+	{
+		if(demSystem_)
+		{
+			return demSystem_->sendFluidPropertiesToDEM();
+		}
+		else
+		{
+			return true;
+		}
+	}
+
+	/*
+	inline
+	bool sendGasConcentrationsToDEM()
+	{
+		if(demSystem_)
+		{
+			return demSystem_->sendGasConcentrationsToDEM();
+		}
+		else
+		{
+			return true;
+		}
+	}
+	*/
+
+	// --- timestep execution ---
 
 	inline
 	bool iterate(real upToTime, bool writeTime, const word& timeName)
@@ -322,6 +599,18 @@ public:
 		else
 		{
 			return nullptr;
+		}
+	}
+
+	inline
+	span<real> particlesTemperatureAllMaster()
+	{
+		if(demSystem_)
+		{
+			return demSystem_->temperature();
+		}else
+		{
+			return span<real>();
 		}
 	}
 

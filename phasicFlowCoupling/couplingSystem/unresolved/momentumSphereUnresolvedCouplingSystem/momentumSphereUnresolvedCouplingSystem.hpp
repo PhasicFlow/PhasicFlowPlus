@@ -135,6 +135,25 @@ private:
 	/// Flag indicating if coupling requires distribution weights for field mapping.
     bool 		requiresDistribution_ = false;
 
+protected:
+
+	//- protected methods
+
+		/// Const reference to the internally-owned porosity object.
+		inline
+		const porosity& porosityCoupling() const
+		{
+			return porosity_();
+		}
+
+		/// Const reference to the internally-owned momentumInteraction
+		/// object.
+		inline
+		const momentumInteraction& momentumInteractionCoupling() const
+		{
+			return momentumInteraction_;
+		}
+
 public:
 
 	/// Type information 

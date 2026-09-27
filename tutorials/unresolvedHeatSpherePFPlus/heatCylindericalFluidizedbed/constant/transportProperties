@@ -1,0 +1,35 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      transportProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+transportModel  Newtonian;
+
+nu              [0 2 -1 0 0 0 0] 1.5e-05;
+
+rho             [1 -3 0 0 0 0 0] 1.2;
+
+// --- Thermal properties (air @ ~300 K), needed by the thermal solver ---
+
+// Specific heat capacity [J/(kg.K)]
+Cp              [0 2 -2 -1 0 0 0] 1005;
+
+// Thermal conductivity [W/(m.K)]
+kappa           [1 1 -3 -1 0 0 0] 0.026;
+
+// Turbulent Prandtl number [-] (unused while turbulenceProperties is
+// laminar, but the solver reads it unconditionally)
+Prt             [0 0 0 0 0 0 0] 0.85;
+
+// ************************************************************************* //
