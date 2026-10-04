@@ -33,6 +33,7 @@ Licence:
 #include "drag.hpp"
 #include "procCMFields.hpp"
 
+
 namespace pFlow::coupling
 {
 
@@ -50,7 +51,24 @@ private:
     
     /// @brief Volume-averaged diameter field per cell.
     Foam::volScalarField        averageDiameter_;
-
+    
+ 
+    
+protected:
+    
+    mutable Foam::volScalarField sumD2_;
+      
+    mutable Foam::volScalarField sumD3_;
+      
+    mutable Foam::volScalarField sumD4_;
+      
+      
+    /// @brief Calculate per-cell Sauter mean diameter 
+    void calculateSauterDiameter(
+         const Plus::realProcCMField& diameter,
+         const distributionBase&      cellDistribution);
+   
+    
 public:
 
     // type info
@@ -64,6 +82,8 @@ public:
     /// @brief Destructor.
     virtual ~polydisperseDragBase() override = default ;
 
+
+        
     /// @brief Get mutable reference to average diameter field.
     Foam::volScalarField& averageDiameter()
     {
@@ -76,6 +96,23 @@ public:
         return averageDiameter_;
     }
 
+    /// @brief Get sum of d2 field
+    const Foam::volScalarField& sumD2() const 
+    { 
+        return sumD2_; 
+    }
+    
+    /// @brief Get sum of d3 field
+    const Foam::volScalarField& sumD3() const 
+    { 
+        return sumD3_; 
+    }
+    
+    /// @brief Get sum of d4 field
+    const Foam::volScalarField& sumD4() const 
+    { 
+        return sumD4_;
+    }
 
 }; 
 
