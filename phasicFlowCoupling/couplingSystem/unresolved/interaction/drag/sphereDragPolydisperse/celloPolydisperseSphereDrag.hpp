@@ -28,6 +28,7 @@ Licence:
 #define __celloPolydisperseSphereDrag_hpp__
 
 #include "polydisperseDragBase.hpp"
+#include "Cello.hpp"
 
 namespace pFlow::coupling
 {
@@ -36,6 +37,10 @@ class celloPolydisperseSphereDrag
 :
     public polydisperseDragBase
 {
+
+private : 
+
+    Cello                   dragClosure_;
 
 public:
 
@@ -64,11 +69,11 @@ public:
         const solidAveraging&           parVelocity,
         const Plus::realProcCMField&    diameter,
         const distributionBase&         cellDistribution,    
-        Plus::realx3ProcCMField&        particleForce,
-        Foam::volScalarField&           Sp,
-        Foam::volVectorField&           Su) override;
-};
+        Plus::realx3ProcCMField&        particleForce) override;
+
+   };
 
 }
+
 
 #endif // __celloPolydisperseSphereDrag_hpp__

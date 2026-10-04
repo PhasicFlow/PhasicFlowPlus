@@ -59,6 +59,7 @@ couplingSystem/unresolved/interaction/drag/drag/drag.C
 couplingSystem/unresolved/interaction/drag/sphereDrag/sphereDrags.C
 couplingSystem/unresolved/interaction/drag/grainDrag/grainDrags.C
 couplingSystem/unresolved/interaction/drag/sphereDragPolydisperse/polydisperseDragBase.C
+couplingSystem/unresolved/interaction/drag/sphereDragPolydisperse/celloPolydisperseSphereDrag.C
 couplingSystem/unresolved/interaction/drag/dragClosures/DiFelice.C
 couplingSystem/unresolved/interaction/drag/dragClosures/ErgunWenYu.C
 couplingSystem/unresolved/interaction/drag/dragClosures/Rong.C
