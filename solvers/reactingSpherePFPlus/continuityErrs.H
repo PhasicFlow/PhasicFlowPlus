@@ -18,18 +18,18 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-// Continuity error of the gas phase including the reaction mass source:
+// Continuity error of the gas phase including the reaction volume source:
 //
-//     contErr = d(alpha)/dt + div(alpha*U) - Sm/rho
+//     contErr = d(alpha)/dt + div(alpha*U) - Sv
 //
-// Sm [kg/(m3.s)] is the total gas mass source of the reactions.
+// Sv [1/s] is the volume source of the gas released by the reactions.
 
 {
     volScalarField contErr
     (
         fvc::ddt(coupling.alpha())
       + fvc::div(alphaRhoPhi)
-      - (Sm / rho)
+      - Sv
     );
 
     // Sum of |contErr| weighted by cell volumes (local error metric)

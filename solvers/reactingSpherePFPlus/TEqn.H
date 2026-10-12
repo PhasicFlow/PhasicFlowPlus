@@ -43,9 +43,8 @@ Licence:
           - (tCoupling->heatSu() / (rho * Cp));
 
     // The gas released by the reactions enters at the local fluid
-    // temperature, so the term T*Sm/rho contained in the matrix above is
-    // removed
-    TEqn -= (Sm / rho) * T;
+    // temperature, so the term T*Sv contained in the matrix above is removed
+    TEqn -= Sv * T;
 
     TEqn.relax();
     fvOptions.constrain(TEqn);

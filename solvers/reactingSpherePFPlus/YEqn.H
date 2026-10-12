@@ -26,10 +26,12 @@ Licence:
 // Yold = Y.oldTime(), each equation reads
 //
 //     ddt(alpha*Y) + div(alphaRhoPhi*Y) - laplacian(alpha*Deff, Y)
-//         = (Su + Sp_c*Yold)/rho - Sp_c/rho*Y
+//         = (Su + Sp_c*Yold)/rho - Sp_c/rho*Y - (Sm/rho - Sv)*Y
 //
-// (Picard linearisation of the sink). All species except the inert one are
-// transported; the inert species closes the sum to one.
+// (Picard linearisation of the sink). The last term is the difference
+// between the mass source Sm/rho and the volume source Sv of the continuity
+// equation. All species except the inert one are transported; the inert
+// species closes the sum to one.
 
 {
     // Effective mass diffusivity [m2/s]
@@ -132,6 +134,10 @@ Licence:
           ==
             Su_Effective / rho
           - fvm::Sp(Sp_Corrected / rho, Yi)
+
+            // Mass source Sm/rho against the volume source Sv of continuity
+          - fvm::SuSp(Sm / rho - Sv, Yi)
+
           + fvOptions(Yi)
         );
 

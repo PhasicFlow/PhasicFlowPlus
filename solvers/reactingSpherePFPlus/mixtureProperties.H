@@ -70,7 +70,7 @@ Licence:
     );
 
     // Density [kg/m3] from the ideal gas law at the reference pressure
-    // (low Mach number), with the temperature bounded below by 298 K
+    // (low Mach number), with the temperature bounded below by 1 K
     const dimensionedScalar R_univ
     (
         "R_univ",
@@ -88,7 +88,7 @@ Licence:
         max
         (
             T,
-            dimensionedScalar("Tmin", dimTemperature, scalar(298.0))
+            dimensionedScalar("Tmin", dimTemperature, scalar(1.0))
         )
     );
 
@@ -100,6 +100,9 @@ Licence:
         dimensionedScalar("rhoMin", dimDensity, scalar(0.01))
     );
     rho.correctBoundaryConditions();
+
+    // Molar volume of the mixture [m3/kmol]
+    Vm = MwMix / rho;
 
     // Specific heat capacity [J/(kg.K)]: Cp_mix = sum(Y_i*Cp_i)
     Cp = dimensionedScalar("zero", Cp.dimensions(), scalar(0.0));

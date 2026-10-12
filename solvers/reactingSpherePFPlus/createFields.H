@@ -284,4 +284,41 @@ volScalarField Sm
     dimensionedScalar("Sm", dimDensity/dimTime, scalar(0.0))
 );
 
+// Molar production rate of the gas [kmol/(m3.s)], assembled in
+// reactingSpherePFPlus.C from the species sources of the particles
+volScalarField Sn
+(
+    IOobject
+    (
+        "Sn", runTime.timeName(), mesh,
+        IOobject::NO_READ, IOobject::NO_WRITE
+    ),
+    mesh,
+    dimensionedScalar("Sn", dimMoles/dimVolume/dimTime, scalar(0.0))
+);
+
+// Molar volume of the gas mixture [m3/kmol], updated in mixtureProperties.H
+volScalarField Vm
+(
+    IOobject
+    (
+        "Vm", runTime.timeName(), mesh,
+        IOobject::NO_READ, IOobject::NO_WRITE
+    ),
+    mesh,
+    dimensionedScalar("Vm", dimVolume/dimMoles, scalar(0.0))
+);
+
+// Volume source of the gas released by the reactions [1/s]: Sn*Vm
+volScalarField Sv
+(
+    IOobject
+    (
+        "Sv", runTime.timeName(), mesh,
+        IOobject::NO_READ, IOobject::AUTO_WRITE
+    ),
+    mesh,
+    dimensionedScalar("Sv", dimless/dimTime, scalar(0.0))
+);
+
 Info << "createFields.H complete.\n" << endl;

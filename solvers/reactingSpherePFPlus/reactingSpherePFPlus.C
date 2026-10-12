@@ -50,9 +50,10 @@ Description
     On the first PIMPLE outer iteration of every time step, the DEM side is
     advanced (contact, thermal and chemical calculations) and the heat and
     mass coupling sources are gathered, including the total gas mass source
-    Sm. These sources are frozen for the remaining PIMPLE iterations, in
-    which the momentum, pressure, mixture-property, species, and energy
-    equations are solved in that order.
+    Sm and the molar production rate Sn of the gas. These sources are frozen
+    for the remaining PIMPLE iterations, in which the momentum, pressure,
+    mixture-property, species, and energy equations are solved in that
+    order.
 
 \*---------------------------------------------------------------------------*/
 
@@ -181,6 +182,31 @@ int main(int argc, char *argv[])
                     Sm += speciesSuFields[i];
                 }
 
+                // Molar production rate of the gas: the species sources
+                // divided by the molar masses
+                Sn = dimensionedScalar
+                (
+                    "zero", dimMoles/dimVolume/dimTime, scalar(0)
+                );
+
+                forAll(gasSpeciesNames, j)
+                {
+                    const word SuName("Su_" + gasSpeciesNames[j]);
+
+                    forAll(speciesSuFields, i)
+                    {
+                        if (speciesSuFields[i].name() == SuName)
+                        {
+                            Sn +=
+                                speciesSuFields[i]
+                              / dimensionedScalar
+                                (
+                                    "Mw", dimMass/dimMoles, gasMw[j]
+                                );
+                        }
+                    }
+                }
+
                 coupling.cfdTimers().start();
             } // end pimple.firstIter()
 
@@ -203,6 +229,10 @@ int main(int argc, char *argv[])
                     }
                 }
             }
+
+            // Volume source of the gas released by the reactions, from the
+            // molar volume of the current mixture
+            Sv = Sn * Vm;
 
             // Momentum predictor
             #include "UEqn.H"

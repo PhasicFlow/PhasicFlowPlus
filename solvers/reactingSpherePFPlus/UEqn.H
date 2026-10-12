@@ -35,7 +35,7 @@ tmp<fvVectorMatrix> tUEqn
   - coupling.Su() / rho
 
     // Gas released by the reactions carries the local fluid velocity
-  + (Sm / rho) * U
+  + Sv * U
 
   + fvOptions(U)
 );

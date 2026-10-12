@@ -80,7 +80,7 @@ while (pimple.correctNonOrthogonal())
         fvc::div(phiHbyA)
       + fvc::ddt(coupling.alpha())
         // Volume source of the gas released by the reactions
-      - (Sm / rho)
+      - Sv
     );
 
     pEqn.setReference(pRefCell, pRefValue);
