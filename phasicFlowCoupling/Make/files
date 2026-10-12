@@ -18,6 +18,9 @@ couplingSystem/unresolved/unresolvedCouplingSystem/unresolvedCouplingSystem.C
 couplingSystem/unresolved/momentumSphereUnresolvedCouplingSystem/momentumSphereUnresolvedCouplingSystem.C
 couplingSystem/unresolved/momentumGrainUnresolvedCouplingSystem/momentumGrainUnresolvedCouplingSystem.C
 couplingSystem/unresolved/momentumSphereUnresolvedCouplingSystem/thermalMomentumSphereUnresolvedCouplingSystem.C
+couplingSystem/unresolved/momentumSphereUnresolvedCouplingSystem/multiReactiveThermalMomentumSphereUnresolvedCouplingSystem.C
+
+
 
 
 
@@ -39,6 +42,7 @@ couplingSystem/unresolved/porosity/porosityCellDistribution/porosityCellDistribu
 
 couplingSystem/unresolved/interaction/momentumInteraction/momentumInteraction/momentumInteraction.C
 couplingSystem/unresolved/interaction/heatInteraction/heatInteraction.C
+couplingSystem/unresolved/interaction/reactionInteraction/reactionInteraction.C
 
 couplingSystem/unresolved/interaction/solidAveraging/solidAveraging/solidAveraging.C
 couplingSystem/unresolved/interaction/solidAveraging/particle/particleSolidAveraging.C
@@ -53,6 +57,9 @@ couplingSystem/unresolved/interaction/heatTransfer/heatTransfer/heatTransfer.C
 couplingSystem/unresolved/interaction/heatTransfer/sphereHeatTransfer/sphereHeatTransfers.C
 couplingSystem/unresolved/interaction/heatTransfer/heatTransferClosures/RanzMarshall.C
 couplingSystem/unresolved/interaction/heatTransfer/heatTransferClosures/noneHeatTransfer.C
+
+couplingSystem/unresolved/interaction/reactionTransfer/reactionTransfer/reactionTransfer.C
+couplingSystem/unresolved/interaction/reactionTransfer/sphereReactionTransfer/sphereReactionTransfer.C
 
 
 couplingSystem/unresolved/interaction/drag/drag/drag.C

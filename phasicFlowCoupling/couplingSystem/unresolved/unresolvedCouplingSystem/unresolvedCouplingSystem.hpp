@@ -202,25 +202,6 @@ public:
     virtual 
     word couplingSystemType()const = 0;
 
-    /// Returns explicit reaction heat source (Fallback: Zero)
-    virtual 
-    Foam::tmp<Foam::volScalarField> rxnHeatSu() const
-    {
-        return Foam::tmp<Foam::volScalarField>::New(
-            Foam::IOobject(
-                "dummyRxnHeat", 
-                this->cMesh().mesh().time().timeName(), 
-                this->cMesh().mesh(), 
-                Foam::IOobject::NO_READ, 
-                Foam::IOobject::NO_WRITE, 
-                false),
-            this->cMesh().mesh(),
-            Foam::dimensionedScalar(
-                "zero", 
-                Foam::dimEnergy/Foam::dimVolume/Foam::dimTime, 
-                0.0));
-    }
-
     /// Returns species mass sources (Fallback: Empty List)
     virtual 
     const Foam::PtrList<Foam::volScalarField>& speciesSu() const
