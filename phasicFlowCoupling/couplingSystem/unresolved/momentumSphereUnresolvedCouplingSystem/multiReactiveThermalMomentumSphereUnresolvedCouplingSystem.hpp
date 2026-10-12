@@ -52,7 +52,8 @@ private:
     /// Picard implicit sink coefficients [kg.m3/(kmol.s)], same layout.
     std::vector<real>        gasMassSourceSp_;
 
-    /// Gas concentrations [kmol/m3], layout [p * N_gas + g].
+    /// Gas concentrations [kmol/m3], layout [g * N_par + p], one segment per
+    /// species.
     std::vector<real>        gasConcentrations_;
 
     /// Number of gas species.

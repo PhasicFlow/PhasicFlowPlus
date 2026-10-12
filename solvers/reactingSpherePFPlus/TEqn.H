@@ -18,28 +18,10 @@ Licence:
 
 -----------------------------------------------------------------------------*/
 
-/**
- * @file TEqn.H
- * @brief Fluid-phase energy (temperature) equation for the unresolved
- * thermal CFD-DEM solvers.
- *
- * @details
- * Formulates and solves the macroscopic energy balance for the fluid
- * phase, integrating implicit/explicit convective coupling from the DEM
- * particles.
- *
- * Energy Source Term — Particle-fluid convection (Implicit + Explicit):
- * `fvm::Sp(-(heatSp)/(rho*Cp), T) - heatSu/(rho*Cp)`
- * where:
- * - heatSp = -h*Ap/V [W/(m³·K)] (Negative scalar)
- * - heatSu =  h*Ap*Tp/V [W/m³] (Positive scalar when Tp > 0)
- */
+// Energy equation of the gas phase
 
 {
-    //--- effective thermal diffusivity --------------------------------------
-    // α_eff = κ/(ρ·Cp) + ν_t/Prt   [m²/s]
-    // First term:  molecular (laminar) thermal diffusivity
-    // Second term: turbulent thermal diffusivity
+    // Effective thermal diffusivity [m2/s]: kappa/(rho*Cp) + nut/Prt
     volScalarField alphaEff
     (
         "alphaEff",
@@ -48,8 +30,6 @@ Licence:
 
     const volScalarField& alpha = coupling.alpha();
 
-    //--- base fluid-phase energy equation matrix ----------------------------
-    // ∂(α·T)/∂t + ∇·(α·U·T) − ∇·(α·α_eff·∇T) = Sources
     fvScalarMatrix TEqn
     (
         fvm::ddt(alpha, T)
@@ -57,26 +37,16 @@ Licence:
       - fvm::laplacian(alpha * alphaEff, T)
     );
 
-    //--- particle-fluid convective heat exchange ----------------------------
-    // Numerical stability note: `heatSp()` is evaluated and stored in the
-    // coupling layer as a NEGATIVE quantity (e.g., -hAp/V). OpenFOAM's
-    // `fvm::Sp(coeff, T)` ADDS the coefficient to the matrix diagonal. To
-    // ensure diagonal dominance and solver stability, the diagonal
-    // coefficient must be strictly POSITIVE. Therefore, a minus sign is
-    // applied: `fvm::Sp(-(heatSp)/..., T)`.
+    // Particle-fluid convection. heatSp() is negative (-h*Ap/V), so the
+    // diagonal coefficient -heatSp/(rho*Cp) is positive.
     TEqn += fvm::Sp(-(tCoupling->heatSp() / (rho * Cp)), T)
           - (tCoupling->heatSu() / (rho * Cp));
 
-    //--- gas released by the reactions --------------------------------------
-    // The released gas enters at the local fluid temperature, so the term
-    // T*Sm/rho contained in the matrix above is removed (explicit). Sm exists
-    // only in the reactive solver.
-    if (mesh.foundObject<volScalarField>("Sm"))
-    {
-        TEqn -= (mesh.lookupObject<volScalarField>("Sm") / rho) * T;
-    }
+    // The gas released by the reactions enters at the local fluid
+    // temperature, so the term T*Sm/rho contained in the matrix above is
+    // removed
+    TEqn -= (Sm / rho) * T;
 
-    //--- matrix relaxation, constraint, and solve ---------------------------
     TEqn.relax();
     fvOptions.constrain(TEqn);
     TEqn.solve();

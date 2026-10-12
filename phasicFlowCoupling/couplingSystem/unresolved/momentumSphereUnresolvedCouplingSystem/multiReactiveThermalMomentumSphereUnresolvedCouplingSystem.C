@@ -142,7 +142,7 @@ dispatchGasConcentrationsToDEM()
         for (size_t p = 0; p < numPar; ++p)
         {
             const Foam::label cellI = cellIDs[p];
-            gasConcentrations_[p * N_gas + g] =
+            gasConcentrations_[g * numPar + p] =
                 (cellI >= 0 && cellI < static_cast<Foam::label>(rho.size()))
                 ? static_cast<real>(rho[cellI] * Y_g[cellI])
                     / static_cast<real>(gasMw[cfdIdx])
@@ -167,7 +167,6 @@ dispatchGasConcentrationsToDEM()
         );
     }
 
-    std::vector<real> localSpec (numPar, real(0));
     std::vector<real> globalSpec
     (
         Plus::processor::isMaster() ? nTotal : size_t(0),
@@ -176,12 +175,17 @@ dispatchGasConcentrationsToDEM()
 
     for (size_t g = 0; g < N_gas; ++g)
     {
-        for (size_t p = 0; p < numPar; ++p)
-        {
-            localSpec[p] = gasConcentrations_[p * N_gas + g];
-        }
+        // collectSum() adds into the receive buffer, so clear it for each
+        // species
+        std::fill(globalSpec.begin(), globalSpec.end(), real(0));
 
-        pFlow::span<real> localSpan (localSpec .data(), localSpec .size());
+        // Each species is sent from its own segment of the member buffer:
+        // collectSum() does not wait for the sends to complete
+        pFlow::span<real> localSpan
+        (
+            gasConcentrations_.data() + g * numPar,
+            numPar
+        );
         pFlow::span<real> globalSpan(globalSpec.data(), globalSpec.size());
 
         if (!comm.collectSum(localSpan, globalSpan)) return false;
