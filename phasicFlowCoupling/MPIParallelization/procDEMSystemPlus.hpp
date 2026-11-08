@@ -373,19 +373,6 @@ public:
 	}
 
 	// --- multi-species chemical reaction extensions ---
-	// Reaction coupling (not yet reviewed).
-	/*
-	inline
-	span<real> solidMassFractions()
-	{
-		if(demSystem_)
-		{
-			return demSystem_->solidMassFractions();
-		}else
-		{
-			return span<real>();
-		}
-	}
 
 	inline
 	span<real> gasMassSource()
@@ -423,33 +410,6 @@ public:
 		}
 	}
 
-	// Per-particle solid-side reaction heat: (1-eta)*Q_rxn [W].
-	inline
-	span<real> reactionHeat()
-	{
-		if(demSystem_)
-		{
-			return demSystem_->reactionHeat();
-		}else
-		{
-			return span<real>();
-		}
-	}
-
-	// Per-particle fluid-side reaction heat: eta*Q_rxn [W].
-	// Zero-filled when eta = 0 (default for surface reactions).
-	inline
-	span<real> reactionHeatFluid()
-	{
-		if(demSystem_)
-		{
-			return demSystem_->reactionHeatFluid();
-		}else
-		{
-			return span<real>();
-		}
-	}
-
 	// Returns the DEM gas species names as a standard C++ vector. Clean
 	// C++ interface, no OpenFOAM dependencies, to keep standalone DEM
 	// capability. Used by buildSpeciesMapping().
@@ -465,7 +425,7 @@ public:
 		}
 	}
 
-	// Gas species molar masses [kg/mol] from the DEM kinetics, in the
+	// Gas species molar masses [kg/kmol] from the DEM kinetics, in the
 	// same order as gasSpeciesNames(). Used by buildSpeciesMapping()'s
 	// cross-check at CFD startup to catch a stale/mismatched
 	// transportProperties/gasMw entry.
@@ -480,13 +440,6 @@ public:
 			return std::vector<real>();
 		}
 	}
-
-	// sendReactionDataToDEM() has no wrapper here: reaction data flows
-	// one way from DEM to CFD via reactionDataHostUpdatedSync() inside
-	// getDataFromDEM(), and the other way via sendGasConcentrationsToDEM()
-	// below - there is no separate CFD-to-DEM reaction-data send this
-	// class needs to expose.
-	*/
 
 	// --- sync dispatchers: host -> dem device ---
 
@@ -542,7 +495,6 @@ public:
 		}
 	}
 
-	/*
 	inline
 	bool sendGasConcentrationsToDEM()
 	{
@@ -555,7 +507,6 @@ public:
 			return true;
 		}
 	}
-	*/
 
 	// --- timestep execution ---
 
