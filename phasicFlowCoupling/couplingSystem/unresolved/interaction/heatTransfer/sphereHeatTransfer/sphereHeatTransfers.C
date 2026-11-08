@@ -24,6 +24,7 @@ Licence:
 
 // --- Specific Nusselt Closure Models ---
 #include "RanzMarshall.hpp"
+#include "Gunn.hpp"
 #include "noneHeatTransfer.hpp"
 
 namespace pFlow
@@ -35,6 +36,10 @@ namespace coupling
     /// Ranz-Marshall heat transfer implementation.
     template class sphereHeatTransfer<RanzMarshall>;
     
+    /// @brief Instructs the compiler to generate the binary code for the
+    /// Gunn heat transfer implementation.
+    template class sphereHeatTransfer<Gunn>;
+
     template class sphereHeatTransfer<noneHeatTransfer>;
 
 } // coupling

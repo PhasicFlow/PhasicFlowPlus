@@ -55,6 +55,7 @@ couplingSystem/unresolved/interaction/heatTransfer/heatTransfer/heatTransfer.C
 couplingSystem/unresolved/interaction/heatTransfer/sphereHeatTransfer/sphereHeatTransfers.C
 couplingSystem/unresolved/interaction/heatTransfer/heatTransferClosures/RanzMarshall.C
 couplingSystem/unresolved/interaction/heatTransfer/heatTransferClosures/noneHeatTransfer.C
+couplingSystem/unresolved/interaction/heatTransfer/heatTransferClosures/Gunn.C
 
 couplingSystem/unresolved/interaction/reactionTransfer/reactionTransfer/reactionTransfer.C
 couplingSystem/unresolved/interaction/reactionTransfer/sphereReactionTransfer/sphereReactionTransfer.C
