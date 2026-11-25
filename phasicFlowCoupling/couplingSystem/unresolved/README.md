@@ -9,9 +9,10 @@
 5. [Momentum Coupling](#5-momentum-coupling)
 6. [Drag Force Models](#6-drag-force-models)
 7. [Lift Force Models](#7-lift-force-models)
-8. [Example Dictionary for Unresolved Coupling](#8-example-dictionary-for-unresolved-coupling)
-9. [Nomenclature](#9-nomenclature)
-10. [References](#10-references)
+8. [Virtual Mass Force Models](#8-virtual-mass-force-models)
+9. [Example Dictionary for Unresolved Coupling](#9-example-dictionary-for-unresolved-coupling)
+10. [Nomenclature](#10-nomenclature)
+11. [References](#11-references)
 
 ---
 
@@ -849,9 +850,39 @@ The Shi2019 model is recommended for applications with broader Reynolds number r
 
 **Reference:** Pengyu Shi and Roland Rzehak, 2019. Lift forces on solid spherical particles in unbounded flows. Chemical Engineering Science, 208, 115145
 
+## 8. Virtual Mass Force Models
+
+Virtual mass (added mass) force arises from the acceleration of fluid surrounding a particle. This force becomes significant when the fluid density is comparable to the particle density.
+
+**General Form:**
+
+$$\mathbf{F}_{vm} = C_{vm} \rho_f V_p \left( \frac{D\mathbf{U}_f}{Dt} - \frac{d\mathbf{v}_p}{dt} \right) \quad (55)$$
+
+where:
+- $C_{vm}$ is the virtual mass coefficient
+- $\rho_f$ is the fluid density
+- $V_p = \frac{\pi d_p^3}{6}$ is the particle volume
+- $\frac{D\mathbf{U}_f}{Dt}$ is the material derivative of the fluid velocity
+- $\frac{d\mathbf{v}_p}{dt}$ is the particle acceleration
+
+### 8.1 Constant Coefficient Model
+
+**Model Name:** `constantCoeff`
+
+**Applicability:**
+- Typically important when $\rho_f/\rho_p \gtrsim 0.1$
+- Negligible for fluid-solid flows where $\rho_f / \rho_p \sim 10^{-3}$
+
+**Formulation:**
+
+$$\mathbf{F}_{vm} = C_{vm} \rho_f V_p \left( \frac{D\mathbf{U}_f}{Dt} - \frac{d\mathbf{v}_p}{dt} \right) \quad (55)$$
+
+Virtual Mass coefficient $$\mathbf (C_{vm}) $$ : Default Value of $$\mathbf (C_{vm}) $$ = 0.5 and you can defined it manually too.
+
+**Reference:** Odar, F. and Hamilton, W.S. (1964) Forces on a sphere accelerating in a viscous fluid. Journal of Fluid Mechanics, 18(2), 302–315.
 
 
-## 8. Example Dictionary for Unresolved Coupling
+## 9. Example Dictionary for Unresolved Coupling
 
 A complete configuration example (sampleDictionary):
 
@@ -954,7 +985,12 @@ unresolved
 
         virtualMass
         {
-            // This part has not been implemented yet
+            // Virtual mass force model options:
+            //   - none: Not included (default)
+            //   - constantCoeff: Simple model based on Odar 1964 
+            
+            model                constantCoeff;
+            Cvm                  0.3;    
         }
     }
 
@@ -969,7 +1005,7 @@ unresolved
 }
 ```
 
-## 9. Nomenclature
+## 10. Nomenclature
 
 ### Greek Symbols
 
@@ -1044,6 +1080,7 @@ unresolved
 | $\mathbf{v}_p$ | Particle velocity vector | m/s |
 | $\overline{\mathbf{v}}_c$ | Cell-averaged particle velocity | m/s |
 | $\overline{\mathbf{v}}_p$ | Particle velocity in coupling calculations | m/s |
+| $\overline{\mathbf{a}}_p$ | Particle acceleration | m²/s |
 | $\mathbf{x}_i$ | Position vector of cell $i$ | m |
 | $\mathbf{x}_p$ | Position vector of particle $p$ | m |
 
@@ -1106,7 +1143,7 @@ unresolved
 
 ---
 
-## 10. References
+## 11. References
 
 1. Ergun, S. (1952). Fluid flow through packed columns. Chemical Engineering Progress, 48, 89-94.
 2. Wen, C. Y., & Yu, Y. H. (1966). Mechanics of fluidization. Chemical Engineering Progress Symposium Series, 62, 100-111.
@@ -1118,3 +1155,4 @@ unresolved
 8. Rong, L. W., Dong, K. J., & Yu, A. B. (2013). Lattice-Boltzmann simulation of fluid flow through packed beds of uniform spheres. Chemical Engineering Science, 99, 44-58.
 9. Shi, P., & Rzehak, R. (2019). Lift forces on solid spherical particles in unbounded flows. Chemical Engineering Science, 208, 115145.
 10. Kianimoqadam, A., & Lapp, J. (2026). Gaussian integral method for void fraction. Particuology, 108, 125-142. [https://doi.org/10.1016/j.partic.2025.10.014](https://doi.org/10.1016/j.partic.2025.10.014)
+11. Odar, F. and Hamilton, W.S. (1964) Forces on a sphere accelerating in a viscous fluid. Journal of Fluid Mechanics, 18(2), 302–315

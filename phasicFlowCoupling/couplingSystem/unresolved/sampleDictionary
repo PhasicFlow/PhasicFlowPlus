@@ -96,7 +96,12 @@ unresolved
 
         virtualMass
         {
-            // This part has not been implemented yet
+            // Virtual mass force model options:
+            //   - none: Not included (default)
+            //   - constantCoeff: Simplified model based on Odar 1964 
+            
+            model                constantCoeff;
+            Cvm                  0.3;    
         }
     }
 
