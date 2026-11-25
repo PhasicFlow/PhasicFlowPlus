@@ -1,0 +1,49 @@
+#!/bin/sh
+set -e  # Exit immediately if a command exits with a non-zero status
+cd ${0%/*} || exit 1    # Run from this directory
+
+# Fuel reactor of chemical looping combustion: a batch fluidized bed of
+# oxygen carrier reduced by CO (3 Fe2O3 + CO -> 2 Fe3O4 + CO2)
+
+echo "\n<--------------------------------------------------------------------->"
+echo "1) Running blockMesh"
+echo "<--------------------------------------------------------------------->\n"
+blockMesh
+
+echo "\n<--------------------------------------------------------------------->"
+echo "2) Settling, DEM only, 0 - 0.25 s (particles in N2, no reaction)"
+echo "<--------------------------------------------------------------------->\n"
+echo " \n2.1) add Particle "
+particlesPhasicFlow
+echo " \n2.2) add Geometry "
+geometryPhasicFlow
+echo " \n2.3) Correction table of the grain model (caseSetup/correctionTables)"
+correctionTablePhasicFlow
+echo " \n2.4) Running DEM simulation"
+multiSpeciesGranFlow
+
+echo "\n<--------------------------------------------------------------------->"
+echo "3) Copy the fluid fields to time folder 0.25 (p, U, alpha, T, Y.*)"
+echo "<--------------------------------------------------------------------->\n"
+cp ./FluidField/alpha ./0.25
+cp ./FluidField/p     ./0.25
+cp ./FluidField/U     ./0.25
+cp ./FluidField/T     ./0.25
+cp ./FluidField/Y.CO  ./0.25
+cp ./FluidField/Y.CO2 ./0.25
+cp ./FluidField/Y.N2  ./0.25
+
+echo "\n<--------------------------------------------------------------------->"
+echo "4) Reacting CFD-DEM, 0.25 - 5 s (N2 until 1 s, then 50 % CO)"
+echo "<--------------------------------------------------------------------->\n"
+reactingSpherePFPlus
+
+echo "\n<--------------------------------------------------------------------->"
+echo "5) Converting to VTK Files"
+echo "<--------------------------------------------------------------------->\n"
+pFlowToVTK -t 0.25:5 --binary
+touch foam.foam
+echo "Start paraview with the command: paraview foam.foam & to visualize the results"
+echo "\n<--------------------------------------------------------------------->"
+
+#------------------------------------------------------------------------------

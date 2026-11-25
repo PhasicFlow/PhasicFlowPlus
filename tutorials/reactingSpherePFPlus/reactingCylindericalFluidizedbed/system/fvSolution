@@ -1,0 +1,81 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      fvSolution;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+solvers
+{
+    p
+    {
+        solver          GAMG;
+        smoother        DIC;
+        tolerance       1e-06;
+        relTol          0.01;
+    }
+
+    pFinal
+    {
+        $p;
+        tolerance       1e-06;
+        relTol          0;
+    }
+
+    // Y.* : species of YEqn.H, solved with mesh.solver(Y.<name>)
+    "(rho|U|h|Tsolid|T|k|epsilon|omega|Y.*)"
+    {
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-05;
+        relTol          0.1;
+    }
+
+    "(rho|U|h|Tsolid|T|k|epsilon|omega|Y.*)Final"
+    {
+        $U;
+        tolerance       1e-05;
+        relTol          0;
+    }
+}
+
+// reactingSpherePFPlus runs a PIMPLE loop (the thermal tutorial: PISO)
+PIMPLE
+{
+    momentumPredictor        yes;
+    nOuterCorrectors         1;
+    nCorrectors              2;
+    nNonOrthogonalCorrectors 0;
+    pRefCell                 0;
+    pRefValue                0;
+}
+
+relaxationFactors
+{
+    equations
+    {
+        ".*"            0.9;
+    }
+}
+
+// Time-step limits from the reactions (ReactionNo.H; need adjustTimeStep yes)
+CLC
+{
+    // gas mass of a cell: max(|Sm|/(alpha rho)) dt
+    maxReactionNo           0.15;
+
+    // each consumed gas: max(Sp_i/(alpha Mw_i)) dt;
+    // default: the value of maxReactionNo
+    maxSpeciesReactionNo    0.15;
+}
+
+// ************************************************************************* //

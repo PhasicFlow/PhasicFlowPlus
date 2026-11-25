@@ -38,6 +38,12 @@ surfaces
 		patch 		cylinderWall; 		
 		
 		material 	wallMaterial;   // material name of this wall
+
+		// Wall temperature [K] for the particle-wall heat transfer
+		// (enablePW, enablePFW, enableWallRadiation in
+		// caseSetup/thermoPhysicalInteraction). Without it the surface
+		// is adiabatic, as in this tutorial.
+		// temperature 350;
 	}
 }
 

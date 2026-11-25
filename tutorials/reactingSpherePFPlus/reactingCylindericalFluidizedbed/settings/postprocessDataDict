@@ -1,0 +1,65 @@
+/* -------------------------------*- C++ -*--------------------------------- *\
+|  phasicFlow File                                                            |
+|  copyright: www.cemf.ir                                                     |
+\* ------------------------------------------------------------------------- */
+objectName  postprocessDataDict;
+objectType  dictionary;
+fileFormat  ASCII;
+/*---------------------------------------------------------------------------*/
+
+// History of 10 particles (ids 0, 1250, ..., 11250) every 0.05 s, written
+// to postprocessData/: temperature, the CO concentration the particle sees
+// (gasConc_CO), its Fe2O3 mass fraction and its gas-film coefficient k_c
+// (massTransferCoeff). gasConc_<gas> and massTransferCoeff live in memory
+// only; probing them here is the way to record them.
+
+activeInSimulation  Yes;
+
+shapeType           sphere;
+
+defaultTimeControl
+{
+    timeControl        simulationTime;
+    startTime          0;
+    executionInterval  0.05;
+}
+
+components
+(
+    particle_T
+    {
+        processMethod  particleProbe;
+        processRegion  centerPoints;
+        selector       id;
+        ids            (0 1250 2500 3750 5000 6250 7500 8750 10000 11250);
+        field          temperature;
+        timeControl    default;
+    }
+    particle_CO
+    {
+        processMethod  particleProbe;
+        processRegion  centerPoints;
+        selector       id;
+        ids            (0 1250 2500 3750 5000 6250 7500 8750 10000 11250);
+        field          gasConc_CO;
+        timeControl    default;
+    }
+    particle_Fe2O3
+    {
+        processMethod  particleProbe;
+        processRegion  centerPoints;
+        selector       id;
+        ids            (0 1250 2500 3750 5000 6250 7500 8750 10000 11250);
+        field          solidFrac_Fe2O3;
+        timeControl    default;
+    }
+    particle_kc
+    {
+        processMethod  particleProbe;
+        processRegion  centerPoints;
+        selector       id;
+        ids            (0 1250 2500 3750 5000 6250 7500 8750 10000 11250);
+        field          massTransferCoeff;
+        timeControl    default;
+    }
+);

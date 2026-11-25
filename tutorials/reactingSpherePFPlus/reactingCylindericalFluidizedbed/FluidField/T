@@ -1,0 +1,47 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       volScalarField;
+    object      T;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 0 0 1 0 0 0];
+
+internalField   uniform 1173.15;
+
+boundaryField
+{
+    inlet
+    {
+        type            fixedValue;
+        value           uniform 1173.15;
+    }
+    outlet
+    {
+        type            zeroGradient;
+    }
+    cylinderWall
+    {
+        // furnace wall: the gas exchanges heat with the wall
+        // With fixedValue, conduction across the first 3 mm cell sets the
+        // gas-wall flux: h = alpha*kappa/(dx/2), about 22-49 W/(m2 K).
+        // This is the gas path only and stays as it is. The 200-350
+        // W/(m2 K) that Li et al. (2017) and Patil et al. (2015) fitted
+        // as a gas-wall term also carries the particle path, which their
+        // models did not have; here Q_pfw, Q_pw and wall radiation
+        // (thermoPhysicalInteraction) supply it, so no fitted coefficient
+        // is added to the gas.
+        type            fixedValue;
+        value           uniform 1173.15;
+    }
+}
+
+// ************************************************************************* //

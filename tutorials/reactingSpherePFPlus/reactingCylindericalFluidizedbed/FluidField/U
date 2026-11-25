@@ -1,0 +1,40 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       volVectorField;
+    object      U;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 1 -1 0 0 0 0];
+
+internalField   uniform (0 0 0);
+
+boundaryField
+{
+    cylinderWall
+    {
+        type            noSlip;
+        value           uniform (0 0 0);
+    }
+    inlet
+    {
+        // Superficial velocity at 1173 K: 2.2 u_mf; u_mf = 1.38 m/s from
+        // Wen and Yu (1966) for the 2 mm carrier in N2
+        type            fixedValue;
+        value           uniform (0.0 0.0 3.0);
+    }
+    outlet
+    {
+        type            zeroGradient;
+    }
+}
+
+// ************************************************************************* //

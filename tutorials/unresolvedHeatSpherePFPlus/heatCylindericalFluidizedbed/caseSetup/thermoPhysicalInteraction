@@ -30,8 +30,6 @@ enablePP           No;   // particle-particle contact conduction (Q_pp)
 
 enablePFP          No;   // particle-fluid-particle sub-grid conduction (Q_pfp)
 
-neighborListUpdateInterval 1;   // optional, default: 1
-
 // Required only when enablePP or enablePFP is Yes above. Must match
 // model.Yeff in the interaction file (the softened/simulated modulus
 // used for the DEM contact force), so the Hertzian contact-radius
@@ -54,3 +52,22 @@ neighborListUpdateInterval 1;   // optional, default: 1
 //     kappa    0.026;
 //     alpha    1.0;
 // }
+
+// --- Particle-wall heat transfer ---
+//
+// Off here, so the walls are adiabatic for the particles, as FluidField/T
+// (zeroGradient) keeps them for the gas. The three paths are independent
+// switches. A path needs simYoungsModulus above and a wall temperature in
+// settings/geometryDict; a surface without one stays adiabatic.
+
+enablePW              No;   // particle-wall contact conduction (Q_pw)
+
+enablePFW             No;   // conduction through the gas lens (Q_pfw)
+
+enableWallRadiation   No;   // particle-wall radiation (Q_rw)
+
+// Optional keys of the wall paths, with their default values:
+// wallLensRatio          1.4;      // [-] outer radius of the gas lens / R_p
+// wallMinGap             2.75e-8;  // [m] smallest conduction distance
+// wallRadiationRange     8;        // [particle radii] at most 10.2
+// wallHeatReportInterval 0.01;     // [s] interval of wallHeatFlow.dat
