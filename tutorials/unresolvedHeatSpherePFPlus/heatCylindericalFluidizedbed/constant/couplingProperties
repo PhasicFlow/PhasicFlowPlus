@@ -140,7 +140,12 @@ unresolved
 
         heatTransferModel
         {
-            // Available options: RanzMarshall, none
+            // Available options: RanzMarshall, Gunn, none
+            //    - RanzMarshall: isolated sphere, no dependence on the
+            //      fluid volume fraction
+            //    - Gunn: fixed and fluidised beds, uses the fluid
+            //      volume fraction (0.35 <= epsilon_f <= 1)
+            //    - none: Nu = 0, convective coupling off
             model           RanzMarshall;
 
             // Optional lower bounds used inside the heat-transfer

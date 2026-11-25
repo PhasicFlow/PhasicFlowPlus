@@ -1,0 +1,175 @@
+/* -------------------------------*- C++ -*--------------------------------- *\
+|  phasicFlow File                                                            |
+|  copyright: www.cemf.ir                                                     |
+\* ------------------------------------------------------------------------- */
+objectName  thermoPhysicalInteraction;
+objectType  dictionary;
+fileFormat  ASCII;
+/*---------------------------------------------------------------------------*/
+
+// Fuel reactor of chemical looping combustion: 3 Fe2O3 + CO -> 2 Fe3O4 + CO2
+// Oxygen carrier Fe45Al-FG (Abad et al. 2007, Chem. Eng. Sci. 62:533):
+// 45 wt% active Fe2O3, the rest Al2O3 and inactive Fe2O3 lumped as
+// "inert"; porosity 0.30; 2 mm spheres. Bed, gas and furnace wall at
+// 1173.15 K, 1 atm.
+
+// ---- Thermal properties, one value per material of the interaction file:
+//      (carrierMaterial wallMaterial)
+
+// carrier: mass-weighted JANAF heat capacities (Chase 1998) at 1173 K.
+// wallMaterial: Kanthal APMT (FeCrAl alloy, Al2O3 scale), as the lab CLC
+// reactor of Andersson et al. 2023 (Fuel Process. Technol. 252:107988);
+// values at 900 C from the Kanthal APMT datasheet (cp, k interpolated
+// between 800 and 1000 C; emissivity of fully oxidized material).
+heatCapacities        (1032  680);   // [J/(kg.K)]
+// carrier: effective conductivity of the porous particle and emissivity
+// as in the particle energy balance of Garcia-Labiano et al. 2005 (Chem.
+// Eng. Sci. 60:851, Eqs. 29-33, Table 1; eps_p = 0.85), at porosity 0.30.
+heatConductivities    (1.0   25);    // [W/(m.K)] used by the conduction paths
+emissivities          (0.85  0.70);  // [-]       used by the radiation paths
+
+enableRadiation    Yes;    // particle-particle radiation
+radCut             0.003;  // [m] 1.5 d_p: radius of the enclosure whose mean
+                           //     temperature the particle sees (Norouzi et al.
+                           //     2016, Eq. 6.179)
+radUpdateInterval  1;      // DEM steps between updates of that mean
+enablePP           Yes;    // particle-particle contact conduction
+enablePFP          Yes;    // particle-fluid-particle conduction
+
+// Furnace wall: heat flows between the particles and the wall at the
+// temperature given per surface in settings/geometryDict. Three paths,
+// largest first:
+//   Q_pfw  conduction through the static gas lens between particle and
+//          wall (Rong and Horio 1999, in the form of Liu et al. 2021,
+//          Chem. Eng. Sci. 236:116492, Eqs. 31-36)
+//   Q_rw   radiation, eps_p A_p sigma D_iw (T_w^4 - T_env^4), with the
+//          particle-wall distribution factor D_iw of Johnson et al. 2021
+//          (Powder Technol. 380:164, Eq. 2, Tables B3-B4) by wall distance
+//          and local solid fraction; T_env is the mean temperature of the
+//          neighbours of enableRadiation
+//   Q_pw   contact conduction, the particle-particle formula with the
+//          wall as a particle of infinite radius (Norouzi et al. 2016,
+//          Section 6.3.2.2); 0.3-0.7 W against 47-104 W of the gas-wall
+//          term in Patil et al. (2015, Table 4)
+// The gas-wall path is the fixedValue of FluidField/T and takes no fitted
+// coefficient (see the comment there).
+enablePFW             Yes;  // particle-fluid-wall conduction (Q_pfw)
+enableWallRadiation   Yes;  // particle-wall radiation, eps_w from emissivities
+enablePW              Yes;  // particle-wall contact conduction (Q_pw)
+
+// Optional keys of the wall paths; the values below are the defaults.
+// r_lens/R_p of the gas lens: Zhang and Lu 2021 (Chem. Eng. J.
+// 406:126880); Liu et al. 2021 find the result converged at 1.4.
+wallLensRatio         1.4;     // [-]
+// minimum conduction distance s: Zhang and Lu 2021; Liu et al. 2021 find
+// that 0.01-1 micrometre makes little difference.
+wallMinGap            2.75e-8; // [m]
+// largest centre-to-wall distance of Q_rw; integrating the tables of
+// Johnson et al. 2021, 8 radii hold 91% of the wall exchange at solid
+// fraction 0.25 and 98-100% at 0.35-0.64 (4 radii: 69% and 83-100%).
+wallRadiationRange    8;       // [particle radii], at most 10.2
+// interval of wallHeatFlow.dat (heat of each wall surface, each path)
+wallHeatReportInterval 0.01;   // [s]
+
+// Must match model.Yeff of the interaction file. With realYoungsModuli of
+// that file it corrects the contact radius of enablePP, enablePFP and the
+// wall paths: c = (E_sim/E_real)^(1/5) (Norouzi et al. 2016, Eq. 6.166).
+simYoungsModulus   1.0e6;
+
+// Gas seen by the conduction paths before the first CFD exchange
+// (settling run, everything at 1173.15 K): N2 at 1173 K, Cengel and
+// Cimbala, Table A-10, interpolated. The CFD side overwrites both values
+// at the first exchange.
+fluidProperties
+{
+    kappa    0.0742;   // [W/(m.K)]
+    alpha    1.0;      // [-]
+}
+
+// ---- Reactions
+
+enableMultiReaction   Yes;
+
+multiReactiveProperties
+{
+    // "inert" is Al2O3 (40 wt%) with the inactive Fe2O3 (15 wt%) of the
+    // carrier; it takes part in no reaction.
+    solidSpecies        (Fe2O3   Fe3O4   inert);   // index 0 1 2
+    solidMolarMasses    (159.69  231.53  101.96);  // [kg/kmol]; inert: nominal
+    solidDensities      (5240    5170    4234);    // [kg/m3] true (skeletal) densities
+
+    // Same names and order as transportProperties/gasSpecies and
+    // couplingProperties/reactionTransferModel/productGas
+    productGas          (CO      CO2     N2);      // index 0 1 2
+    gasMolarMasses      (28.010  44.010  28.013);  // [kg/kmol]
+
+    // Gas seen by the particles before the first CFD exchange (settling
+    // run): N2 only, so nothing reacts before the CFD starts.  [kmol/m3]
+    defaultGasConcentrations (0  0  0.01039);
+
+    // Porous carrier: the diameter stays fixed and the mass changes.
+    // (Yes makes d follow the solid volume at zero porosity.)
+    enableShrinking     No;
+
+    reactions
+    {
+        FR_CO       // 3 Fe2O3 + CO -> 2 Fe3O4 + CO2
+        {
+            // ---- kinetics and stoichiometry
+
+            // rateBasis gives the surface that preExpFactor refers to:
+            //   grain -> per unit grain surface, as in the TGA papers
+            //            (Abad et al. 2007, Table 3: 6.2e-4 m/s, n = 1);
+            //            the code converts it per particle to the outer
+            //            surface, k = k_g phi_A R / r_g, phi_A = volume
+            //            fraction of Fe2O3 in the particle (0.280)
+            //   outer -> per unit outer surface (default): 0.667 for this
+            //            particle (grain area / outer area = 1076)
+            rateBasis             grain;     // grain | outer
+            preExpFactor          6.2e-4;    // [m/s] for n = 1
+            activationTemperature 2405;      // [K] E/R, E = 20 kJ/mol
+            onsetTemperature      0;         // [K]
+            dH_rxn                -4.43e7;   // [J/kmol] JANAF at 1173 K
+            gasOrder              1;         // n
+            solidOrder            0.6667;    // used only with particleModel none (Y^m);
+                                             // the grain model uses s^2
+            gasSpeciesIdx         0;         // CO
+            solidReactantIdx      0;         // Fe2O3
+            stoicSolid            (-3  2  0);
+            stoicGas              (-1  1  0);
+
+            // ---- grain model of the porous particle
+
+            particleModel         grain;     // none | USCM | grain
+            solidProductIdx       1;         // Fe3O4, for the conversion X
+            // porosity 0.30 (Abad 2007 Table 2) is not a key: it enters through
+            // D_e and D_eKnudsen and through the particle density.
+            grainRadius           2.6e-7;    // r_g [m], Abad 2007 Table 3
+            D_e                   2.04e-5;   // CO in the pores [m2/s], molecular
+                                             //   part, eps^2 D (Garcia-Labiano
+                                             //   et al. 2005, Eq. 15), D(CO-N2)
+                                             //   from Fuller-Schettler-Giddings
+            D_eKnudsen            4.16e-6;   // Knudsen part, eps^2 D_K, in the
+                                             //   0.15 um pores of the BET area;
+                                             //   Bosanquet: 1/D = 1/D_e + 1/D_eKnudsen
+                                             //   = 1/3.46e-6. Absent: molecular only
+            D_eTemperature        1173.15;   // T of the two values above [K];
+                                             //   the molecular part follows T^1.75 and
+                                             //   the Knudsen part T^0.5. Absent: constant
+            // D_P                ...;       // grain product layer [m2/s];
+                                             //   absent: no layer (g-hat = 0)
+            k_c                   1.14;      // film [m/s], Gunn at voidage 0.6 and
+                                             //   the inlet velocity; used until the
+                                             //   CFD sends k_c of each particle
+                                             //   (couplingProperties massTransferModel)
+            Z                     0.980;     // molar volume ratio product/reactant;
+                                             //   default 1
+            correctionTable       Yes;       // c(sigma2, g, X), read from
+                                             //   caseSetup/correctionTables, which
+                                             //   correctionTablePhasicFlow writes
+
+            // Equilibrium (JANAF, 1100-1200 K): K(1173 K) = 4.3e4, so the
+            // reverse reaction has no effect in this bed.
+        }
+    }
+}

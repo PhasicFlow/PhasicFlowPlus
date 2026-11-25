@@ -1,0 +1,39 @@
+[33mcommit 7f093778e56d0460d6ca9e16c9479025f72ef535[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mclc-coupling[m[33m, [m[1;31morigin/clc-coupling[m[33m)[m
+Author: 0Arian0 <arianazizkhanii1381@gmail.com>
+Date:   Wed Nov 25 14:05:33 2026 +0330
+
+    Adds a per-species reaction timestep limiter (maxSpeciesReactionNo) and CFD-to-DEM gas-film mass transfer coupling (massTransferModel) sending per-particle k_c to DEM.
+
+ .../MPIParallelization/procDEMSystemPlus.hpp       |  76 [32m+[m[31m--[m
+ phasicFlowCoupling/Make/files                      |   9 [32m+[m
+ .../heatTransfer/heatTransferClosures/Gunn.C       |  40 [32m++[m
+ .../heatTransfer/heatTransferClosures/Gunn.hpp     | 119 [32m+++++[m
+ .../sphereHeatTransfer/sphereHeatTransfers.C       |   5 [32m+[m
+ .../massTransfer/massTransfer/massTransfer.C       | 104 [32m++++[m
+ .../massTransfer/massTransfer/massTransfer.hpp     | 137 [32m+++++[m
+ .../sphereMassTransfer/sphereMassTransfer.C        | 119 [32m+++++[m
+ .../sphereMassTransfer/sphereMassTransfer.hpp      | 102 [32m++++[m
+ .../sphereMassTransfer/sphereMassTransfers.C       |  42 [32m++[m
+ .../reactionInteraction/reactionInteraction.C      | 107 [32m++++[m
+ .../reactionInteraction/reactionInteraction.hpp    | 136 [32m+++++[m
+ .../reactionTransfer/reactionTransfer.C            | 183 [32m+++++++[m
+ .../reactionTransfer/reactionTransfer.hpp          | 155 [32m++++++[m
+ .../sphereReactionTransfer.C                       | 112 [32m++++[m
+ .../sphereReactionTransfer.hpp                     |  84 [32m+++[m
+ ...ThermalMomentumSphereUnresolvedCouplingSystem.C | 568 [32m+++++++++++++++++++++[m
+ ...ermalMomentumSphereUnresolvedCouplingSystem.hpp | 178 [32m+++++++[m
+ solvers/reactingSpherePFPlus/Make/files            |   3 [32m+[m
+ solvers/reactingSpherePFPlus/Make/options          |  46 [32m++[m
+ solvers/reactingSpherePFPlus/ReactionNo.H          | 129 [32m+++++[m
+ solvers/reactingSpherePFPlus/TEqn.H                |  53 [32m++[m
+ solvers/reactingSpherePFPlus/UEqn.H                |  58 [32m+++[m
+ solvers/reactingSpherePFPlus/YEqn.H                | 220 [32m++++++++[m
+ solvers/reactingSpherePFPlus/continuityErrs.H      |  51 [32m++[m
+ solvers/reactingSpherePFPlus/correctPhi.H          |  38 [32m++[m
+ solvers/reactingSpherePFPlus/createFields.H        | 324 [32m++++++++++++[m
+ solvers/reactingSpherePFPlus/mixtureProperties.H   | 153 [32m++++++[m
+ solvers/reactingSpherePFPlus/pEqn.H                | 127 [32m+++++[m
+ .../reactingSpherePFPlus/reactingSpherePFPlus.C    | 284 [32m+++++++++++[m
+ solvers/wclean                                     |   1 [32m+[m
+ solvers/wmake                                      |   1 [32m+[m
+ 32 files changed, 3714 insertions(+), 50 deletions(-)

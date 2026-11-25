@@ -1,0 +1,53 @@
+/* -------------------------------*- C++ -*--------------------------------- *\
+|  phasicFlow File                                                            |
+|  copyright: www.cemf.ir                                                     |
+\* ------------------------------------------------------------------------- */
+objectName  particlesDict;
+objectType  dictionary;
+fileFormat  ASCII;
+/* ------------------------------------------------------------------------- */
+
+setFields
+{
+    defaultValue
+    {
+        velocity        realx3  (0 0 0);        // linear velocity (m/s)
+        rVelocity       realx3  (0 0 0);        // rotational velocity (rad/s)
+        shapeName       word    carrierParticle;
+        temperature     real    1173.15;        // [K] bed at 900 C
+
+        // One field per solid species of thermoPhysicalInteraction; read
+        // like temperature, the sum must be 1
+        // Fe45Al-FG: 45 wt% active Fe2O3, 55 wt% inert
+        solidFrac_Fe2O3 real    0.45;
+        solidFrac_Fe3O4 real    0.0;
+        solidFrac_inert real    0.55;
+    }
+
+    selectors
+    {}
+}
+
+// positions particles
+positionParticles
+{
+    method random;
+
+    randomInfo
+    {
+        numPoints   12500;
+
+        distance 0.002;
+
+        maxIterations 50;
+    }
+
+    regionType cylinder;
+
+    cylinderInfo
+    {
+        p1 (0.025 0.025 0.001);
+        p2 (0.025 0.025 0.090);
+        radius      0.024;
+    }
+}

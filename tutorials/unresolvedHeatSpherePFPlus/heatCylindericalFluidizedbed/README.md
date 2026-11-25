@@ -5,7 +5,7 @@
 
 ## 0. Problem Definition
 
-In this tutorial, we will simulate a gas-solid fluidized bed with fluid-to-particle heat transfer, using the unresolved thermal solver `unresolvedHeatSpherePFPlus`. The cylinderical fluidized bed dimensions are 0.1 m in diameter and 0.2 m in height. We are going to 50K 2-mm particles with density of 1000 kg/m³. Gas is uniformly injected from the bottom of the bed at a superficial velocity of 1.2 m/s and a temperature of 350 K, into a bed initially at 300 K, so the particles' temperature rise as they fluidize can be observed. The simulation runs for a total of 10 seconds, with the 0.25 s dedicated to the initial packing of particles (pure DEM simulation) and the remaining 9.75 seconds to the fluidized bed simulation.
+In this tutorial, we will simulate a gas-solid fluidized bed with fluid-to-particle heat transfer, using the unresolved thermal solver `unresolvedHeatSpherePFPlus`. The cylinderical fluidized bed dimensions are 0.1 m in diameter and 0.2 m in height. We are going to use 50K 2-mm particles with density of 1000 kg/m³. Gas is uniformly injected from the bottom of the bed at a superficial velocity of 1.2 m/s and a temperature of 350 K, into a bed initially at 300 K, so the particles' temperature rise as they fluidize can be observed. The simulation runs for a total of 10 seconds, with the 0.25 s dedicated to the initial packing of particles (pure DEM simulation) and the remaining 9.75 seconds to the fluidized bed simulation.
 
 <div align="center">
 <b>
@@ -24,7 +24,7 @@ The `Allrun` script is designed to automate the simulation process for the gas-s
 
 ### Step 1: Execute the `Allrun` Script
 
-1. Navigate to the `fluidizedbed` directory.
+1. Navigate to the `heatCylindericalFluidizedbed` directory.
 2. Run the `Allrun` script by executing the following command:
 
    ```sh
@@ -165,7 +165,7 @@ The most important setup file for CFD-DEM simulation is `constant/couplingProper
   - `fluidVelocity` / `solidVelocity`: Same options as under `momentumInteraction` above, plus `similarToMomentum`, which reuses `momentumInteraction`'s already-computed averaging instead of computing a separate one for heat.
 
   - `heatTransferModel`: Defines the Nusselt-number closure and its sub-dictionary:
-    - `model`: `RanzMarshall` (Nu = 2 + 0.6·Re^(1/2)·Pr^(1/3)) or `none` (Nu = 0, disables convective coupling for isolated testing of other mechanisms).
+    - `model`: `RanzMarshall` (Nu = 2 + 0.6·Re^(1/2)·Pr^(1/3), isolated sphere), `Gunn` (Gunn 1978, fixed and fluidised beds: depends on the fluid volume fraction, reported for 0.35 ≤ ε_f ≤ 1) or `none` (Nu = 0, disables convective coupling for isolated testing of other mechanisms).
     - Optional bounds (`kappaMin`, `muMin`, `dpMin`, `Tmin`) guard the calculation against degenerate inputs; all have safe defaults.
 
 - `interaction` (in `caseSetup/`) gains two new keys, one value per material in its `materials` list, needed by the thermal contact-radius correction even when particle-particle conduction itself is off:
@@ -175,5 +175,6 @@ The most important setup file for CFD-DEM simulation is `constant/couplingProper
 - `thermoPhysicalInteraction` (new file, in `caseSetup/`) defines the per-material thermal properties and which particle-particle thermal mechanisms are active:
   - `heatCapacities`, `heatConductivities`, `emissivities`: one value per material, same order as `interaction`'s `materials` list.
   - `enableRadiation`, `enablePP`, `enablePFP`: independent switches for particle-particle radiation, contact conduction, and sub-grid (particle-fluid-particle) conduction. This tutorial keeps all three off, so only fluid-to-particle convection (via `heatInteraction` above) is demonstrated; each can be turned on independently once that baseline case is working. `enablePP`/`enablePFP` need `simYoungsModulus` (matching `model.Yeff`); `enableRadiation` needs `radCut`.
+  - `enablePW`, `enablePFW`, `enableWallRadiation`: independent switches for the particle-wall heat transfer: contact conduction, conduction through the gas lens between particle and wall, and radiation. All three are off here, so the walls are adiabatic for the particles (as `FluidField/T` keeps them for the gas). A path needs `simYoungsModulus` and a wall temperature: add `temperature` (in K) to a surface in `settings/geometryDict`; a surface without it stays adiabatic. With any path on, the heat that each surface gives to the particles is written per path to `wallHeatFlow.dat` in the case folder. The optional keys `wallLensRatio`, `wallMinGap`, `wallRadiationRange` and `wallHeatReportInterval` are listed with their defaults in the file; the models and their references are described in `thermalWallMechanism.hpp` of phasicFlow.
 
 For detailed mathematical formulations and more information about the coupling properties, please refer to the main coupling system documentation in `phasicFlowCoupling/couplingSystem/unresolved/README.md`. 

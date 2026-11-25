@@ -1,0 +1,46 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       volScalarField;
+    object      Y.N2;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Mass fraction of N2, the inert species: the solver sets it to 1 - sum of
+// the others; the boundary values below are kept consistent
+
+dimensions      [0 0 0 0 0 0 0];
+
+internalField   uniform 1;
+
+boundaryField
+{
+    inlet
+    {
+        type            uniformFixedValue;
+        uniformValue    table
+        (
+            (0      1)
+            (1.0    1)
+            (1.001  0.5)
+            (1000   0.5)
+        );
+    }
+    outlet
+    {
+        type            zeroGradient;
+    }
+    cylinderWall
+    {
+        type            zeroGradient;
+    }
+}
+
+// ************************************************************************* //

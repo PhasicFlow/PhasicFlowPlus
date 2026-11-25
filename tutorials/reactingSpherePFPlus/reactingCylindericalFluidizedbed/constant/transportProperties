@@ -1,0 +1,63 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      transportProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Gas at 1173.15 K and 1 atm. Gas data from Cengel and Cimbala, Table
+// A-10, interpolated to 900 C.
+
+transportModel  Newtonian;
+
+// Kinematic viscosity [m2/s], N2 at 1173 K. The solver keeps it constant.
+nu              [0 2 -1 0 0 0 0] 1.51e-04;
+
+// Initial values only: the solver recomputes rho = pRef Mw_mix/(R T) and the
+// mass-weighted Cp and kappa from the species lists below
+rho             [1 -3 0 0 0 0 0] 0.291;
+
+Cp              [0 2 -2 -1 0 0 0] 1194;
+
+kappa           [1 1 -3 -1 0 0 0] 0.0742;
+
+// Turbulent Prandtl number [-] (unused while turbulenceProperties is laminar)
+Prt             [0 0 0 0 0 0 0] 0.85;
+
+// ---- Gas species
+//
+// Same names and order as couplingProperties/reactionTransferModel/productGas
+// and thermoPhysicalInteraction/multiReactiveProperties/productGas. Each
+// species needs a field Y.<name> in the start time folder.
+
+gasSpecies      (CO      CO2     N2);
+
+gasMw           (28.010  44.010  28.013);   // [kg/kmol]
+
+gasCp           (1208    1265    1194);     // [J/(kg.K)]
+
+gasKappa        (0.0740  0.0785  0.0742);   // [W/(m.K)]
+
+// Not transported: Y.N2 = 1 - Y.CO - Y.CO2
+inertSpecies    N2;
+
+// Laminar Schmidt number: D = nu/Sc for every species. 0.666 is CO in N2
+// (Fuller); the same D also sets k_c of massTransferModel.
+Sc              [0 0 0 0 0 0 0] 0.666;
+
+// Turbulent Schmidt number (unused while laminar)
+Sct             [0 0 0 0 0 0 0] 0.7;
+
+// Absolute pressure of the ideal-gas density [Pa]
+pRef            [1 -1 -2 0 0 0 0] 101325;
+
+// ************************************************************************* //

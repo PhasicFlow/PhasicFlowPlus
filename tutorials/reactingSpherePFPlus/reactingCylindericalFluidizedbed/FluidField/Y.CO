@@ -1,0 +1,47 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       volScalarField;
+    object      Y.CO;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Mass fraction of CO
+
+dimensions      [0 0 0 0 0 0 0];
+
+internalField   uniform 0;
+
+boundaryField
+{
+    inlet
+    {
+        // N2 until 1 s, while the bed fluidizes; then 50 vol% CO
+        // (mass fraction 0.5000)
+        type            uniformFixedValue;
+        uniformValue    table
+        (
+            (0      0)
+            (1.0    0)
+            (1.001  0.5)
+            (1000   0.5)
+        );
+    }
+    outlet
+    {
+        type            zeroGradient;
+    }
+    cylinderWall
+    {
+        type            zeroGradient;
+    }
+}
+
+// ************************************************************************* //

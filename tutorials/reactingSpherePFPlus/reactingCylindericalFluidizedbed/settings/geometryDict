@@ -1,0 +1,52 @@
+/* -------------------------------*- C++ -*--------------------------------- *\ 
+|  phasicFlow File                                                            | 
+|  copyright: www.cemf.ir                                                     | 
+\* ------------------------------------------------------------------------- */  
+objectName 	geometryDict;
+objectType 	dictionary;
+fileFormat 	ASCII;
+/* ------------------------------------------------------------------------- */
+
+// motion model: all surfaces are fixed
+
+// temperature: wall temperature for the particle-wall heat
+// transfer (enablePFW, enableWallRadiation, enablePW in
+// thermoPhysicalInteraction). The outlet
+// has none, so it stays adiabatic.
+motionModel stationary;
+ 
+
+surfaces
+{
+	inlet
+	{
+		type 	 	foamPatchWall;   // type of the wall
+
+		patch 		inlet; 		
+		
+		material 	wallMaterial;   // material name of this wall
+
+		temperature 1173.15;          // distributor in the furnace [K]
+	}
+
+	outlet
+	{
+		type 	 	foamPatchWall;   // type of the wall
+
+		patch 		outlet; 		
+		
+		material 	wallMaterial;   // material name of this wall
+	}
+
+	cylinder
+	{
+		type 	 	foamPatchWall;   // type of the wall
+
+		patch 		cylinderWall; 		
+		
+		material 	wallMaterial;   // material name of this wall
+
+		temperature 1173.15;          // furnace wall [K]; absent: adiabatic
+	}
+}
+
